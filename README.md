@@ -10,6 +10,14 @@ The standard approach to generating Excalidraw diagrams with AI asks the LLM to 
 
 ## Install
 
+**AI Skill** — works with Claude Code, GitHub Copilot, Cursor, Codex, Windsurf, and [30+ other AI assistants](https://github.com/vercel-labs/skills):
+
+```bash
+npx skills add https://github.com/guohaonan-shy/excalidrawer
+```
+
+**npm package** — for programmatic use in your project:
+
 ```bash
 npm install excalidrawer
 ```
@@ -85,21 +93,15 @@ colors.strokeBlue / colors.strokeGreen / colors.strokeYellow / colors.strokeOran
 
 ## AI Skill
 
-Install the bundled skill using the `skills` CLI — works with Claude Code, GitHub Copilot, Cursor, Codex, Windsurf, and [30+ other AI assistants](https://github.com/vercel-labs/skills):
+The bundled skill (`skills/excalidrawer/SKILL.md`) teaches AI assistants to use this package's API instead of generating raw JSON — resulting in faster, more accurate diagrams.
 
-```bash
-npx skills add https://github.com/guohaonan-shy/excalidrawer
-```
-
-Or install for a specific agent only:
+Install for a specific agent:
 
 ```bash
 npx skills add https://github.com/guohaonan-shy/excalidrawer --agent claude-code
 npx skills add https://github.com/guohaonan-shy/excalidrawer --agent cursor
 npx skills add https://github.com/guohaonan-shy/excalidrawer --agent github-copilot
 ```
-
-The skill teaches the AI to use this package's API instead of generating raw JSON — resulting in faster, more accurate diagram generation.
 
 ## License
 
