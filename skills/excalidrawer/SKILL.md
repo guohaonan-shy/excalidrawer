@@ -16,16 +16,16 @@ A code-first diagram generation skill. Instead of generating raw Excalidraw JSON
 
 ## Prerequisites
 
-Install the package in your project:
+Install this skill:
+
+```bash
+npx skills add https://github.com/guohaonan-shy/excalidrawer
+```
+
+Install the npm package in your project:
 
 ```bash
 npm install excalidrawer
-```
-
-Or run examples without installing:
-
-```bash
-npx excalidrawer examples/basic.mjs
 ```
 
 ## Core API

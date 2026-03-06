@@ -85,14 +85,18 @@ colors.strokeBlue / colors.strokeGreen / colors.strokeYellow / colors.strokeOran
 
 ## AI Skill
 
-Install the bundled skill for GitHub Copilot, Claude Code, Cursor, and other compatible AI assistants:
+Install the bundled skill using the `skills` CLI — works with Claude Code, GitHub Copilot, Cursor, Codex, Windsurf, and [30+ other AI assistants](https://github.com/vercel-labs/skills):
 
 ```bash
-# Claude Code
-cp -r node_modules/excalidrawer/skill/SKILL.md ~/.claude/skills/excalidrawer/SKILL.md
+npx skills add https://github.com/guohaonan-shy/excalidrawer
+```
 
-# Or copy the skill folder
-cp -r node_modules/excalidrawer/skill ~/.claude/skills/excalidrawer
+Or install for a specific agent only:
+
+```bash
+npx skills add https://github.com/guohaonan-shy/excalidrawer --agent claude-code
+npx skills add https://github.com/guohaonan-shy/excalidrawer --agent cursor
+npx skills add https://github.com/guohaonan-shy/excalidrawer --agent github-copilot
 ```
 
 The skill teaches the AI to use this package's API instead of generating raw JSON — resulting in faster, more accurate diagram generation.
