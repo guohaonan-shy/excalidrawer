@@ -13,7 +13,7 @@ The standard approach to generating Excalidraw diagrams with AI asks the LLM to 
 **AI Skill** — works with Claude Code, GitHub Copilot, Cursor, Codex, Windsurf, and [30+ other AI assistants](https://github.com/vercel-labs/skills):
 
 ```bash
-npx skills add https://github.com/guohaonan-shy/excalidrawer
+npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer
 ```
 
 **npm package** — for programmatic use in your project:
@@ -98,9 +98,9 @@ The bundled skill (`skills/excalidrawer/SKILL.md`) teaches AI assistants to use 
 Install for a specific agent:
 
 ```bash
-npx skills add https://github.com/guohaonan-shy/excalidrawer --agent claude-code
-npx skills add https://github.com/guohaonan-shy/excalidrawer --agent cursor
-npx skills add https://github.com/guohaonan-shy/excalidrawer --agent github-copilot
+npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer --agent claude-code
+npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer --agent cursor
+npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer --agent github-copilot
 ```
 
 ## License

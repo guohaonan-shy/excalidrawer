@@ -19,7 +19,7 @@ A code-first diagram generation skill. Instead of generating raw Excalidraw JSON
 Install this skill:
 
 ```bash
-npx skills add https://github.com/guohaonan-shy/excalidrawer
+npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer
 ```
 
 Install the npm package in your project:
