@@ -5,7 +5,64 @@
  * PNG is rendered from SVG using the `sharp` library.
  */
 
-import { createRequire } from "module";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// ---------------------------------------------------------------------------
+// Font embedding
+// ---------------------------------------------------------------------------
+
+/** Load Excalifont as base64 for SVG embedding. */
+let _excalifontBase64 = null;
+function getExcalifontBase64() {
+  if (!_excalifontBase64) {
+    const fontPath = join(__dirname, "fonts", "Excalifont-Regular.woff2");
+    _excalifontBase64 = readFileSync(fontPath).toString("base64");
+  }
+  return _excalifontBase64;
+}
+
+/**
+ * Font family mapping: Excalidraw fontFamily number → CSS font stack.
+ *  1 = Virgil (hand-drawn)
+ *  2 = Helvetica (clean)
+ *  3 = Cascadia (monospace)
+ *  5 = Excalifont (legacy, map to Virgil)
+ */
+function cssFontFamily(fontFamily) {
+  switch (fontFamily) {
+    case 1:
+    case 5:
+      return "Excalifont, Segoe UI Emoji, sans-serif";
+    case 2:
+      return "Helvetica Neue, Helvetica, Arial, sans-serif";
+    case 3:
+      return "Cascadia Code, Fira Code, ui-monospace, monospace";
+    default:
+      return "Excalifont, Segoe UI Emoji, sans-serif";
+  }
+}
+
+/** Generate @font-face CSS for embedded fonts used by elements. */
+function fontFaceCss(elements) {
+  const needsHandDrawn = elements.some(
+    (el) => el.type === "text" && (!el.fontFamily || el.fontFamily === 1 || el.fontFamily === 5)
+  );
+  if (!needsHandDrawn) return "";
+
+  const b64 = getExcalifontBase64();
+  return `<style>
+@font-face {
+  font-family: "Excalifont";
+  src: url("data:font/woff2;base64,${b64}") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+</style>`;
+}
 
 // ---------------------------------------------------------------------------
 // SVG renderer
@@ -13,7 +70,6 @@ import { createRequire } from "module";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-/** Convert a roughness value to a simple SVG filter id string (unused visually but kept for parity). */
 function strokeDashArray(strokeStyle) {
   if (strokeStyle === "dashed") return "8,4";
   if (strokeStyle === "dotted") return "2,4";
@@ -86,9 +142,14 @@ function renderArrow(el) {
   const dash = strokeDashArray(el.strokeStyle);
   const markerId = `arrow-${el.id}`;
 
-  const marker = `<marker id="${markerId}" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+  let markerDef = "";
+  let markerEnd = null;
+  if (el.endArrowhead !== null) {
+    markerDef = `<defs><marker id="${markerId}" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
   <path d="M0,0 L0,6 L8,3 z" fill="${el.strokeColor}"/>
-</marker>`;
+</marker></defs>`;
+    markerEnd = `url(#${markerId})`;
+  }
 
   const attrs = svgAttrs({
     d,
@@ -96,14 +157,14 @@ function renderArrow(el) {
     stroke: el.strokeColor,
     "stroke-width": el.strokeWidth,
     "stroke-dasharray": dash,
-    "marker-end": `url(#${markerId})`,
+    "marker-end": markerEnd,
     opacity: el.opacity / 100,
   });
 
-  return `<defs>${marker}</defs><path ${attrs}/>`;
+  return `${markerDef}<path ${attrs}/>`;
 }
 
-function renderText(el, boundParent) {
+function renderText(el) {
   // Skip bound text — it will be rendered as part of its container
   if (el.containerId) return "";
 
@@ -111,6 +172,7 @@ function renderText(el, boundParent) {
   const lineH = el.fontSize * 1.4;
   const totalH = lineH * lines.length;
   const baseY = el.y + (el.verticalAlign === "middle" ? (el.height - totalH) / 2 + el.fontSize : el.fontSize);
+  const fontFamily = cssFontFamily(el.fontFamily);
 
   const textEls = lines.map((line, i) => {
     const attrs = svgAttrs({
@@ -118,7 +180,7 @@ function renderText(el, boundParent) {
       y: baseY + i * lineH,
       "text-anchor": "middle",
       "font-size": el.fontSize,
-      "font-family": "ui-monospace, monospace",
+      "font-family": fontFamily,
       fill: el.strokeColor,
       opacity: el.opacity / 100,
     });
@@ -137,16 +199,10 @@ function renderBoundText(container, elements) {
   const lines = bound.text.split("\n");
   const lineH = bound.fontSize * 1.4;
   const totalH = lineH * lines.length;
+  const fontFamily = cssFontFamily(bound.fontFamily);
 
-  let cx, cy;
-  if (container.type === "diamond") {
-    cx = container.x + container.width / 2;
-    cy = container.y + container.height / 2;
-  } else {
-    cx = container.x + container.width / 2;
-    cy = container.y + container.height / 2;
-  }
-
+  const cx = container.x + container.width / 2;
+  const cy = container.y + container.height / 2;
   const startY = cy - totalH / 2 + bound.fontSize;
 
   return lines.map((line, i) => {
@@ -155,7 +211,7 @@ function renderBoundText(container, elements) {
       y: startY + i * lineH,
       "text-anchor": "middle",
       "font-size": bound.fontSize,
-      "font-family": "ui-monospace, monospace",
+      "font-family": fontFamily,
       fill: bound.strokeColor,
     });
     return `<text ${attrs}>${escapeXml(line)}</text>`;
@@ -213,6 +269,10 @@ export function toSvg(elements) {
 
   const parts = [];
 
+  // Embed font face declarations
+  const fontCss = fontFaceCss(flat);
+  if (fontCss) parts.push(fontCss);
+
   for (const el of flat) {
     switch (el.type) {
       case "rectangle":
@@ -245,12 +305,14 @@ export function toSvg(elements) {
 }
 
 // ---------------------------------------------------------------------------
-// PNG export (via sharp)
+// PNG export (via Playwright headless Chromium)
 // ---------------------------------------------------------------------------
 
 /**
  * Render elements to a PNG Buffer.
- * Requires `sharp` to be installed: npm install sharp
+ *
+ * Uses Playwright (headless Chromium) for accurate rendering of embedded
+ * @font-face woff2 fonts (hand-drawn Excalifont).
  *
  * @param {Array} elements  - flat array of element objects
  * @param {number} scale    - output scale factor (default 2 for retina)
@@ -258,10 +320,40 @@ export function toSvg(elements) {
  */
 export async function toPng(elements, scale = 2) {
   const svg = toSvg(elements);
-  const { default: sharp } = await import("sharp");
-  const vb = computeViewBox(elements.flat(Infinity).filter((e) => !e.isDeleted));
-  return sharp(Buffer.from(svg))
-    .resize(Math.round(vb.w * scale), Math.round(vb.h * scale))
-    .png()
-    .toBuffer();
+  const flat = elements.flat(Infinity).filter((e) => !e.isDeleted);
+  const vb = computeViewBox(flat);
+
+  const { chromium } = await import("playwright-core");
+  const browser = await chromium.launch({ headless: true });
+
+  try {
+    const page = await browser.newPage({
+      viewport: {
+        width: Math.ceil(vb.w * scale),
+        height: Math.ceil(vb.h * scale),
+      },
+      deviceScaleFactor: scale,
+    });
+
+    // Load SVG as data URI so embedded @font-face works
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+  * { margin: 0; padding: 0; }
+  body { width: ${vb.w}px; height: ${vb.h}px; overflow: hidden; }
+</style></head><body>${svg}</body></html>`;
+
+    await page.setContent(html, { waitUntil: "networkidle" });
+    // Wait for fonts to load
+    await page.evaluate(() => document.fonts.ready);
+
+    const png = await page.screenshot({
+      type: "png",
+      clip: { x: 0, y: 0, width: vb.w, height: vb.h },
+      omitBackground: false,
+    });
+
+    return png;
+  } finally {
+    await browser.close();
+  }
 }

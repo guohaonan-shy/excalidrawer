@@ -1,11 +1,15 @@
 {
   "name": "excalidrawer",
-  "version": "0.1.3",
-  "description": "Code-first Excalidraw diagram generation with SVG/PNG export",
+  "version": "0.3.0",
+  "description": "Code-first Excalidraw diagram generation with SVG/PNG export and CLI",
   "type": "module",
   "main": "./src/index.mjs",
+  "bin": {
+    "excalidrawer": "./src/cli.mjs"
+  },
   "exports": {
-    ".": "./src/index.mjs"
+    ".": "./src/index.mjs",
+    "./templates": "./src/templates/index.mjs"
   },
   "scripts": {
     "test": "node examples/basic.mjs"
@@ -22,6 +26,9 @@
   "author": "guohaonan-shy",
   "license": "MIT",
   "dependencies": {
-    "sharp": "^0.33.5"
+    "@resvg/resvg-js": "^2.6.2",
+    "playwright-core": "^1.58.2",
+    "sharp": "^0.33.5",
+    "wawoff2": "^2.0.1"
   }
 }

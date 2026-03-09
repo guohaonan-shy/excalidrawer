@@ -5,14 +5,7 @@ description: 'Code-first Excalidraw diagram generation with SVG and PNG export. 
 
 # Excalidrawer
 
-A code-first diagram generation skill. Instead of generating raw Excalidraw JSON directly, this skill writes a short JavaScript file using the `excalidrawer` npm package, then executes it locally to produce `.excalidraw`, `.svg`, and `.png` outputs.
-
-## Why Code-First
-
-- **Faster**: LLM writes ~30 lines of JS instead of 500+ lines of raw JSON
-- **Correct**: coordinates managed by variables, text centering handled automatically
-- **Reusable**: diagrams live as readable source code, easy to update
-- **Exportable**: one script produces all three formats in one run
+A diagram generation tool with built-in templates and a CLI. For supported diagram types, just provide JSON data and run the CLI. For custom diagrams, write a short JS script using the library API.
 
 ## Prerequisites
 
@@ -28,7 +21,86 @@ Install the npm package in your project:
 npm install excalidrawer
 ```
 
-## Core API
+## Workflow: Template-Based (Preferred)
+
+For supported diagram types (timeline, etc.), use the CLI directly — no script needed.
+
+### Step 1: Identify the diagram type
+
+Check if the request matches a built-in template:
+
+| Type | Use for |
+|------|---------|
+| `timeline` | Project timelines, roadmaps, milestones |
+
+Run `npx excalidrawer types` to see all available types.
+
+### Step 2: Create a JSON data file
+
+Write a JSON file matching the template's schema (see Template Schemas below).
+
+### Step 3: Run the CLI
+
+```bash
+npx excalidrawer generate --type <type> --input data.json --output ./path/to/output
+```
+
+CLI options:
+- `--type, -t` — Diagram type (required)
+- `--input, -i` — Input JSON file (reads stdin if omitted)
+- `--output, -o` — Output path without extension (required)
+- `--format, -f` — Comma-separated: `excalidraw,svg,png` (default: all three)
+- `--seed, -s` — Seed for deterministic IDs
+
+Examples:
+```bash
+# Generate all formats
+npx excalidrawer generate -t timeline -i timeline.json -o docs/timeline
+
+# Only SVG and PNG
+npx excalidrawer generate -t timeline -i timeline.json -o docs/timeline -f svg,png
+
+# Pipe from stdin
+echo '{"title":"My Timeline","items":[...]}' | npx excalidrawer generate -t timeline -o out/timeline
+```
+
+## Template Schemas
+
+### Timeline
+
+Input JSON:
+```json
+{
+  "title": "Project Timeline",
+  "items": [
+    {
+      "label": "Milestone 1",
+      "time": "Jan",
+      "desc": "Description line 1\nline 2"
+    },
+    {
+      "label": "Milestone 2",
+      "time": "Mar",
+      "desc": "Another description",
+      "color": "#a5d8ff"
+    }
+  ]
+}
+```
+
+Fields:
+- `title` (string) — Diagram title displayed at top
+- `items` (array) — Milestones in chronological order
+  - `label` (string) — Milestone name (displayed in colored box)
+  - `time` (string) — Time label (displayed near the axis)
+  - `desc` (string) — Description text. Use `\n` for line breaks.
+  - `color` (string, optional) — Box fill color. If omitted, cycles through: yellow → blue → green → purple → red → orange
+
+## Workflow: Custom Script (Fallback)
+
+For diagram types not covered by templates, write a JS script using the library API.
+
+### Core API
 
 ```javascript
 import {
@@ -42,10 +114,11 @@ import {
   excalidraw,   // excalidraw(elements) → JSON string for .excalidraw file
   toSvg,        // toSvg(elements) → SVG string
   toPng,        // toPng(elements, scale?) → Promise<Buffer>
+  timeline,     // timeline(data, opts?) → elements array (also usable as library)
 } from 'excalidrawer';
 ```
 
-## Color Palette
+### Color Palette
 
 ```javascript
 colors.blue      // "#a5d8ff"  — info / process steps
@@ -63,123 +136,41 @@ colors.bgBlue / colors.bgGreen / colors.bgYellow / colors.bgPurple
 colors.strokeBlue / colors.strokeGreen / colors.strokeYellow / colors.strokeOrange
 ```
 
-## Step-by-Step Workflow
-
-### Step 1: Understand the diagram request
-
-Identify:
-- Diagram type (flowchart, architecture, sequence, ER, mind map)
-- Key nodes and their relationships
-- Approximate number of elements
-
-### Step 2: Plan layout
-
-Use horizontal left-to-right flow for most diagrams:
-- Main flow center Y: pick a `CY` value (e.g. 150)
-- Box height: 50–60px, width: 120–160px depending on label length
-- Horizontal gap between boxes: 30–50px
-- Decision diamonds: `w ≈ 160, h ≈ 70`
-
-For multi-section diagrams, stack sections vertically with section background `rect`.
-
-### Step 3: Write the generation script
+### Script Example
 
 ```javascript
 import { writeFileSync } from "fs";
-import { setSeed, box, diamondBox, arrow, textEl, rect, colors, excalidraw, toSvg, toPng } from "excalidrawer";
+import { setSeed, box, arrow, textEl, colors, excalidraw, toSvg, toPng } from "excalidrawer";
 
-setSeed(100000); // use a different base per diagram
-
+setSeed(100000);
 const CY = 150, BH = 56, BY = CY - BH / 2;
 
 const elements = [
-  // title
   textEl("title", 20, 12, 500, 28, "My Diagram", 22),
-
-  // nodes
   ...box("s1", "s1t", 20, BY, 130, BH, colors.yellow, "Start", 15),
   arrow("a1", 150, CY, [[0,0],[40,0]]),
   ...box("s2", "s2t", 190, BY, 150, BH, colors.blue, "Process", 14),
-  arrow("a2", 340, CY, [[0,0],[40,0]]),
-  ...diamondBox("d1", "d1t", 380, CY-35, 160, 70, colors.orange, "Decision?", 13),
-
-  // Yes branch
-  arrow("ayes", 540, CY, [[0,0],[40,0]], { strokeColor: colors.strokeGreen }),
-  ...box("s3", "s3t", 580, BY, 130, BH, colors.green, "Done", 15),
 ];
 
 writeFileSync("diagram.excalidraw", excalidraw(elements));
 writeFileSync("diagram.svg", toSvg(elements));
-const png = await toPng(elements, 2);
-writeFileSync("diagram.png", png);
+writeFileSync("diagram.png", await toPng(elements, 2));
 ```
 
-### Step 4: Run the script
-
-```bash
-node diagram.mjs
-```
-
-### Step 5: Choose output format by use case
-
-| Use case | Format | Reason |
-|----------|--------|--------|
-| Embed in Markdown / GitHub | `.svg` | Vector, scales perfectly |
-| Paste into Lark / Notion / Slides | `.png` | Universal compatibility |
-| Edit interactively | `.excalidraw` | Open at excalidraw.com |
-
-## Layout Patterns
-
-### Horizontal flowchart (most common)
-
-```javascript
-const CY = 150, BH = 56, BY = CY - BH / 2;
-// place boxes left to right, connecting with arrow(id, rightEdgeX, CY, [[0,0],[gap,0]])
-```
-
-### Multi-section stacked layout
-
-```javascript
-// Section A at y=40, Section B at y=320
-const SEC_A_Y = 140; // center Y of section A flow
-const SEC_B_Y = 420; // center Y of section B flow
-
-// Section backgrounds
-rect("bg-a", 10, 40, 1200, 260, colors.bgYellow, { strokeColor: colors.strokeYellow, strokeStyle: "dashed" })
-rect("bg-b", 10, 320, 1200, 280, colors.bgBlue,   { strokeColor: colors.strokeBlue,   strokeStyle: "dashed" })
-```
-
-### Decision diamond with Yes/No branches
-
-```javascript
-// Diamond center at (cx, cy)
-...diamondBox("d1", "d1t", cx - 80, cy - 35, 160, 70, colors.orange, "Ambiguous?", 13),
-
-// No → right (auto-link)
-arrow("ano", cx + 80, cy, [[0,0],[40,0]], { strokeColor: colors.strokeGreen }),
-textEl("lno", cx + 84, cy - 14, 28, 12, "No", 10, { strokeColor: colors.strokeGreen }),
-...box("auto", "autot", cx + 120, cy - 28, 140, 56, colors.green, "Auto-link", 13),
-
-// Yes → down (human in loop)
-arrow("ayes", cx, cy + 35, [[0,0],[0,30]], { strokeColor: colors.strokeOrange }),
-textEl("lyes", cx + 4, cy + 38, 28, 12, "Yes", 10, { strokeColor: colors.strokeOrange }),
-...box("hitl", "hitlt", cx - 70, cy + 65, 140, 52, colors.green, "User Confirms", 13),
-```
+Run: `node diagram.mjs`
 
 ## Common Mistakes to Avoid
 
-- **Do NOT** use `verticalAlign: "top"` on bound text (it's set correctly inside `box()` and `diamondBox()`)
 - **Do NOT** forget to spread `...box(...)` — it returns an array of two elements
-- **Do NOT** reuse element IDs across diagrams — use `setSeed()` with a different value per diagram
-- **Arrows**: `x, y` is the arrow start point; `points` are relative offsets from that start
+- **Do NOT** reuse element IDs — use `setSeed()` with different values per diagram
+- **Arrows**: `x, y` is the start point; `points` are relative offsets
 
 ## Export Format Decision
 
-When the user asks to export a diagram without specifying format:
 - Default to all three: `.excalidraw` + `.svg` + `.png`
-- If user says "for Markdown" or "embed in docs" → `.svg`
-- If user says "for Lark / Notion / slides" → `.png`
-- If user says "I want to edit it" → `.excalidraw`
+- "for Markdown / GitHub" → `.svg`
+- "for Lark / Notion / slides" → `.png`
+- "I want to edit it" → `.excalidraw`
 
 ## References
 

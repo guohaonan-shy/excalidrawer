@@ -15,3 +15,6 @@ export {
 } from "./elements.mjs";
 
 export { toSvg, toPng } from "./export.mjs";
+
+// Built-in templates
+export { timeline, flowchart, architecture } from "./templates/index.mjs";

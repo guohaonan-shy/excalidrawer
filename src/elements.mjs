@@ -80,7 +80,7 @@ export function textEl(id, x, y, w, h, text, fontSize, extra = {}) {
   return base(id, "text", x, y, w, h, {
     text,
     fontSize,
-    fontFamily: 5,
+    fontFamily: 1,
     textAlign: "center",
     verticalAlign: "top",
     roundness: null,
@@ -105,7 +105,7 @@ export function box(rid, tid, x, y, w, h, bg, text, fontSize = 16, extra = {}) {
     base(tid, "text", x, y, w, h, {
       text,
       fontSize,
-      fontFamily: 5,
+      fontFamily: 1,
       textAlign: "center",
       verticalAlign: "middle",
       roundness: null,
@@ -127,7 +127,7 @@ export function diamondBox(rid, tid, x, y, w, h, bg, text, fontSize = 14, extra 
     base(tid, "text", x, y, w, h, {
       text,
       fontSize,
-      fontFamily: 5,
+      fontFamily: 1,
       textAlign: "center",
       verticalAlign: "middle",
       roundness: null,
