@@ -1,12 +1,6 @@
 # excalidrawer
 
-Code-first Excalidraw diagram generation with SVG and PNG export — no browser required.
-
-## Why
-
-The standard approach to generating Excalidraw diagrams with AI asks the LLM to write 500+ lines of raw JSON directly. This is slow, error-prone, and produces diagrams that are hard to update.
-
-`excalidrawer` gives you a small, declarative API. Write ~30 lines of JavaScript, run it locally, get `.excalidraw` + `.svg` + `.png` in one step.
+Code-first Excalidraw diagram generation with built-in templates, CLI, and SVG/PNG export.
 
 ## Install
 
@@ -16,20 +10,98 @@ The standard approach to generating Excalidraw diagrams with AI asks the LLM to 
 npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer
 ```
 
-**npm package** — for programmatic use in your project:
+**npm package**:
 
 ```bash
 npm install excalidrawer
 ```
 
-## Quick Start
+## Quick Start: CLI Templates
+
+For supported diagram types, just provide JSON data — no code needed.
+
+```bash
+# Generate timeline from JSON
+npx excalidrawer generate -t timeline -i data.json -o docs/timeline
+
+# Only SVG and PNG
+npx excalidrawer generate -t timeline -i data.json -o docs/timeline -f svg,png
+
+# List available types
+npx excalidrawer types
+```
+
+### Built-in Templates
+
+| Type | Use for | Input |
+|------|---------|-------|
+| `timeline` | Project timelines, roadmaps, milestones | `{ title, items: [{ label, time, desc, color? }] }` |
+| `flowchart` | Process flows, decision trees | `{ title?, direction?, nodes: [{ id, label, type?, color? }], edges: [{ from, to, label? }] }` |
+| `architecture` | System architecture, layered diagrams | `{ title?, sections: [{ label, color?, items }], connections? }` |
+
+### Timeline
+
+```json
+{
+  "title": "Project Timeline",
+  "items": [
+    { "label": "MVP", "time": "Jan", "desc": "Core features ready" },
+    { "label": "Beta", "time": "Mar", "desc": "User testing" },
+    { "label": "Launch", "time": "Jun", "desc": "Public release" }
+  ]
+}
+```
+
+### Flowchart
+
+Node types: `start`, `end`, `process`, `decision`, `io`
+
+```json
+{
+  "title": "Login Flow",
+  "direction": "horizontal",
+  "nodes": [
+    { "id": "start", "label": "Start", "type": "start" },
+    { "id": "input", "label": "Enter Credentials", "type": "process" },
+    { "id": "check", "label": "Valid?", "type": "decision" },
+    { "id": "ok", "label": "Dashboard", "type": "end" },
+    { "id": "err", "label": "Show Error", "type": "process" }
+  ],
+  "edges": [
+    { "from": "start", "to": "input" },
+    { "from": "input", "to": "check" },
+    { "from": "check", "to": "ok", "label": "Yes" },
+    { "from": "check", "to": "err", "label": "No" }
+  ]
+}
+```
+
+### Architecture
+
+```json
+{
+  "title": "System Architecture",
+  "sections": [
+    { "label": "Frontend", "color": "blue", "items": ["Web App", "Mobile App"] },
+    { "label": "Backend", "color": "green", "items": ["API Gateway", "Auth Service"] },
+    { "label": "Data", "color": "yellow", "items": ["PostgreSQL", "Redis"] }
+  ],
+  "connections": [
+    { "from": "Web App", "to": "API Gateway" },
+    { "from": "API Gateway", "to": "PostgreSQL" }
+  ]
+}
+```
+
+## Custom Scripts
+
+For diagram types not covered by templates, use the library API directly:
 
 ```javascript
 import { writeFileSync } from "fs";
 import { setSeed, box, arrow, textEl, colors, excalidraw, toSvg, toPng } from "excalidrawer";
 
 setSeed(100000);
-
 const CY = 120, BH = 56, BY = CY - BH / 2;
 
 const elements = [
@@ -46,14 +118,7 @@ writeFileSync("diagram.svg", toSvg(elements));
 writeFileSync("diagram.png", await toPng(elements, 2));
 ```
 
-```bash
-node diagram.mjs
-# diagram.excalidraw  — open in excalidraw.com
-# diagram.svg         — embed in Markdown / GitHub
-# diagram.png         — paste into Lark / Notion / slides
-```
-
-## API
+## API Reference
 
 ### Elements
 
@@ -73,13 +138,21 @@ node diagram.mjs
 | `row(count, startX, y, itemW, gap, builder)` | Horizontal row of items |
 | `grid(cols, count, startX, startY, itemW, itemH, gapX, gapY, builder)` | Grid of items |
 
+### Templates (programmatic)
+
+| Function | Description |
+|----------|-------------|
+| `timeline(data, opts?)` | Generate timeline elements from JSON data |
+| `flowchart(data, opts?)` | Generate flowchart elements from JSON data |
+| `architecture(data, opts?)` | Generate architecture diagram elements from JSON data |
+
 ### Output
 
 | Function | Returns | Description |
 |----------|---------|-------------|
 | `excalidraw(elements)` | `string` | JSON for `.excalidraw` file |
-| `toSvg(elements)` | `string` | SVG markup |
-| `toPng(elements, scale?)` | `Promise<Buffer>` | PNG buffer (requires `sharp`) |
+| `toSvg(elements)` | `string` | SVG markup with embedded fonts |
+| `toPng(elements, scale?)` | `Promise<Buffer>` | PNG buffer (uses Playwright for font rendering) |
 
 ### Colors
 
@@ -87,15 +160,13 @@ node diagram.mjs
 import { colors } from "excalidrawer";
 
 colors.blue / colors.green / colors.yellow / colors.purple / colors.red / colors.orange / colors.gray
-colors.bgBlue / colors.bgGreen / colors.bgYellow / colors.bgPurple  // lighter section backgrounds
+colors.bgBlue / colors.bgGreen / colors.bgYellow / colors.bgPurple  // section backgrounds
 colors.strokeBlue / colors.strokeGreen / colors.strokeYellow / colors.strokeOrange  // stroke accents
 ```
 
 ## AI Skill
 
-The bundled skill (`skills/excalidrawer/SKILL.md`) teaches AI assistants to use this package's API instead of generating raw JSON — resulting in faster, more accurate diagrams.
-
-Install for a specific agent:
+The bundled skill teaches AI assistants to use templates and the API instead of generating raw JSON.
 
 ```bash
 npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer --agent claude-code
