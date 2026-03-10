@@ -28,6 +28,8 @@ Check if the request matches a built-in template:
 | Type | Use for |
 |------|---------|
 | `timeline` | Project timelines, roadmaps, milestones |
+| `architecture` | Layered system architecture, component diagrams |
+| `flowchart` | Decision flows, process diagrams |
 
 Run `npx excalidrawer types` to see all available types.
 
@@ -61,6 +63,57 @@ echo '{"title":"My Timeline","items":[...]}' | npx excalidrawer generate -t time
 ```
 
 ## Template Schemas
+
+### Architecture
+
+Input JSON:
+```json
+{
+  "title": "My System",
+  "sections": [
+    {
+      "label": "Users",
+      "color": "yellow",
+      "items": [
+        { "label": "Web User", "color": "yellow", "desc": "Browser-based access" },
+        { "label": "API User", "color": "orange", "desc": "Programmatic access" }
+      ]
+    },
+    {
+      "label": "Services",
+      "color": "blue",
+      "items": [
+        { "label": "Auth Service", "color": "blue" },
+        { "label": "Data API",     "color": "green" }
+      ]
+    },
+    {
+      "label": "Storage",
+      "color": "gray",
+      "items": ["PostgreSQL", "Redis"]
+    }
+  ],
+  "connections": [
+    { "from": "Web User",     "to": "Auth Service" },
+    { "from": "Auth Service", "to": "PostgreSQL",  "style": "dashed" }
+  ]
+}
+```
+
+Fields:
+- `title` (string, optional) — Diagram title at the top
+- `sections` (array) — Horizontal layers stacked top to bottom
+  - `label` (string) — Section heading (e.g. "Users", "Interface", "Backend")
+  - `color` (string, optional) — Section palette: `blue` `green` `yellow` `purple` `red` `orange` `gray`
+  - `items` (array) — Boxes inside the section, laid out horizontally
+    - Short form: `"Label string"`
+    - Full form: `{ label, color?, desc? }`
+    - `label` — Box title. **Keep under ~20 chars** — box width auto-sizes to the longest label across all sections, so one very long label widens every box
+    - `desc` (string, optional) — Small grey caption rendered below the box; use this for sub-details instead of cramming everything into the label
+- `connections` (array, optional) — Arrows between items across sections
+  - `from` / `to` — Must exactly match the item's `label` string
+  - `label` (string, optional) — Text shown on the arrow
+  - `style` — `"solid"` (default) or `"dashed"`
 
 ### Timeline
 
@@ -154,6 +207,45 @@ writeFileSync("diagram.png", await toPng(elements, 2));
 ```
 
 Run: `node diagram.mjs`
+
+## Visual Design Guidelines
+
+Follow these principles so diagrams feel readable and well-spaced:
+
+### Labels
+- **Keep item labels short** — aim for ≤ 20 characters. The architecture template auto-widens every box to fit the longest label, so one long label stretches the whole diagram.
+- **Use `desc` for secondary info** — put sub-details (URLs, tech stack, short notes) in the `desc` field, not in the label. `desc` renders as a small grey caption below the box and doesn't affect box sizing.
+- **Avoid line breaks in labels** — multi-line labels (`\n`) can cause text to overflow short boxes. Use `desc` instead.
+
+### Titles
+- **Keep titles under ~60 characters** — the canvas width is driven by item count × box width. A very long title can exceed the auto-computed canvas width and appear clipped. Shorten or split into title + subtitle.
+
+### Color usage
+- Use color to encode meaning, not decoration:
+  - `yellow` / `orange` → users, humans, external actors
+  - `blue` → primary services, interface layer
+  - `purple` → AI, ML, protocol layer
+  - `green` → core logic, success state, data layer
+  - `gray` → infrastructure, storage, secondary systems
+  - `red` → warnings, external dependencies, risky paths
+- Assign one color per architectural layer / role for visual consistency
+
+### Connections
+- Prefer direct vertical connections (same column) — they render as straight arrows
+- Diagonal connections (different columns) render as L-shaped paths; avoid too many to prevent visual clutter
+
+### Z-order (rendering layers)
+When writing custom scripts, always control element order to avoid arrows obscuring text:
+1. **Background rects** first (bottom layer)
+2. **Arrows / connections** second (middle layer)
+3. **Boxes, labels, desc text** last (top layer)
+
+The `architecture` template handles this automatically. In custom scripts, use separate arrays and spread them in the right order:
+```javascript
+const bg = [], conn = [], fg = [];
+// ... push elements into the right bucket ...
+const elements = [...bg, ...conn, ...fg];
+```
 
 ## Common Mistakes to Avoid
 
