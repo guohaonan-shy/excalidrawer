@@ -30,6 +30,7 @@ Check if the request matches a built-in template:
 | `timeline` | Project timelines, roadmaps, milestones |
 | `architecture` | Layered system architecture, component diagrams |
 | `flowchart` | Decision flows, process diagrams |
+| `sequence` | Sequence / interaction diagrams, swimlane flows |
 
 Run `npx excalidrawer types` to see all available types.
 
@@ -114,6 +115,65 @@ Fields:
   - `from` / `to` — Must exactly match the item's `label` string
   - `label` (string, optional) — Text shown on the arrow
   - `style` — `"solid"` (default) or `"dashed"`
+
+### Sequence
+
+Input JSON:
+```json
+{
+  "title": "OAuth Login Flow",
+  "actors": [
+    { "label": "User / CLI",      "color": "yellow" },
+    { "label": "Local Client",    "color": "blue"   },
+    { "label": "OAuth Server",    "color": "purple" }
+  ],
+  "steps": [
+    {
+      "actor": "User / CLI",
+      "text":  "1. Run login command"
+    },
+    {
+      "actor": "Local Client",
+      "text":  "2. Start callback server\nlocalhost:PORT",
+      "from":  "User / CLI",
+      "arrow": ""
+    },
+    {
+      "actor": "OAuth Server",
+      "text":  "3. Show login page",
+      "from":  "Local Client",
+      "arrow": "GET /authorize"
+    },
+    {
+      "actor": "User / CLI",
+      "text":  "4. User authorizes",
+      "from":  "OAuth Server",
+      "arrow": "(page rendered)",
+      "style": "dashed"
+    },
+    {
+      "actor": "Local Client",
+      "text":  "5. Receive token",
+      "color": "green",
+      "from":  "OAuth Server",
+      "arrow": "200 OK token"
+    }
+  ]
+}
+```
+
+Fields:
+- `title` (string, optional) — Diagram title at the top, centered
+- `actors` (array) — The participant columns, left to right
+  - `label` (string) — Actor name, shown as column header; also used as reference key in steps
+  - `color` (string, optional) — Header box color: `yellow` `blue` `purple` `orange` `green` `red` `gray`. Defaults to cycling through the palette.
+- `steps` (array) — Events in chronological order, each occupying one row
+  - `actor` (string) — Which actor column this step box belongs to (must match an actor `label`)
+  - `text` (string) — Box content. Use `\n` for line breaks. Keep to 3 lines for readability.
+  - `color` (string, optional) — Override box color (e.g. `"green"` for a success/final step)
+  - `from` (string, optional) — Source actor label. When set, draws a **horizontal arrow** from that actor's lifeline into this step box. The arrow Y is aligned to this box's center, ensuring perfect horizontal alignment.
+  - `arrow` (string, optional) — Label shown above the arrow line. Use `""` for an unlabelled arrow.
+  - `style` (string, optional) — Arrow style: `"solid"` (default) or `"dashed"` (for return/async flows)
 
 ### Timeline
 

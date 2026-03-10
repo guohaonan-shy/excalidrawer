@@ -10,11 +10,11 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { dirname } from "path";
-import { timeline, flowchart, architecture } from "./templates/index.mjs";
+import { timeline, flowchart, architecture, sequence } from "./templates/index.mjs";
 import { excalidraw } from "./elements.mjs";
 import { toSvg, toPng } from "./export.mjs";
 
-const TEMPLATES = { timeline, flowchart, architecture };
+const TEMPLATES = { timeline, flowchart, architecture, sequence };
 
 function usage() {
   console.log(`
