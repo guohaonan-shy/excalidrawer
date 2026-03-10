@@ -9,13 +9,9 @@ A diagram generation tool with built-in templates and a CLI. For supported diagr
 
 ## Prerequisites
 
-Install this skill:
+No install needed for template-based workflows — `npx` handles everything automatically.
 
-```bash
-npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer
-```
-
-Install the npm package in your project:
+Only install the npm package if you need the library API for custom scripts:
 
 ```bash
 npm install excalidrawer
