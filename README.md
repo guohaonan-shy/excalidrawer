@@ -4,16 +4,22 @@ Code-first Excalidraw diagram generation with built-in templates, CLI, and SVG/P
 
 ## Install
 
+No install needed — `npx` handles everything:
+
+```bash
+npx excalidrawer generate -t timeline -i data.json -o output
+```
+
+Only install the npm package if you need the library API for custom scripts:
+
+```bash
+npm install excalidrawer
+```
+
 **AI Skill** — works with Claude Code, GitHub Copilot, Cursor, Codex, Windsurf, and [30+ other AI assistants](https://github.com/vercel-labs/skills):
 
 ```bash
 npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer
-```
-
-**npm package**:
-
-```bash
-npm install excalidrawer
 ```
 
 ## Quick Start: CLI Templates
@@ -38,6 +44,7 @@ npx excalidrawer types
 | `timeline` | Project timelines, roadmaps, milestones | `{ title, items: [{ label, time, desc, color? }] }` |
 | `flowchart` | Process flows, decision trees | `{ title?, direction?, nodes: [{ id, label, type?, color? }], edges: [{ from, to, label? }] }` |
 | `architecture` | System architecture, layered diagrams | `{ title?, sections: [{ label, color?, items }], connections? }` |
+| `sequence` | Sequence diagrams, interaction flows | `{ title?, actors: [{ label, color? }], steps: [{ actor, text, from?, arrow?, style? }] }` |
 
 ### Timeline
 
@@ -89,6 +96,26 @@ Node types: `start`, `end`, `process`, `decision`, `io`
   "connections": [
     { "from": "Web App", "to": "API Gateway" },
     { "from": "API Gateway", "to": "PostgreSQL" }
+  ]
+}
+```
+
+### Sequence
+
+```json
+{
+  "title": "OAuth Login Flow",
+  "actors": [
+    { "label": "User", "color": "yellow" },
+    { "label": "Client", "color": "blue" },
+    { "label": "Auth Server", "color": "purple" }
+  ],
+  "steps": [
+    { "actor": "User", "text": "1. Login request" },
+    { "actor": "Client", "text": "2. Start callback server", "from": "User" },
+    { "actor": "Auth Server", "text": "3. Show login page", "from": "Client", "arrow": "GET /authorize" },
+    { "actor": "User", "text": "4. User authorizes", "from": "Auth Server", "style": "dashed" },
+    { "actor": "Client", "text": "5. Receive token", "color": "green", "from": "Auth Server", "arrow": "200 OK" }
   ]
 }
 ```
@@ -145,6 +172,7 @@ writeFileSync("diagram.png", await toPng(elements, 2));
 | `timeline(data, opts?)` | Generate timeline elements from JSON data |
 | `flowchart(data, opts?)` | Generate flowchart elements from JSON data |
 | `architecture(data, opts?)` | Generate architecture diagram elements from JSON data |
+| `sequence(data, opts?)` | Generate sequence diagram elements from JSON data |
 
 ### Output
 
