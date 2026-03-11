@@ -134,11 +134,45 @@ function renderEllipse(el) {
   return `<ellipse ${attrs}/>`;
 }
 
+/**
+ * Convert an array of points to a smooth cubic bezier SVG path using
+ * Catmull-Rom → Cubic Bezier conversion (matches Excalidraw's curve rendering).
+ */
+function catmullRomToBezierPath(pts) {
+  if (pts.length < 2) return "";
+  if (pts.length === 2) {
+    return `M${pts[0][0]},${pts[0][1]} L${pts[1][0]},${pts[1][1]}`;
+  }
+
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  const n = pts.length;
+
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[Math.min(n - 1, i + 1)];
+    const p3 = pts[Math.min(n - 1, i + 2)];
+
+    // Catmull-Rom to cubic bezier control points (alpha = 0.5 / tension = 1/6)
+    const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+
+    d += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2[0]},${p2[1]}`;
+  }
+
+  return d;
+}
+
 function renderArrow(el) {
   if (!el.points || el.points.length < 2) return "";
 
   const pts = el.points.map(([dx, dy]) => [el.x + dx, el.y + dy]);
-  const d = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x},${y}`).join(" ");
+  const useCurve = el.roundness && pts.length >= 3;
+  const d = useCurve
+    ? catmullRomToBezierPath(pts)
+    : pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x},${y}`).join(" ");
   const dash = strokeDashArray(el.strokeStyle);
   const markerId = `arrow-${el.id}`;
 
