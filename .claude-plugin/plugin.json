@@ -1,0 +1,8 @@
+{
+  "name": "excalidrawer",
+  "description": "Code-first Excalidraw diagram generation with SVG and PNG export. Create flowcharts, architecture diagrams, sequence diagrams, and timelines from JSON data.",
+  "version": "0.5.1",
+  "author": {
+    "name": "guohaonan-shy"
+  }
+}
