@@ -12,6 +12,7 @@
 
 import { setSeed, box, arrow, textEl, rect, colors, excalidraw } from "../elements.mjs";
 import { toSvg, toPng } from "../export.mjs";
+import { wrapText } from "../text.mjs";
 
 // Color rotation for items without explicit color
 const COLOR_CYCLE = [
@@ -126,11 +127,12 @@ export function timeline(data, opts = {}) {
       ...box(`${prefix}box`, `${prefix}txt`, x, boxY, NODE_W, NODE_H, itemColor, item.label, 16)
     );
 
-    // Description text
+    // Description text (auto-wrap to fit node width)
     if (item.desc) {
       const descY = isAbove ? ABOVE_DESC_Y : BELOW_DESC_Y;
+      const wrappedDesc = wrapText(item.desc, NODE_W - 10, 13);
       elements.push(
-        textEl(`${prefix}desc`, x, descY, NODE_W, DESC_H, item.desc, 13, {
+        textEl(`${prefix}desc`, x, descY, NODE_W, DESC_H, wrappedDesc, 13, {
           textAlign: "center",
           strokeColor: "#495057",
         })

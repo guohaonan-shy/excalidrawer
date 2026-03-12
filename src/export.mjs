@@ -354,40 +354,17 @@ export function toSvg(elements) {
  */
 export async function toPng(elements, scale = 2) {
   const svg = toSvg(elements);
-  const flat = elements.flat(Infinity).filter((e) => !e.isDeleted);
-  const vb = computeViewBox(flat);
+  const fontPath = join(__dirname, "fonts", "Excalifont-Regular.ttf");
 
-  const { chromium } = await import("playwright-core");
-  const browser = await chromium.launch({ headless: true });
+  const { Resvg } = await import("@resvg/resvg-js");
+  const resvg = new Resvg(svg, {
+    font: {
+      fontFiles: [fontPath],
+      loadSystemFonts: false,
+      defaultFontFamily: "Excalifont",
+    },
+    fitTo: { mode: "zoom", value: scale },
+  });
 
-  try {
-    const page = await browser.newPage({
-      viewport: {
-        width: Math.ceil(vb.w * scale),
-        height: Math.ceil(vb.h * scale),
-      },
-      deviceScaleFactor: scale,
-    });
-
-    // Load SVG as data URI so embedded @font-face works
-    const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><style>
-  * { margin: 0; padding: 0; }
-  body { width: ${vb.w}px; height: ${vb.h}px; overflow: hidden; }
-</style></head><body>${svg}</body></html>`;
-
-    await page.setContent(html, { waitUntil: "networkidle" });
-    // Wait for fonts to load
-    await page.evaluate(() => document.fonts.ready);
-
-    const png = await page.screenshot({
-      type: "png",
-      clip: { x: 0, y: 0, width: vb.w, height: vb.h },
-      omitBackground: false,
-    });
-
-    return png;
-  } finally {
-    await browser.close();
-  }
+  return Buffer.from(resvg.render().asPng());
 }

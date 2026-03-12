@@ -26,6 +26,7 @@
 
 import { setSeed, box, arrow, textEl, rect, colors, excalidraw } from "../elements.mjs";
 import { toSvg, toPng } from "../export.mjs";
+import { estimateTextWidth, wrapText, lineCount, textHeight } from "../text.mjs";
 
 // Map color name strings to actual color values
 const COLOR_MAP = {
@@ -40,18 +41,6 @@ const COLOR_MAP = {
 
 const SECTION_COLORS = ["blue", "green", "purple", "yellow", "red", "orange"];
 
-/**
- * Estimate rendered text width without a canvas (rough heuristic).
- * CJK characters are roughly square (≈ fontSize wide).
- * ASCII characters are narrower (≈ 0.62× fontSize).
- */
-function estimateLabelWidth(text, fontSize) {
-  let w = 0;
-  for (const ch of text) {
-    w += ch.charCodeAt(0) > 0x7f ? fontSize : fontSize * 0.62;
-  }
-  return Math.ceil(w);
-}
 
 /**
  * Generate architecture diagram elements from structured data.
@@ -80,13 +69,25 @@ export function architecture(data, opts = {}) {
   const allLabels = sections.flatMap((s) =>
     s.items.map((i) => (typeof i === "string" ? i : i.label))
   );
-  const maxLabelW = Math.max(...allLabels.map((l) => estimateLabelWidth(l, ITEM_FONT)));
+  const maxLabelW = Math.max(...allLabels.map((l) => estimateTextWidth(l, ITEM_FONT)));
   const ITEM_W = Math.max(160, maxLabelW + ITEM_PAD_X * 2);
+
+  // Pre-compute wrapped labels and dynamic item heights per section
+  const sectionMeta = sections.map((section) => {
+    const itemsMeta = section.items.map((item) => {
+      const rawLabel = typeof item === "string" ? item : item.label;
+      const wrapped = wrapText(rawLabel, ITEM_W - ITEM_PAD_X * 2, ITEM_FONT);
+      const h = Math.max(ITEM_H, textHeight(wrapped, ITEM_FONT, 24));
+      return { wrapped, h };
+    });
+    const maxItemH = Math.max(...itemsMeta.map((m) => m.h));
+    return { itemsMeta, maxItemH };
+  });
 
   // Canvas width: driven by items, but also wide enough for the title
   const maxItems = Math.max(...sections.map((s) => s.items.length), 1);
   const contentW = maxItems * ITEM_W + (maxItems - 1) * ITEM_GAP;
-  const titleEstW = title ? estimateLabelWidth(title, TITLE_FONT) + 20 : 0;
+  const titleEstW = title ? estimateTextWidth(title, TITLE_FONT) + 20 : 0;
   const sectionW = Math.max(contentW + SECTION_PAD * 2, titleEstW);
   const totalW = sectionW + PAD * 2;
   const TITLE_H = title ? 50 : 0;
@@ -117,9 +118,10 @@ export function architecture(data, opts = {}) {
     const colorKey = section.color || SECTION_COLORS[si % SECTION_COLORS.length];
     const palette = COLOR_MAP[colorKey] || COLOR_MAP.blue;
     const itemCount = section.items.length;
+    const { itemsMeta, maxItemH } = sectionMeta[si];
 
-    // Section height: label + items + padding
-    const sectionH = SECTION_LABEL_H + SECTION_PAD + ITEM_H + SECTION_PAD * 2;
+    // Section height: label + items (dynamic) + padding
+    const sectionH = SECTION_LABEL_H + SECTION_PAD + maxItemH + SECTION_PAD * 2;
 
     // Section background → bottom layer
     bgElements.push(
@@ -145,23 +147,24 @@ export function architecture(data, opts = {}) {
     const itemsY = curY + SECTION_PAD + SECTION_LABEL_H + 10;
 
     section.items.forEach((item, ii) => {
-      const itemLabel = typeof item === "string" ? item : item.label;
+      const rawLabel = typeof item === "string" ? item : item.label;
       const itemColor = typeof item === "object" && item.color
         ? (COLOR_MAP[item.color]?.fill || item.color)
         : palette.fill;
       const x = itemsStartX + ii * (ITEM_W + ITEM_GAP);
-      // Reduce font only if the label still overflows after dynamic sizing
-      const fontSize = estimateLabelWidth(itemLabel, ITEM_FONT) > ITEM_W - ITEM_PAD_X * 2 ? 12 : ITEM_FONT;
+      const { wrapped, h: itemH } = itemsMeta[ii];
+      // Vertically center items when shorter than tallest in section
+      const itemY = itemsY + (maxItemH - itemH) / 2;
 
       // Item box and label → top layer
       fgElements.push(
-        ...box(`item-${si}-${ii}`, `item-${si}-${ii}-t`, x, itemsY, ITEM_W, ITEM_H, itemColor, itemLabel, fontSize)
+        ...box(`item-${si}-${ii}`, `item-${si}-${ii}-t`, x, itemY, ITEM_W, itemH, itemColor, wrapped, ITEM_FONT)
       );
 
       // Optional description below item → top layer
       if (typeof item === "object" && item.desc) {
         fgElements.push(
-          textEl(`item-${si}-${ii}-desc`, x, itemsY + ITEM_H + 4, ITEM_W, 20, item.desc, 11, {
+          textEl(`item-${si}-${ii}-desc`, x, itemsY + maxItemH + 4, ITEM_W, 20, item.desc, 11, {
             textAlign: "center",
             strokeColor: "#868e96",
           })
@@ -169,9 +172,9 @@ export function architecture(data, opts = {}) {
       }
 
       // Store position for connections (include w for same-section horizontal routing)
-      const pos = { cx: x + ITEM_W / 2, cy: itemsY + ITEM_H / 2, y: itemsY, h: ITEM_H, w: ITEM_W, sectionIdx: si };
+      const pos = { cx: x + ITEM_W / 2, cy: itemY + itemH / 2, y: itemY, h: itemH, w: ITEM_W, sectionIdx: si };
       itemPos.set(`${si}-${ii}`, pos);
-      itemPos.set(itemLabel, pos);
+      itemPos.set(rawLabel, pos);
     });
 
     curY += sectionH + SECTION_GAP;

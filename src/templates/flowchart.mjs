@@ -22,6 +22,7 @@
 
 import { setSeed, box, diamondBox, arrow, textEl, rect, ellipse, colors, excalidraw } from "../elements.mjs";
 import { toSvg, toPng } from "../export.mjs";
+import { wrapText, textHeight } from "../text.mjs";
 
 const COLOR_CYCLE = [
   colors.blue,
@@ -124,6 +125,18 @@ export function flowchart(data, opts = {}) {
   const TITLE_H = title ? 50 : 0;
   const PAD = 40;
 
+  // Pre-compute wrapped labels and dynamic node heights
+  const nodeWrapped = new Map(); // id → { wrapped, h }
+  for (const n of nodes) {
+    const type = n.type || "process";
+    const defaults = TYPE_DEFAULTS[type] || TYPE_DEFAULTS.process;
+    const maxTextW = defaults.w - 20;
+    const fontSize = 15;
+    const wrapped = wrapText(n.label, maxTextW, fontSize);
+    const h = Math.max(defaults.h, textHeight(wrapped, fontSize, 20));
+    nodeWrapped.set(n.id, { wrapped, h });
+  }
+
   // Compute node dimensions and positions
   const nodePos = new Map(); // id → { x, y, w, h, cx, cy }
 
@@ -136,7 +149,7 @@ export function flowchart(data, opts = {}) {
       const type = n.type || "process";
       const defaults = TYPE_DEFAULTS[type] || TYPE_DEFAULTS.process;
       const w = defaults.w;
-      const h = defaults.h;
+      const h = nodeWrapped.get(n.id).h;
 
       let x, y;
       if (isHoriz) {
@@ -206,21 +219,22 @@ export function flowchart(data, opts = {}) {
     const type = n.type || "process";
     const defaults = TYPE_DEFAULTS[type] || TYPE_DEFAULTS.process;
     const color = n.color || defaults.color || COLOR_CYCLE[colorIdx++ % COLOR_CYCLE.length];
-    const fontSize = n.label.length > 16 ? 13 : 15;
+    const { wrapped } = nodeWrapped.get(n.id);
+    const fontSize = 15;
 
     if (type === "decision") {
       elements.push(
-        ...diamondBox(`${n.id}`, `${n.id}-t`, pos.x, pos.y, pos.w, pos.h, color, n.label, fontSize)
+        ...diamondBox(`${n.id}`, `${n.id}-t`, pos.x, pos.y, pos.w, pos.h, color, wrapped, fontSize)
       );
     } else if (type === "start" || type === "end") {
       elements.push(
-        ...box(`${n.id}`, `${n.id}-t`, pos.x, pos.y, pos.w, pos.h, color, n.label, fontSize, {
+        ...box(`${n.id}`, `${n.id}-t`, pos.x, pos.y, pos.w, pos.h, color, wrapped, fontSize, {
           roundness: { type: 3, value: pos.h / 2 },
         })
       );
     } else {
       elements.push(
-        ...box(`${n.id}`, `${n.id}-t`, pos.x, pos.y, pos.w, pos.h, color, n.label, fontSize)
+        ...box(`${n.id}`, `${n.id}-t`, pos.x, pos.y, pos.w, pos.h, color, wrapped, fontSize)
       );
     }
   }

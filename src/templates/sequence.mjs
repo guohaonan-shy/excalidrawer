@@ -30,6 +30,7 @@
 
 import { setSeed, box, arrow, textEl, colors, excalidraw } from "../elements.mjs";
 import { toSvg, toPng } from "../export.mjs";
+import { estimateTextWidth, wrapText, textHeight } from "../text.mjs";
 
 const COLOR_MAP = {
   yellow: colors.yellow,
@@ -50,12 +51,6 @@ const COLOR_CYCLE = [
   colors.red,
 ];
 
-/** Rough text-width estimator (no canvas). CJK ≈ fontSize, ASCII ≈ 0.62×. */
-function estimateWidth(text, fontSize) {
-  let w = 0;
-  for (const ch of text) w += ch.charCodeAt(0) > 0x7f ? fontSize : fontSize * 0.62;
-  return Math.ceil(w);
-}
 
 /**
  * Generate sequence diagram elements from structured data.
@@ -74,7 +69,6 @@ export function sequence(data, opts = {}) {
   const COL_GAP    = 45;
   const BOX_H      = 75;
   const ROW_GAP    = 38;
-  const ROW_STEP   = BOX_H + ROW_GAP;
   const HEADER_H   = 52;
   const HEADER_Y   = title ? 56 : 20;
   const START_Y    = HEADER_Y + HEADER_H + 44;
@@ -83,9 +77,23 @@ export function sequence(data, opts = {}) {
 
   // ── Column width: fit longest actor label + padding ───────────────
   const maxActorLabelW = Math.max(
-    ...actors.map((a) => estimateWidth(a.label, HEADER_FONT))
+    ...actors.map((a) => estimateTextWidth(a.label, HEADER_FONT))
   );
   const COL_W = Math.max(160, maxActorLabelW + 40);
+
+  // ── Pre-compute wrapped step text and dynamic heights ─────────────
+  const stepsMeta = steps.map((step) => {
+    const wrapped = wrapText(step.text, COL_W - 20, STEP_FONT);
+    const h = Math.max(BOX_H, textHeight(wrapped, STEP_FONT, 24));
+    return { wrapped, h };
+  });
+  // Cumulative Y offsets for each step
+  const stepY = [];
+  let cumY = 0;
+  for (let i = 0; i < stepsMeta.length; i++) {
+    stepY.push(cumY);
+    cumY += stepsMeta[i].h + ROW_GAP;
+  }
 
   // ── Build actor index & column centers ───────────────────────────
   const actorIndex = new Map(actors.map((a, i) => [a.label, i]));
@@ -114,7 +122,7 @@ export function sequence(data, opts = {}) {
   });
 
   // ── Lifelines (dashed vertical) ───────────────────────────────────
-  const lifelineH = ROW_STEP * steps.length + ROW_GAP;
+  const lifelineH = cumY + ROW_GAP;
   actors.forEach((_, i) => {
     elements.push(
       arrow(`seq-ll${i}`, colCX[i], HEADER_Y + HEADER_H,
@@ -128,8 +136,9 @@ export function sequence(data, opts = {}) {
   steps.forEach((step, i) => {
     const actorIdx = actorIndex.get(step.actor) ?? 0;
     const bx  = colX[actorIdx];
-    const by  = START_Y + i * ROW_STEP;
-    const bcy = by + BOX_H / 2;   // vertical center — this is the arrow Y
+    const by  = START_Y + stepY[i];
+    const { wrapped, h: boxH } = stepsMeta[i];
+    const bcy = by + boxH / 2;   // vertical center — this is the arrow Y
 
     // Resolve box color: step override > actor default > cycle
     const actorColor = COLOR_MAP[actors[actorIdx]?.color] ?? COLOR_CYCLE[actorIdx % COLOR_CYCLE.length];
@@ -137,7 +146,7 @@ export function sequence(data, opts = {}) {
 
     // Step box
     elements.push(
-      ...box(`seq-sR${i}`, `seq-sT${i}`, bx, by, COL_W, BOX_H, boxColor, step.text, STEP_FONT)
+      ...box(`seq-sR${i}`, `seq-sT${i}`, bx, by, COL_W, boxH, boxColor, wrapped, STEP_FONT)
     );
 
     // Incoming arrow — Y aligned to this box's vertical center

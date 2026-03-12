@@ -1,6 +1,6 @@
 {
   "name": "excalidrawer",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Code-first Excalidraw diagram generation with SVG/PNG export and CLI",
   "type": "module",
   "main": "./src/index.mjs",
@@ -27,8 +27,6 @@
   "license": "MIT",
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
-    "playwright-core": "^1.58.2",
-    "sharp": "^0.33.5",
     "wawoff2": "^2.0.1"
   }
 }
