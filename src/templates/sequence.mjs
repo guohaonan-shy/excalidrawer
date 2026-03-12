@@ -62,7 +62,8 @@ const COLOR_CYCLE = [
 export function sequence(data, opts = {}) {
   setSeed(opts.seed ?? 500000);
 
-  const { title, actors, steps } = data;
+  const { title, actors = [], steps = [] } = data;
+  if (actors.length === 0) return [];
 
   // ── Layout constants ──────────────────────────────────────────────
   const MARGIN     = 25;
@@ -127,7 +128,7 @@ export function sequence(data, opts = {}) {
     elements.push(
       arrow(`seq-ll${i}`, colCX[i], HEADER_Y + HEADER_H,
         [[0, 0], [0, lifelineH]],
-        { strokeStyle: "dashed", strokeColor: "#ced4da", strokeWidth: 1, endArrowhead: "none" }
+        { strokeStyle: "dashed", strokeColor: "#ced4da", strokeWidth: 1, endArrowhead: null }
       )
     );
   });

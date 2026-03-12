@@ -247,6 +247,7 @@ function renderBoundText(container, elements) {
       "font-size": bound.fontSize,
       "font-family": fontFamily,
       fill: bound.strokeColor,
+      opacity: bound.opacity / 100,
     });
     return `<text ${attrs}>${escapeXml(line)}</text>`;
   }).join("\n");
@@ -325,7 +326,7 @@ export function toSvg(elements) {
         parts.push(renderArrow(el));
         break;
       case "text":
-        parts.push(renderText(el, flat));
+        parts.push(renderText(el));
         break;
     }
   }
@@ -339,14 +340,13 @@ export function toSvg(elements) {
 }
 
 // ---------------------------------------------------------------------------
-// PNG export (via Playwright headless Chromium)
+// PNG export (via resvg-js)
 // ---------------------------------------------------------------------------
 
 /**
  * Render elements to a PNG Buffer.
  *
- * Uses Playwright (headless Chromium) for accurate rendering of embedded
- * @font-face woff2 fonts (hand-drawn Excalifont).
+ * Uses @resvg/resvg-js for fast native SVG-to-PNG rendering.
  *
  * @param {Array} elements  - flat array of element objects
  * @param {number} scale    - output scale factor (default 2 for retina)

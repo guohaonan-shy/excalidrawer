@@ -19,4 +19,4 @@ export { toSvg, toPng } from "./export.mjs";
 export { estimateTextWidth, wrapText, lineCount, textHeight } from "./text.mjs";
 
 // Built-in templates
-export { timeline, flowchart, architecture } from "./templates/index.mjs";
+export { timeline, flowchart, architecture, sequence } from "./templates/index.mjs";

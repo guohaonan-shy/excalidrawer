@@ -1,0 +1,9 @@
+.agent/
+.agents/
+.claude/
+.kiro/
+.windsurf/
+examples/
+convert-fonts.mjs
+test-font.mjs
+skills-lock.json

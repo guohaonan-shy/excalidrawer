@@ -51,7 +51,8 @@ const TYPE_DEFAULTS = {
 export function flowchart(data, opts = {}) {
   setSeed(opts.seed ?? 300000);
 
-  const { title, nodes, edges } = data;
+  const { title, nodes = [], edges = [] } = data;
+  if (nodes.length === 0) return [];
   const direction = data.direction || "horizontal";
   const isHoriz = direction === "horizontal";
 
@@ -86,8 +87,8 @@ export function flowchart(data, opts = {}) {
   for (const n of nodes) layer.set(n.id, 0);
 
   const hasForwardIncoming = new Set();
-  for (const e of edges) {
-    if (!backEdgeSet.has(edges.indexOf(e))) hasForwardIncoming.add(e.to);
+  for (let i = 0; i < edges.length; i++) {
+    if (!backEdgeSet.has(i)) hasForwardIncoming.add(edges[i].to);
   }
   const roots = nodes.filter((n) => !hasForwardIncoming.has(n.id));
   if (roots.length === 0) roots.push(nodes[0]);

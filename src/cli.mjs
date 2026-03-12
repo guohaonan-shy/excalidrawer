@@ -118,15 +118,34 @@ async function main() {
     process.exit(1);
   }
 
+  // Validate required fields per template type
+  const REQUIRED_FIELDS = {
+    timeline:     ["items"],
+    flowchart:    ["nodes", "edges"],
+    architecture: ["sections"],
+    sequence:     ["actors", "steps"],
+  };
+  const missing = (REQUIRED_FIELDS[args.type] || []).filter((f) => !data[f] || !Array.isArray(data[f]));
+  if (missing.length > 0) {
+    console.error(`Error: input JSON missing required field(s): ${missing.join(", ")}`);
+    process.exit(1);
+  }
+
   // Generate elements
   const opts = {};
   if (args.seed != null) opts.seed = args.seed;
   const elements = templateFn(data, opts);
 
   // Determine formats
+  const VALID_FORMATS = new Set(["excalidraw", "svg", "png"]);
   const formats = args.format
-    ? args.format.split(",").map((f) => f.trim())
+    ? args.format.split(",").map((f) => f.trim().toLowerCase())
     : ["excalidraw", "svg", "png"];
+  const unknown = formats.filter((f) => !VALID_FORMATS.has(f));
+  if (unknown.length > 0) {
+    console.error(`Error: unknown format(s): ${unknown.join(", ")}. Valid: excalidraw, svg, png`);
+    process.exit(1);
+  }
 
   // Ensure output directory exists
   mkdirSync(dirname(args.output), { recursive: true });
