@@ -16,11 +16,18 @@ Only install the npm package if you need the library API for custom scripts:
 npm install excalidrawer
 ```
 
-**AI Skill** — works with Claude Code, GitHub Copilot, Cursor, Codex, Windsurf, and [30+ other AI assistants](https://github.com/vercel-labs/skills):
+**Claude Code Plugin** — say "draw a flowchart" and it just works:
 
 ```bash
+# Option 1: Plugin (auto-updates via marketplace)
+/plugin marketplace add guohaonan-shy/claude-plugins
+/plugin install excalidrawer@guohaonan-plugins
+
+# Option 2: Standalone skill
 npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer
 ```
+
+Also works with GitHub Copilot, Cursor, Windsurf, and [30+ other AI assistants](https://github.com/vercel-labs/skills).
 
 ## Quick Start: CLI Templates
 
@@ -180,7 +187,7 @@ writeFileSync("diagram.png", await toPng(elements, 2));
 |----------|---------|-------------|
 | `excalidraw(elements)` | `string` | JSON for `.excalidraw` file |
 | `toSvg(elements)` | `string` | SVG markup with embedded fonts |
-| `toPng(elements, scale?)` | `Promise<Buffer>` | PNG buffer (uses Playwright for font rendering) |
+| `toPng(elements, scale?)` | `Promise<Buffer>` | PNG buffer (uses resvg-js for fast native rendering) |
 
 ### Colors
 
