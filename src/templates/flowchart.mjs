@@ -22,7 +22,7 @@
 
 import { setSeed, box, diamondBox, arrow, textEl, rect, ellipse, colors, excalidraw } from "../elements.mjs";
 import { toSvg, toPng } from "../export.mjs";
-import { wrapText, textHeight } from "../text.mjs";
+import { estimateTextWidth, wrapText, textHeight } from "../text.mjs";
 
 const COLOR_CYCLE = [
   colors.blue,
@@ -240,6 +240,25 @@ export function flowchart(data, opts = {}) {
     }
   }
 
+  // --- Helpers for edge routing ---
+
+  // Global bounding box of all nodes (for back-edge routing clearance)
+  let globalMinY = Infinity, globalMaxY = -Infinity;
+  let globalMinX = Infinity, globalMaxX = -Infinity;
+  for (const [, pos] of nodePos) {
+    globalMinY = Math.min(globalMinY, pos.y);
+    globalMaxY = Math.max(globalMaxY, pos.y + pos.h);
+    globalMinX = Math.min(globalMinX, pos.x);
+    globalMaxX = Math.max(globalMaxX, pos.x + pos.w);
+  }
+
+  // AABB overlap test
+  function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+    return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+  }
+
+  const BACK_EDGE_MARGIN = 36;
+
   // Edges
   for (let ei = 0; ei < edges.length; ei++) {
     const e = edges[ei];
@@ -247,33 +266,103 @@ export function flowchart(data, opts = {}) {
     const to = nodePos.get(e.to);
     if (!from || !to) continue;
 
-    let startX, startY, dx, dy;
+    const isBackEdge = backEdgeSet.has(ei);
+    let startX, startY, points;
 
-    if (isHoriz) {
-      startX = from.x + from.w;
-      startY = from.cy;
-      dx = to.x - startX;
-      dy = to.cy - startY;
-    } else {
-      startX = from.cx;
-      startY = from.y + from.h;
-      dx = to.cx - startX;
-      dy = to.y - startY;
-    }
-
-    // Use an L-shaped path if nodes aren't aligned
-    const needsBend = isHoriz ? Math.abs(dy) > 5 : Math.abs(dx) > 5;
-    let points;
-    if (needsBend) {
+    if (isBackEdge) {
+      // --- Back-edge: route around the flow to avoid crossing nodes ---
       if (isHoriz) {
-        const midX = dx / 2;
-        points = [[0, 0], [midX, 0], [midX, dy], [dx, dy]];
+        // Decide whether to route above or below based on which is closer
+        const midCy = (from.cy + to.cy) / 2;
+        const distToTop = midCy - globalMinY;
+        const distToBot = globalMaxY - midCy;
+        const routeAbove = distToTop <= distToBot;
+
+        if (routeAbove) {
+          const clearY = globalMinY - BACK_EDGE_MARGIN;
+          startX = from.cx;
+          startY = from.y;
+          const endX = to.cx;
+          const endY = to.y;
+          points = [
+            [0, 0],
+            [0, clearY - startY],
+            [endX - startX, clearY - startY],
+            [endX - startX, endY - startY],
+          ];
+        } else {
+          const clearY = globalMaxY + BACK_EDGE_MARGIN;
+          startX = from.cx;
+          startY = from.y + from.h;
+          const endX = to.cx;
+          const endY = to.y + to.h;
+          points = [
+            [0, 0],
+            [0, clearY - startY],
+            [endX - startX, clearY - startY],
+            [endX - startX, endY - startY],
+          ];
+        }
       } else {
-        const midY = dy / 2;
-        points = [[0, 0], [0, midY], [dx, midY], [dx, dy]];
+        // Vertical flow: route to the right or left
+        const midCx = (from.cx + to.cx) / 2;
+        const distToLeft = midCx - globalMinX;
+        const distToRight = globalMaxX - midCx;
+        const routeRight = distToRight <= distToLeft;
+
+        if (routeRight) {
+          const clearX = globalMaxX + BACK_EDGE_MARGIN;
+          startX = from.x + from.w;
+          startY = from.cy;
+          const endX = to.x + to.w;
+          const endY = to.cy;
+          points = [
+            [0, 0],
+            [clearX - startX, 0],
+            [clearX - startX, endY - startY],
+            [endX - startX, endY - startY],
+          ];
+        } else {
+          const clearX = globalMinX - BACK_EDGE_MARGIN;
+          startX = from.x;
+          startY = from.cy;
+          const endX = to.x;
+          const endY = to.cy;
+          points = [
+            [0, 0],
+            [clearX - startX, 0],
+            [clearX - startX, endY - startY],
+            [endX - startX, endY - startY],
+          ];
+        }
       }
     } else {
-      points = [[0, 0], [dx, dy]];
+      // --- Forward edge: standard routing ---
+      let dx, dy;
+      if (isHoriz) {
+        startX = from.x + from.w;
+        startY = from.cy;
+        dx = to.x - startX;
+        dy = to.cy - startY;
+      } else {
+        startX = from.cx;
+        startY = from.y + from.h;
+        dx = to.cx - startX;
+        dy = to.y - startY;
+      }
+
+      const needsBend = isHoriz ? Math.abs(dy) > 5 : Math.abs(dx) > 5;
+      if (needsBend) {
+        if (isHoriz) {
+          const midX = dx / 2;
+          points = [[0, 0], [midX, 0], [midX, dy], [dx, dy]];
+        } else {
+          const midY = dy / 2;
+          points = [[0, 0], [0, midY], [dx, midY], [dx, dy]];
+        }
+      } else {
+        points = [[0, 0], [dx, dy]];
+      }
     }
 
     elements.push(
@@ -283,12 +372,38 @@ export function flowchart(data, opts = {}) {
       })
     );
 
-    // Edge label
+    // --- Edge label with collision avoidance ---
     if (e.label) {
-      const lx = startX + dx / 2 - 20;
-      const ly = startY + dy / 2 - 16;
+      const labelFontSize = 12;
+      const labelLines = e.label.split("\n");
+      const labelW = Math.max(...labelLines.map((l) => estimateTextWidth(l, labelFontSize))) + 8;
+      const labelH = textHeight(e.label, labelFontSize, 4);
+
+      // Compute arrow midpoint in absolute coordinates
+      const lastPt = points[points.length - 1];
+      const arrowMidAbsX = startX + lastPt[0] / 2;
+      const arrowMidAbsY = startY + lastPt[1] / 2;
+
+      let lx = arrowMidAbsX - labelW / 2;
+      let ly = arrowMidAbsY - labelH - 4; // default: above the arrow
+
+      // Try to avoid overlapping any node; offset perpendicular to flow
+      const offsetDir = isHoriz ? [0, -labelH - 4] : [-labelW - 4, 0];
+      for (let attempt = 0; attempt < 6; attempt++) {
+        let collides = false;
+        for (const [, pos] of nodePos) {
+          if (rectsOverlap(lx, ly, labelW, labelH, pos.x - 2, pos.y - 2, pos.w + 4, pos.h + 4)) {
+            collides = true;
+            break;
+          }
+        }
+        if (!collides) break;
+        lx += offsetDir[0];
+        ly += offsetDir[1];
+      }
+
       elements.push(
-        textEl(`elbl-${ei}`, lx, ly, 40, 14, e.label, 12, {
+        textEl(`elbl-${ei}`, lx, ly, labelW, labelH, e.label, labelFontSize, {
           strokeColor: "#495057",
         })
       );
