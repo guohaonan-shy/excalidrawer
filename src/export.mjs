@@ -7,13 +7,33 @@
 
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
-import { dirname, join } from "path";
+import { dirname, join, basename } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ---------------------------------------------------------------------------
 // Font embedding
 // ---------------------------------------------------------------------------
+
+/**
+ * Register custom font files (e.g. CJK fonts) for use in SVG and PNG export.
+ * Call this once before toSvg() / toPng() — fonts will be embedded in SVG
+ * @font-face declarations and loaded into the Resvg renderer for PNG export.
+ *
+ * @param {string | string[]} fontPaths - absolute path(s) to TTF / OTF / WOFF2 font files
+ *
+ * @example
+ * // macOS system font
+ * registerFonts("/System/Library/Fonts/PingFang.ttc");
+ *
+ * // multiple fonts
+ * registerFonts(["/path/to/NotoSansCJK.ttf", "/path/to/other.ttf"]);
+ */
+export function registerFonts(fontPaths) {
+  _customFontFiles = Array.isArray(fontPaths) ? fontPaths : [fontPaths];
+}
+
+let _customFontFiles = [];
 
 /** Load Excalifont as base64 for SVG embedding. */
 let _excalifontBase64 = null;
@@ -33,35 +53,66 @@ function getExcalifontBase64() {
  *  5 = Excalifont (legacy, map to Virgil)
  */
 function cssFontFamily(fontFamily) {
+  // Append registered custom fonts as fallbacks so their glyphs are used
+  // when the primary font doesn't cover a character (e.g. CJK).
+  // Use single quotes for multi-word names — SVG text attributes are
+  // already wrapped in double quotes by svgAttrs(), so inner double
+  // quotes would break XML parsing.
+  const customFamilies = _customFontFiles
+    .map((fp) => {
+      const family = basename(fp).replace(/\.[^.]+$/, "");
+      return family.includes(" ") ? `'${family}'` : family;
+    })
+    .join(", ");
+  const fallback = customFamilies ? `, ${customFamilies}` : "";
+
   switch (fontFamily) {
     case 1:
     case 5:
-      return "Excalifont, Segoe UI Emoji, sans-serif";
+      return `Excalifont, Segoe UI Emoji${fallback}, sans-serif`;
     case 2:
-      return "Helvetica Neue, Helvetica, Arial, sans-serif";
+      return `Helvetica Neue, Helvetica, Arial${fallback}, sans-serif`;
     case 3:
-      return "Cascadia Code, Fira Code, ui-monospace, monospace";
+      return `Cascadia Code, Fira Code, ui-monospace${fallback}, monospace`;
     default:
-      return "Excalifont, Segoe UI Emoji, sans-serif";
+      return `Excalifont, Segoe UI Emoji${fallback}, sans-serif`;
   }
 }
 
 /** Generate @font-face CSS for embedded fonts used by elements. */
 function fontFaceCss(elements) {
+  const faces = [];
+
+  // Excalifont — hand-drawn style (fontFamily 1 / 5)
   const needsHandDrawn = elements.some(
     (el) => el.type === "text" && (!el.fontFamily || el.fontFamily === 1 || el.fontFamily === 5)
   );
-  if (!needsHandDrawn) return "";
-
-  const b64 = getExcalifontBase64();
-  return `<style>
-@font-face {
+  if (needsHandDrawn) {
+    const b64 = getExcalifontBase64();
+    faces.push(`@font-face {
   font-family: "Excalifont";
   src: url("data:font/woff2;base64,${b64}") format("woff2");
   font-weight: normal;
   font-style: normal;
-}
-</style>`;
+}`);
+  }
+
+  // Custom fonts (e.g. CJK fonts for Chinese / Japanese / Korean text)
+  for (const fp of _customFontFiles) {
+    const b64 = readFileSync(fp).toString("base64");
+    const ext = fp.split(".").pop().toLowerCase();
+    const fmt = ext === "woff2" ? "woff2" : ext === "otf" ? "opentype" : "truetype";
+    const family = basename(fp).replace(/\.[^.]+$/, "");
+    faces.push(`@font-face {
+  font-family: "${family}";
+  src: url("data:font/${fmt};base64,${b64}") format("${fmt}");
+  font-weight: normal;
+  font-style: normal;
+}`);
+  }
+
+  if (faces.length === 0) return "";
+  return `<style>\n${faces.join("\n")}\n</style>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -359,7 +410,7 @@ export async function toPng(elements, scale = 2) {
   const { Resvg } = await import("@resvg/resvg-js");
   const resvg = new Resvg(svg, {
     font: {
-      fontFiles: [fontPath],
+      fontFiles: [fontPath, ..._customFontFiles],
       loadSystemFonts: false,
       defaultFontFamily: "Excalifont",
     },
