@@ -16,18 +16,25 @@ Only install the npm package if you need the library API for custom scripts:
 npm install excalidrawer
 ```
 
-**Claude Code Plugin** — say "draw a flowchart" and it just works:
+## Claude Code Skill (moved)
 
-```bash
-# Option 1: Plugin (auto-updates via marketplace)
-/plugin marketplace add guohaonan-shy/claude-plugins
-/plugin install excalidrawer@guohaonan-plugins
+> ⚠️ **The Claude Code skill has moved to the [harold-skills](https://github.com/guohaonan-shy/harold-skills) marketplace** and was rebuilt as a 4-skill plugin (`flowchart` / `timeline` / `architecture` / `sequence`) with `AskUserQuestion`-driven clarification. New features only land there.
+>
+> **Install the new version:**
+> ```text
+> /plugin marketplace add guohaonan-shy/harold-skills
+> /plugin install excalidrawer
+> /reload-plugins
+> ```
+>
+> The previous single-skill install (`npx skills add guohaonan-shy/excalidrawer`) **still works but is frozen** — it won't receive updates. To migrate:
+> ```bash
+> rm ~/.claude/skills/excalidrawer
+> npx skills remove excalidrawer    # if you used npx skills add
+> # then run the /plugin commands above
+> ```
 
-# Option 2: Standalone skill
-npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer
-```
-
-Also works with GitHub Copilot, Cursor, Windsurf, and [30+ other AI assistants](https://github.com/vercel-labs/skills).
+This npm package itself is unchanged — `npx excalidrawer` and `import 'excalidrawer'` continue to work and stay maintained here.
 
 ## Quick Start: CLI Templates
 

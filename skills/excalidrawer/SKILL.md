@@ -3,6 +3,22 @@ name: excalidrawer
 description: 'Code-first Excalidraw diagram generation with SVG and PNG export. Use when asked to "create a diagram", "draw a flowchart", "generate an architecture diagram", "export diagram to SVG", "export diagram to PNG", or "visualize a process". Produces .excalidraw, .svg, and .png files using the excalidrawer npm package — no browser required.'
 ---
 
+> ⚠️ **This skill is in maintenance mode.**
+>
+> An updated version is available as a Claude Code marketplace plugin — split into 4 focused skills (`flowchart` / `timeline` / `architecture` / `sequence`), each with `AskUserQuestion`-driven clarification before drawing. New features and improvements only land in the new plugin.
+>
+> **Migrate (recommended):**
+> ```text
+> /plugin marketplace add guohaonan-shy/harold-skills
+> /plugin install excalidrawer
+> /reload-plugins
+> ```
+> Then remove the old install: `rm ~/.claude/skills/excalidrawer && npx skills remove excalidrawer`
+>
+> Source: https://github.com/guohaonan-shy/harold-skills/tree/main/excalidrawer
+>
+> The underlying `excalidrawer` **npm package** is unchanged and still maintained at this repo — only the Claude Code skill has moved.
+
 # Excalidrawer
 
 A diagram generation tool with built-in templates and a CLI. For supported diagram types, just provide JSON data and run the CLI. For custom diagrams, write a short JS script using the library API.
