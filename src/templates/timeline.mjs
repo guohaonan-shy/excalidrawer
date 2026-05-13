@@ -83,7 +83,8 @@ export function timeline(data, opts = {}) {
   items.forEach((item, i) => {
     const x = PADDING_X + i * (NODE_W + GAP);
     const cx = x + NODE_W / 2;
-    const itemColor = item.color || COLOR_CYCLE[i % COLOR_CYCLE.length];
+    // Resolve palette keywords ("red" → "#ffc9c9") so items can use names
+    const itemColor = (item.color && (colors[item.color] ?? item.color)) || COLOR_CYCLE[i % COLOR_CYCLE.length];
     const prefix = `m${i}`;
 
     // Dot on timeline

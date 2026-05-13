@@ -120,10 +120,18 @@ export function flowchart(data, opts = {}) {
     layers[l].push(n);
   }
 
+  // Resolve palette keywords ("red" → "#ffc9c9") so node JSON can use names
+  // instead of hex. Pass through any string starting with "#" (already hex).
+  const resolveColor = (c) => (c == null ? null : (colors[c] ?? c));
+
+  const hasBackEdges = backEdgeSet.size > 0;
+
   // Layout constants
   const LAYER_GAP = isHoriz ? 80 : 100;
   const NODE_GAP = 40;
-  const TITLE_H = title ? 50 : 0;
+  // Title baseline 50px; when back-edges route above the flow we need extra
+  // clearance so the curve doesn't cross the title text.
+  const TITLE_H = title ? (hasBackEdges ? 90 : 50) : 0;
   const PAD = 40;
 
   // Pre-compute wrapped labels and dynamic node heights
@@ -219,7 +227,7 @@ export function flowchart(data, opts = {}) {
     const pos = nodePos.get(n.id);
     const type = n.type || "process";
     const defaults = TYPE_DEFAULTS[type] || TYPE_DEFAULTS.process;
-    const color = n.color || defaults.color || COLOR_CYCLE[colorIdx++ % COLOR_CYCLE.length];
+    const color = resolveColor(n.color) || defaults.color || COLOR_CYCLE[colorIdx++ % COLOR_CYCLE.length];
     const { wrapped } = nodeWrapped.get(n.id);
     const fontSize = 15;
 

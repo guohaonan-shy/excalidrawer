@@ -9,12 +9,17 @@
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
-import { dirname } from "path";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 import { timeline, flowchart, architecture, sequence } from "./templates/index.mjs";
 import { excalidraw } from "./elements.mjs";
 import { toSvg, toPng } from "./export.mjs";
 
 const TEMPLATES = { timeline, flowchart, architecture, sequence };
+
+const PKG_VERSION = JSON.parse(
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "package.json"), "utf-8")
+).version;
 
 function usage() {
   console.log(`
@@ -33,6 +38,8 @@ Options:
   --output, -o    Output path without extension (e.g. ./docs/timeline)
   --format, -f    Comma-separated formats: excalidraw,svg,png (default: all)
   --seed, -s      Seed for deterministic IDs (default: auto)
+  --version, -v   Print package version and exit
+  --help, -h      Print this help and exit
 
 Examples:
   excalidrawer generate -t timeline -i data.json -o ./docs/timeline
@@ -52,6 +59,7 @@ function parseArgs(argv) {
     else if (a === "--format" || a === "-f") args.format = argv[++i];
     else if (a === "--seed" || a === "-s") args.seed = Number(argv[++i]);
     else if (a === "--help" || a === "-h") args.help = true;
+    else if (a === "--version" || a === "-v") args.version = true;
     else if (!args.command) args.command = a;
   }
   return args;
@@ -65,6 +73,11 @@ async function readStdin() {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+
+  if (args.version) {
+    console.log(PKG_VERSION);
+    process.exit(0);
+  }
 
   if (args.help || !args.command) {
     usage();
