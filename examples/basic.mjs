@@ -40,8 +40,9 @@ const elements = [
   arrow("a4", 925, CY, [[0,0],[40,0]]),
   ...box("s5", "s5t", 965, BY, 120, BH, colors.green, "Done", 16),
 
-  // No → loop back down
-  arrow("ano", 655, CY + 40, [[0,0],[0,60],[-465,60],[-465,-60]], { strokeColor: colors.strokeOrange }),
+  // No → loop back down to Enter Email's bottom edge
+  // s2 (Enter Email): x=190..340, bottom y = BY + BH = 148. Aim mid-left (x=265).
+  arrow("ano", 655, CY + 40, [[0,0],[0,60],[-390,60],[-390,-12]], { strokeColor: colors.strokeOrange }),
   textEl("lno", 659, CY + 44, 28, 12, "No", 10, { strokeColor: colors.strokeOrange }),
 ];
 

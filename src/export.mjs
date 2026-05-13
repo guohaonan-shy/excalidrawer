@@ -216,6 +216,41 @@ function catmullRomToBezierPath(pts) {
   return d;
 }
 
+// Sample the last cubic-bezier segment of a Catmull-Rom path at a point
+// roughly TARGET_DIST pixels before the endpoint, and return the angle (in
+// degrees) from that sample to the endpoint. Used to orient end-arrowheads
+// along the *visually approaching* direction rather than the strict t=1
+// tangent, which can be off when Catmull-Rom recovers from a sharp prior
+// direction change (see export.mjs comment on S-curve tails).
+function computeEndOrientDeg(pts, useCurve, strokeWidth) {
+  const n = pts.length;
+  const [px, py] = pts[n - 2];
+  const [qx, qy] = pts[n - 1];
+  if (!useCurve) {
+    return Math.atan2(qy - py, qx - px) * 180 / Math.PI;
+  }
+  const p0 = pts[Math.max(0, n - 3)];
+  const p1 = pts[n - 2];
+  const p2 = pts[n - 1];
+  const cp1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+  const cp2 = [p2[0] - (p2[0] - p1[0]) / 6, p2[1] - (p2[1] - p1[1]) / 6];
+  const TARGET_DIST = Math.max(8, strokeWidth * 6);
+  let bestT = 0.9;
+  let bestDelta = Infinity;
+  for (let t = 0.4; t < 1.0; t += 0.02) {
+    const omt = 1 - t;
+    const x = omt**3 * p1[0] + 3*omt**2*t * cp1[0] + 3*omt*t**2 * cp2[0] + t**3 * p2[0];
+    const y = omt**3 * p1[1] + 3*omt**2*t * cp1[1] + 3*omt*t**2 * cp2[1] + t**3 * p2[1];
+    const d = Math.hypot(p2[0] - x, p2[1] - y);
+    const delta = Math.abs(d - TARGET_DIST);
+    if (delta < bestDelta) { bestDelta = delta; bestT = t; }
+  }
+  const omt = 1 - bestT;
+  const sx = omt**3 * p1[0] + 3*omt**2*bestT * cp1[0] + 3*omt*bestT**2 * cp2[0] + bestT**3 * p2[0];
+  const sy = omt**3 * p1[1] + 3*omt**2*bestT * cp1[1] + 3*omt*bestT**2 * cp2[1] + bestT**3 * p2[1];
+  return Math.atan2(p2[1] - sy, p2[0] - sx) * 180 / Math.PI;
+}
+
 function renderArrow(el) {
   if (!el.points || el.points.length < 2) return "";
 
@@ -230,8 +265,9 @@ function renderArrow(el) {
   let markerDef = "";
   let markerEnd = null;
   if (el.endArrowhead !== null) {
-    markerDef = `<defs><marker id="${markerId}" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-  <path d="M0,0 L0,6 L8,3 z" fill="${el.strokeColor}"/>
+    const orient = computeEndOrientDeg(pts, useCurve, el.strokeWidth).toFixed(2);
+    markerDef = `<defs><marker id="${markerId}" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="${orient}">
+  <path d="M0,0 L12,6 L0,12" fill="none" stroke="${el.strokeColor}" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
 </marker></defs>`;
     markerEnd = `url(#${markerId})`;
   }
