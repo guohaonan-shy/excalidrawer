@@ -18,5 +18,18 @@ export { toSvg, toPng, registerFonts } from "./export.mjs";
 
 export { estimateTextWidth, wrapText, lineCount, textHeight } from "./text.mjs";
 
+// Layout helpers (0.6.0+): pure coordinate math, no element creation.
+export {
+  gridLayout,
+  chain,
+  swimlane,
+  hubSpoke,
+  edgePoint,
+  routeU,
+  labelAnchor,
+  contrastText,
+  triplet,
+} from "./layout.mjs";
+
 // Built-in templates
 export { timeline, flowchart, architecture, sequence } from "./templates/index.mjs";

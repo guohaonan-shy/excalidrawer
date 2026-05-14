@@ -222,6 +222,8 @@ export const colors = {
   bgYellow: "#fffbf0",
   bgPurple: "#f3f0ff",
   bgRed:    "#fff5f5",
+  bgOrange: "#fff4e6",
+  bgGray:   "#f8f9fa",
 
   // Stroke accents
   strokeBlue:   "#1971c2",
@@ -230,6 +232,7 @@ export const colors = {
   strokeOrange: "#e67700",
   strokePurple: "#7048e8",
   strokeGray:   "#868e96",
+  strokeRed:    "#fa5252",
 };
 
 // ---------------------------------------------------------------------------
