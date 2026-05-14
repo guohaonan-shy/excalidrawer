@@ -1,11 +1,12 @@
 {
   "name": "excalidrawer",
-  "version": "0.5.5",
-  "description": "Code-first Excalidraw diagram generation with SVG/PNG export and CLI",
+  "version": "0.5.6",
+  "description": "Code-first Excalidraw diagram generation with SVG/PNG export, CLI and MCP server",
   "type": "module",
   "main": "./src/index.mjs",
   "bin": {
-    "excalidrawer": "./src/cli.mjs"
+    "excalidrawer": "./src/cli.mjs",
+    "excalidrawer-mcp": "./src/mcp.mjs"
   },
   "exports": {
     ".": "./src/index.mjs",
@@ -22,11 +23,13 @@
     "svg",
     "png",
     "architecture",
-    "code-first"
+    "code-first",
+    "mcp"
   ],
   "author": "guohaonan-shy",
   "license": "MIT",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@resvg/resvg-js": "^2.6.2",
     "wawoff2": "^2.0.1"
   }

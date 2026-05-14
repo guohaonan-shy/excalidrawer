@@ -1,6 +1,6 @@
 # excalidrawer roadmap
 
-> Status: living document. Last updated for the 0.5.5 release.
+> Status: living document. Last updated for the 0.5.6 release.
 
 ## Vision
 
@@ -65,7 +65,7 @@ track the package lock-step.
 | Version | npm package | harold-skills plugin | Compatibility |
 |---|---|---|---|
 | **0.5.5** | Layout helpers (`gridLayout`, `chain`, `swimlane`, `hubSpoke`, `edgePoint`, `routeU`, `labelAnchor`, `contrastText`, `triplet`); palette gaps filled (`bgOrange`, `bgGray`, `strokeRed`); `swimlane` default `laneGap: 24`; `node:test` suite; helper demo | **Untouched** — stays pinned at `@^0.5.4`. Helpers are groundwork for later versions, not consumed by current skills. | Additive |
-| **0.5.6** | `render(elements)` accepts raw Excalidraw elements; CLI gains a `render` subcommand (alongside legacy `generate -t`); `excalidrawer-mcp` MCP server ships; helpers re-exposed as MCP tools / CLI subcommands | **Untouched** — MCP server is on npm; validated by manual registration. | Additive |
+| **0.5.6** ✅ | Shared tool registry (`src/tools/`, `defineTool`); `render(elements)` serializer; CLI `render` + `compute-layout` subcommands; `excalidrawer-mcp` MCP server (`bin`, stdio, `@modelcontextprotocol/sdk`). MCP surface = 2 tools (`render_diagram`, `compute_layout`). `generate -t` untouched. | **Untouched** — MCP server is on npm; validated by stdio JSON-RPC smoke test. | Additive |
 | **0.5.7** | Sugar JSON mode (shorthand → raw translation); `generate -t` emits a deprecation warning; bug fixes surfaced by skill migration | **Migration starts.** `plugin.json` declares `mcpServers`; 4 SKILL.md rewritten to the *clarify → helper → compose → render* flow; `skills/<name>/recipes/*.md` added; `custom-api.md` retired (the "write custom JS" path is gone — the escape hatch becomes raw-elements JSON). **Plugin version decouples from npm version here.** | npm additive; skill internals change, user-facing triggers unchanged |
 | **0.5.8+** | Bug fixes; mid-granularity MCP tools as needed | Recipe iteration based on real usage | Additive |
 | **0.6.0** | Remove `generate -t` template dispatch; delete `src/templates/` | Remove residual template references; re-pin `@^0.6.0`; recipes are the only path | **Breaking** |
@@ -78,6 +78,23 @@ track the package lock-step.
 stay on the old path. This validates "the MCP server starts, raw render works"
 in isolation. 0.5.7 is when skills actually migrate. Package bugs and skill
 bugs surface in separate rounds instead of tangled together.
+
+### Why the shared tool registry (0.5.6)
+
+Studied `open-pencil`'s MCP implementation: every tool is declared once with a
+`defineTool` schema, and adapters generate the AI-chat, CLI, and MCP surfaces
+from it (`ALL_TOOLS` is "used by MCP server and CLI"). We adopted the same
+single-source pattern — `src/tools/` — so excalidrawer's two public surfaces
+(CLI + MCP) can never drift, and adding a tool in 0.5.8+ is one definition, not
+two hand-written wrappers.
+
+What we did *not* copy: open-pencil ships ~30 tools because it edits a
+**stateful live canvas** (CRUD on a scene graph — `updateNode`, `setFill`,
+`reparentNode`, …). excalidrawer is **stateless one-shot** (compose JSON →
+render files), so the tool surface is intentionally tiny: `render_diagram`
+(create + emit) and `compute_layout` (one dispatch tool for the geometry
+helpers, analogous to open-pencil's `calc`). `contrastText` / `triplet` stay
+out of the tool surface — they belong in skill recipes' color guidance.
 
 ### JSON input: sugar + raw
 

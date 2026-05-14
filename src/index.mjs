@@ -31,5 +31,8 @@ export {
   triplet,
 } from "./layout.mjs";
 
+// Serializer: raw elements → output formats (0.5.6+).
+export { render, validateElements, ElementValidationError, VALID_FORMATS } from "./render.mjs";
+
 // Built-in templates
 export { timeline, flowchart, architecture, sequence } from "./templates/index.mjs";

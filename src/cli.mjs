@@ -3,17 +3,21 @@
 /**
  * excalidrawer CLI
  *
- * Usage:
- *   excalidrawer generate --type timeline --input data.json --output ./out/diagram
- *   echo '{ ... }' | excalidrawer generate --type timeline --output ./out/diagram
+ * Two eras of commands share this binary:
+ *   - render / compute-layout  — registry-backed (src/tools/), the supported
+ *     surface going forward. Same tool definitions the MCP server uses.
+ *   - generate -t <type>       — legacy template path. Still works through
+ *     the 0.5.x line; removed in 0.6.0.
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+
 import { timeline, flowchart, architecture, sequence } from "./templates/index.mjs";
 import { excalidraw } from "./elements.mjs";
 import { toSvg, toPng } from "./export.mjs";
+import { getTool, parseArgs as parseToolArgs } from "./tools/index.mjs";
 
 const TEMPLATES = { timeline, flowchart, architecture, sequence };
 
@@ -23,29 +27,36 @@ const PKG_VERSION = JSON.parse(
 
 function usage() {
   console.log(`
-excalidrawer — generate diagrams from JSON data
+excalidrawer — generate Excalidraw diagrams
 
 Usage:
-  excalidrawer generate --type <type> [--input <file>] --output <path> [--format <formats>] [--seed <n>]
+  excalidrawer render --input <file> --output <path> [--format <formats>] [--scale <n>]
+  excalidrawer compute-layout --helper <name> [--args <json|file>]
+  excalidrawer generate --type <type> [--input <file>] --output <path>   (legacy)
 
 Commands:
-  generate    Generate a diagram from JSON input
-  types       List available diagram types
+  render          Render raw Excalidraw elements to files
+  compute-layout  Compute coordinates from a layout helper (prints JSON)
+  generate        Generate a diagram from a built-in template (legacy)
+  types           List available template types
 
 Options:
-  --type, -t      Diagram type (e.g. timeline)
   --input, -i     Input JSON file (reads stdin if omitted)
-  --output, -o    Output path without extension (e.g. ./docs/timeline)
+  --output, -o    Output path without extension (e.g. ./docs/diagram)
   --format, -f    Comma-separated formats: excalidraw,svg,png (default: all)
-  --seed, -s      Seed for deterministic IDs (default: auto)
+  --scale         PNG pixel scale 1-4 (default: 2)
+  --helper        Layout helper name (for compute-layout)
+  --args, -a      JSON args object or file path (for compute-layout)
+  --type, -t      Template type (for generate)
+  --seed, -s      Seed for deterministic IDs (generate only)
   --version, -v   Print package version and exit
   --help, -h      Print this help and exit
 
 Examples:
+  excalidrawer render -i elements.json -o ./docs/diagram
+  cat elements.json | excalidrawer render -o ./docs/diagram -f svg,png
+  excalidrawer compute-layout --helper gridLayout -a '{"count":6,"cols":3,"cellW":140,"cellH":50}'
   excalidrawer generate -t timeline -i data.json -o ./docs/timeline
-  cat data.json | excalidrawer generate -t timeline -o ./docs/timeline
-  excalidrawer generate -t timeline -i data.json -o ./out -f svg,png
-  excalidrawer types
 `.trim());
 }
 
@@ -57,6 +68,9 @@ function parseArgs(argv) {
     else if (a === "--input" || a === "-i") args.input = argv[++i];
     else if (a === "--output" || a === "-o") args.output = argv[++i];
     else if (a === "--format" || a === "-f") args.format = argv[++i];
+    else if (a === "--scale") args.scale = Number(argv[++i]);
+    else if (a === "--helper") args.helper = argv[++i];
+    else if (a === "--args" || a === "-a") args.argsJson = argv[++i];
     else if (a === "--seed" || a === "-s") args.seed = Number(argv[++i]);
     else if (a === "--help" || a === "-h") args.help = true;
     else if (a === "--version" || a === "-v") args.version = true;
@@ -71,34 +85,88 @@ async function readStdin() {
   return Buffer.concat(chunks).toString("utf-8");
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
-
-  if (args.version) {
-    console.log(PKG_VERSION);
-    process.exit(0);
-  }
-
-  if (args.help || !args.command) {
-    usage();
-    process.exit(args.help ? 0 : 1);
-  }
-
-  if (args.command === "types") {
-    console.log("Available diagram types:");
-    for (const name of Object.keys(TEMPLATES)) {
-      console.log(`  - ${name}`);
-    }
-    process.exit(0);
-  }
-
-  if (args.command !== "generate") {
-    console.error(`Unknown command: ${args.command}`);
-    usage();
+function parseJson(raw, label) {
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error(`Error: invalid JSON ${label}`);
+    console.error(e.message);
     process.exit(1);
   }
+}
 
-  // Validate required args
+/** Read --input file or stdin, parse JSON. */
+async function readInput(args, label) {
+  const raw = args.input ? readFileSync(args.input, "utf-8") : await readStdin();
+  return parseJson(raw, label);
+}
+
+// ---------------------------------------------------------------------------
+// render — registry-backed
+// ---------------------------------------------------------------------------
+
+async function cmdRender(args) {
+  if (!args.output) {
+    console.error("Error: --output is required");
+    process.exit(1);
+  }
+  const input = await readInput(args, "input");
+  // Accept either a bare array or { elements: [...] }.
+  const elements = Array.isArray(input) ? input : input.elements;
+
+  const tool = getTool("render_diagram");
+  const toolArgs = parseToolArgs(tool.params, {
+    elements,
+    output: args.output,
+    formats: args.format ? args.format.split(",").map((f) => f.trim().toLowerCase()) : undefined,
+    scale: args.scale,
+  });
+  const result = await tool.run(toolArgs);
+
+  if (result.error) {
+    console.error(`Error: ${result.error}`);
+    if (result.issues) for (const iss of result.issues) console.error(`  - ${iss}`);
+    process.exit(1);
+  }
+  for (const path of result.written) console.log(`  ✓ ${path}`);
+  console.log("Done!");
+}
+
+// ---------------------------------------------------------------------------
+// compute-layout — registry-backed
+// ---------------------------------------------------------------------------
+
+async function cmdComputeLayout(args) {
+  if (!args.helper) {
+    console.error("Error: --helper is required");
+    process.exit(1);
+  }
+  let helperArgs = {};
+  if (args.argsJson) {
+    // --args is either an inline JSON string or a file path.
+    const looksLikeJson = args.argsJson.trim().startsWith("{");
+    const raw = looksLikeJson ? args.argsJson : readFileSync(args.argsJson, "utf-8");
+    helperArgs = parseJson(raw, "for --args");
+  } else if (!process.stdin.isTTY) {
+    helperArgs = await readInput(args, "for --args");
+  }
+
+  const tool = getTool("compute_layout");
+  const toolArgs = parseToolArgs(tool.params, { helper: args.helper, args: helperArgs });
+  const result = await tool.run(toolArgs);
+
+  if (result.error) {
+    console.error(`Error: ${result.error}`);
+    process.exit(1);
+  }
+  console.log(JSON.stringify(result.result, null, 2));
+}
+
+// ---------------------------------------------------------------------------
+// generate — legacy template path
+// ---------------------------------------------------------------------------
+
+async function cmdGenerate(args) {
   if (!args.type) {
     console.error("Error: --type is required");
     process.exit(1);
@@ -107,36 +175,19 @@ async function main() {
     console.error("Error: --output is required");
     process.exit(1);
   }
-
   const templateFn = TEMPLATES[args.type];
   if (!templateFn) {
     console.error(`Unknown diagram type: "${args.type}". Available: ${Object.keys(TEMPLATES).join(", ")}`);
     process.exit(1);
   }
 
-  // Read input data
-  let raw;
-  if (args.input) {
-    raw = readFileSync(args.input, "utf-8");
-  } else {
-    raw = await readStdin();
-  }
+  const data = await readInput(args, "input");
 
-  let data;
-  try {
-    data = JSON.parse(raw);
-  } catch (e) {
-    console.error("Error: Invalid JSON input");
-    console.error(e.message);
-    process.exit(1);
-  }
-
-  // Validate required fields per template type
   const REQUIRED_FIELDS = {
-    timeline:     ["items"],
-    flowchart:    ["nodes", "edges"],
+    timeline: ["items"],
+    flowchart: ["nodes", "edges"],
     architecture: ["sections"],
-    sequence:     ["actors", "steps"],
+    sequence: ["actors", "steps"],
   };
   const missing = (REQUIRED_FIELDS[args.type] || []).filter((f) => !data[f] || !Array.isArray(data[f]));
   if (missing.length > 0) {
@@ -144,12 +195,10 @@ async function main() {
     process.exit(1);
   }
 
-  // Generate elements
   const opts = {};
   if (args.seed != null) opts.seed = args.seed;
   const elements = templateFn(data, opts);
 
-  // Determine formats
   const VALID_FORMATS = new Set(["excalidraw", "svg", "png"]);
   const formats = args.format
     ? args.format.split(",").map((f) => f.trim().toLowerCase())
@@ -160,32 +209,54 @@ async function main() {
     process.exit(1);
   }
 
-  // Ensure output directory exists
   mkdirSync(dirname(args.output), { recursive: true });
-
-  // Write outputs
   for (const fmt of formats) {
-    switch (fmt) {
-      case "excalidraw":
-        writeFileSync(`${args.output}.excalidraw`, excalidraw(elements));
-        console.log(`  ✓ ${args.output}.excalidraw`);
-        break;
-      case "svg":
-        writeFileSync(`${args.output}.svg`, toSvg(elements));
-        console.log(`  ✓ ${args.output}.svg`);
-        break;
-      case "png": {
-        const png = await toPng(elements, 2);
-        writeFileSync(`${args.output}.png`, png);
-        console.log(`  ✓ ${args.output}.png`);
-        break;
-      }
-      default:
-        console.error(`Unknown format: ${fmt}`);
+    if (fmt === "excalidraw") {
+      writeFileSync(`${args.output}.excalidraw`, excalidraw(elements));
+      console.log(`  ✓ ${args.output}.excalidraw`);
+    } else if (fmt === "svg") {
+      writeFileSync(`${args.output}.svg`, toSvg(elements));
+      console.log(`  ✓ ${args.output}.svg`);
+    } else if (fmt === "png") {
+      const png = await toPng(elements, 2);
+      writeFileSync(`${args.output}.png`, png);
+      console.log(`  ✓ ${args.output}.png`);
     }
   }
-
   console.log("Done!");
+}
+
+// ---------------------------------------------------------------------------
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+
+  if (args.version) {
+    console.log(PKG_VERSION);
+    process.exit(0);
+  }
+  if (args.help || !args.command) {
+    usage();
+    process.exit(args.help ? 0 : 1);
+  }
+
+  switch (args.command) {
+    case "render":
+      return cmdRender(args);
+    case "compute-layout":
+      return cmdComputeLayout(args);
+    case "generate":
+      return cmdGenerate(args);
+    case "types":
+      console.log("Available template types:");
+      for (const name of Object.keys(TEMPLATES)) console.log(`  - ${name}`);
+      process.exit(0);
+      break;
+    default:
+      console.error(`Unknown command: ${args.command}`);
+      usage();
+      process.exit(1);
+  }
 }
 
 main().catch((e) => {

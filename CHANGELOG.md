@@ -4,6 +4,33 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.5.6
+
+### Added
+
+- **Shared tool registry** (`src/tools/`) — single source of truth feeding both
+  public surfaces. Each tool is declared once with `defineTool`; the CLI and MCP
+  server generate their interfaces from it, so they never drift.
+  - `render_diagram` — render raw Excalidraw elements to files
+  - `compute_layout` — dispatch the layout helpers (single tool, `helper` +
+    flat `args`)
+- **`render(elements, opts)`** (`src/render.mjs`) — the dumb serializer. Flattens
+  + validates minimum element shape (`id` / `type`, no dupes), emits the
+  requested formats. No "diagram kind" concept. Throws `ElementValidationError`
+  with a per-index `issues` list on bad input.
+- **`excalidrawer-mcp` MCP server** (`src/mcp.mjs`) — stdio transport, new `bin`.
+  A thin protocol adapter over the shared registry; built on
+  `@modelcontextprotocol/sdk`.
+- **CLI `render` and `compute-layout` subcommands** — registry-backed, share the
+  same tool `run` as the MCP server.
+- Tests: `tests/render.test.mjs`, `tests/tools.test.mjs`.
+
+### Notes
+
+- Additive. `generate -t <type>` and `src/templates/` are untouched; existing
+  skills on `@^0.5.4` need no update. `lib` (`src/index.mjs`) stays physically
+  importable but, from this version on, the *supported* surface is CLI + MCP.
+
 ## 0.5.5
 
 ### Added
