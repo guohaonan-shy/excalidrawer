@@ -1,19 +1,75 @@
 # excalidrawer
 
-Code-first Excalidraw diagram generation with built-in templates, CLI, and SVG/PNG export.
+Code-first Excalidraw diagram generation — CLI, MCP server, built-in templates, and SVG/PNG export.
 
 ## Install
 
-No install needed — `npx` handles everything:
+excalidrawer has three entry points; pick whichever fits.
+
+### CLI & MCP server
+
+Install globally:
 
 ```bash
-npx excalidrawer generate -t timeline -i data.json -o output
+npm install -g excalidrawer
 ```
 
-Only install the npm package if you need the library API for custom scripts:
+This puts two commands on your PATH:
+
+- `excalidrawer` — the CLI (`render`, `compute-layout`, `generate`)
+- `excalidrawer-mcp` — the MCP server that MCP clients launch
+
+See [MCP Server](#mcp-server) below for client configuration (Claude Code,
+Claude Desktop, Codex).
+
+### Library
+
+Only needed if you want the programmatic API for [custom scripts](#custom-scripts):
 
 ```bash
 npm install excalidrawer
+```
+
+## MCP Server
+
+`excalidrawer-mcp` is a stdio MCP server exposing two tools:
+
+| Tool | What it does |
+|------|--------------|
+| `render_diagram` | Render an array of raw Excalidraw elements to `.excalidraw` / `.svg` / `.png` files. |
+| `compute_layout` | Compute coordinates from a layout helper (grid, chain, swimlane, hub-and-spoke, edge anchors, U-routing, label anchors). |
+
+### Claude Code
+
+```bash
+npm install -g excalidrawer
+claude mcp add excalidrawer -- excalidrawer-mcp
+```
+
+Verify with `claude mcp list` — it should report `✓ Connected`.
+
+### Claude Desktop
+
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
+or `%APPDATA%\Claude\claude_desktop_config.json` (Windows), then restart the app:
+
+```json
+{
+  "mcpServers": {
+    "excalidrawer": {
+      "command": "excalidrawer-mcp"
+    }
+  }
+}
+```
+
+### Codex
+
+Add to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.excalidrawer]
+command = "excalidrawer-mcp"
 ```
 
 ## Claude Code Skill (moved)
@@ -34,7 +90,26 @@ npm install excalidrawer
 > # then run the /plugin commands above
 > ```
 
-This npm package itself is unchanged — `npx excalidrawer` and `import 'excalidrawer'` continue to work and stay maintained here.
+This npm package itself is unchanged — the `excalidrawer` CLI and `import 'excalidrawer'` continue to work and stay maintained here.
+
+## CLI
+
+```bash
+# Render raw Excalidraw elements to files
+excalidrawer render -i elements.json -o docs/diagram
+cat elements.json | excalidrawer render -o docs/diagram -f svg,png
+
+# Compute layout coordinates (prints JSON)
+excalidrawer compute-layout --helper gridLayout -a '{"count":6,"cols":3,"cellW":140,"cellH":50}'
+
+# Generate from a built-in template (legacy)
+excalidrawer generate -t timeline -i data.json -o docs/timeline
+excalidrawer types
+```
+
+`render` accepts either a bare element array or `{ "elements": [...] }`. The
+`render` / `compute-layout` commands share the exact tool definitions the MCP
+server uses, so the two surfaces never drift.
 
 ## Quick Start: CLI Templates
 
@@ -42,13 +117,13 @@ For supported diagram types, just provide JSON data — no code needed.
 
 ```bash
 # Generate timeline from JSON
-npx excalidrawer generate -t timeline -i data.json -o docs/timeline
+excalidrawer generate -t timeline -i data.json -o docs/timeline
 
 # Only SVG and PNG
-npx excalidrawer generate -t timeline -i data.json -o docs/timeline -f svg,png
+excalidrawer generate -t timeline -i data.json -o docs/timeline -f svg,png
 
 # List available types
-npx excalidrawer types
+excalidrawer types
 ```
 
 ### Built-in Templates
