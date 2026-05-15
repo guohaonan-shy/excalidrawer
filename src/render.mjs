@@ -11,6 +11,9 @@
 
 import { excalidraw } from "./elements.mjs";
 import { toSvg, toPng } from "./export.mjs";
+import { desugar } from "./sugar.mjs";
+
+export { SugarError } from "./sugar.mjs";
 
 export const VALID_FORMATS = ["excalidraw", "svg", "png"];
 
@@ -57,15 +60,18 @@ export function validateElements(elements) {
 }
 
 /**
- * @param {Array} elements - raw Excalidraw elements (may be nested; flattened)
+ * @param {Array} elements - sugar and/or raw Excalidraw elements (may be nested; flattened)
  * @param {{ formats?: string[], scale?: number }} [opts]
  * @returns {Promise<{ outputs: Record<string,string|Buffer>, formats: string[], elementCount: number }>}
- * @throws {ElementValidationError}
+ * @throws {SugarError|ElementValidationError}
  */
 export async function render(elements, opts = {}) {
   const flat = Array.isArray(elements) ? elements.flat(Infinity) : elements;
 
-  const issues = validateElements(flat);
+  // sugar → raw (also normalizes passthrough raw); may throw SugarError.
+  const raw = desugar(flat);
+
+  const issues = validateElements(raw);
   if (issues.length > 0) throw new ElementValidationError(issues);
 
   const formats = opts.formats && opts.formats.length ? opts.formats : VALID_FORMATS;
@@ -77,10 +83,10 @@ export async function render(elements, opts = {}) {
   const scale = opts.scale ?? 2;
   const outputs = {};
   for (const fmt of formats) {
-    if (fmt === "excalidraw") outputs.excalidraw = excalidraw(flat);
-    else if (fmt === "svg") outputs.svg = toSvg(flat);
-    else if (fmt === "png") outputs.png = await toPng(flat, scale);
+    if (fmt === "excalidraw") outputs.excalidraw = excalidraw(raw);
+    else if (fmt === "svg") outputs.svg = toSvg(raw);
+    else if (fmt === "png") outputs.png = await toPng(raw, scale);
   }
 
-  return { outputs, formats, elementCount: flat.length };
+  return { outputs, formats, elementCount: raw.length };
 }

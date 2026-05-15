@@ -167,6 +167,10 @@ async function cmdComputeLayout(args) {
 // ---------------------------------------------------------------------------
 
 async function cmdGenerate(args) {
+  console.error(
+    "warning: `generate -t <type>` is deprecated and will be removed in 0.6.0. " +
+    "Migrate to `render` with sugar or raw elements (see README)."
+  );
   if (!args.type) {
     console.error("Error: --type is required");
     process.exit(1);

@@ -1,6 +1,6 @@
 # excalidrawer roadmap
 
-> Status: living document. Last updated for the 0.5.6 release.
+> Status: living document. Last updated for the 0.5.7 release.
 
 ## Vision
 
@@ -66,7 +66,7 @@ track the package lock-step.
 |---|---|---|---|
 | **0.5.5** | Layout helpers (`gridLayout`, `chain`, `swimlane`, `hubSpoke`, `edgePoint`, `routeU`, `labelAnchor`, `contrastText`, `triplet`); palette gaps filled (`bgOrange`, `bgGray`, `strokeRed`); `swimlane` default `laneGap: 24`; `node:test` suite; helper demo | **Untouched** — stays pinned at `@^0.5.4`. Helpers are groundwork for later versions, not consumed by current skills. | Additive |
 | **0.5.6** ✅ | Shared tool registry (`src/tools/`, `defineTool`); `render(elements)` serializer; CLI `render` + `compute-layout` subcommands; `excalidrawer-mcp` MCP server (`bin`, stdio, `@modelcontextprotocol/sdk`). MCP surface = 2 tools (`render_diagram`, `compute_layout`). `generate -t` untouched. | **Untouched** — MCP server is on npm; validated by stdio JSON-RPC smoke test. | Additive |
-| **0.5.7** | Sugar JSON mode (shorthand → raw translation); `generate -t` emits a deprecation warning; bug fixes surfaced by skill migration | **Migration starts.** `plugin.json` declares `mcpServers`; 4 SKILL.md rewritten to the *clarify → helper → compose → render* flow; `skills/<name>/recipes/*.md` added; `custom-api.md` retired (the "write custom JS" path is gone — the escape hatch becomes raw-elements JSON). **Plugin version decouples from npm version here.** | npm additive; skill internals change, user-facing triggers unchanged |
+| **0.5.7** ✅ | Sugar mode shipped: `desugar` translates `{ shape, at, size, fill, ... }` shorthand → full raw elements (4 arrow forms, auto orthogonal routing via `autoSides` + `orthoPath`, `dashed`/`head`/`fromT`/`toT`/`labelT`). Raw passthrough normalizes (closes the `opacity=NaN` trap). `generate -t` emits a deprecation warning. | **Migration in progress** (npm shipped; plugin side next). Plugin will: declare `mcpServers` in `plugin.json`, rewrite 4 SKILL.md to *clarify → recipe → sugar → render*, add `skills/<name>/recipes/*.md`, retire `custom-api.md`. **Plugin version decouples from npm version here.** | npm additive; skill internals change, user-facing triggers unchanged |
 | **0.5.8+** | Bug fixes; mid-granularity MCP tools as needed | Recipe iteration based on real usage | Additive |
 | **0.6.0** | Remove `generate -t` template dispatch; delete `src/templates/` | Remove residual template references; re-pin `@^0.6.0`; recipes are the only path | **Breaking** |
 
@@ -96,13 +96,37 @@ render files), so the tool surface is intentionally tiny: `render_diagram`
 helpers, analogous to open-pencil's `calc`). `contrastText` / `triplet` stay
 out of the tool surface — they belong in skill recipes' color guidance.
 
-### JSON input: sugar + raw
+### JSON input: sugar + raw (0.5.7)
 
 - **Raw** — 1:1 with Excalidraw element schema. Verbose, but copy-pasteable
-  from Excalidraw web exports. The escape hatch.
-- **Sugar** — semantic shorthand (`{ shape: "rect", at: [x,y], size: [w,h],
-  fill: "blue", text: "..." }`). The 90% path. `render` translates sugar → raw
-  internally.
+  from Excalidraw web exports. The escape hatch. Partial raw elements get
+  missing base fields auto-filled (no more silent `opacity=NaN`).
+- **Sugar** — semantic shorthand. The 90% path:
+  - shape: `{ shape:"rect"|"diamond"|"ellipse"|"text", id?, at, size, fill?,
+    stroke?, dashed?, text?, fontSize? }` — non-empty `text` auto-binds a
+    centered child.
+  - arrow: `{ shape:"arrow", from, to, fromSide?, toSide?, fromT?, toT?, via?,
+    head?, dashed?, labelT?, text? }`.
+
+### Arrow auto-routing (0.5.7)
+
+Spike work across the 4 diagram types surfaced that "diagonal arrow between
+non-aligned edge points" is the dominant ugliness mode. So id-anchored arrows
+now auto-route orthogonally:
+
+- `autoSides(fromBox, toBox)` picks sides by **axis disjointness** (two boxes
+  vertically separated → vertical connection regardless of horizontal offset),
+  falling back to center-delta magnitude only when boxes overlap on both axes.
+- `orthoPath(start, end, fromSide, toSide)` builds:
+  - **straight** when the edge points are axis-aligned;
+  - **L-bend** when the two sides are perpendicular;
+  - **Z-route** (two turns at the travel-axis midpoint) when sides are parallel
+    with a perpendicular offset — so the arrow leaves and arrives along its
+    sides' normals.
+
+Recipes still drive *which* sides to use (e.g. flowchart back-edges:
+perpendicular pair → L-bend; sequence: explicit message direction). The engine
+only guarantees that the chosen sides resolve to a clean orthogonal path.
 
 ### Recipes vs templates
 

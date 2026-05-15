@@ -4,6 +4,50 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.5.7
+
+### Added
+
+- **Sugar shorthand** (`src/sugar.mjs`) — terse `{ shape, at, size, fill, ... }`
+  objects translate into full raw Excalidraw elements. Shapes auto-expand to a
+  bound `[shape, text]` pair when `text` is non-empty. Arrow sugar has four
+  forms:
+  - L1 `{ from, to }` — auto sides + auto orthogonal route
+  - L2 `{ from, to, fromSide, toSide, fromT?, toT? }` — pinned sides + sliding
+    edge anchors
+  - L3 `{ from, to, via, clearance? }` — U-route detour (`above` / `below` /
+    `left` / `right`)
+  - L4 `{ at, points }` — manual escape
+- **Auto orthogonal routing** (`autoSides` + `orthoPath`) — pick sides by axis
+  disjointness (vertical separation wins ties), then build a straight / L-bend
+  / Z-route depending on whether the chosen sides are aligned, perpendicular,
+  or parallel-with-offset. Never a bare diagonal.
+- **Arrow style options** — `dashed`, `head:"arrow"|"none"`, `labelT` (0–1
+  position of the auto-label along the path).
+- **Raw passthrough normalizes** — partial raw elements get missing base fields
+  (`opacity`, `strokeColor`, `groupIds`, ...) filled in by `base()`. Closes the
+  silent "`opacity=NaN`" trap where a partially-specified raw element rendered
+  as garbage.
+- **`render(elements)` runs `desugar` before validation** — sugar and raw can
+  freely mix in the same array.
+- `desugar` and `SugarError` (with `.issues`) re-exported from the package root.
+- Tests: `tests/sugar.test.mjs` (88 tests total, all green).
+
+### Changed
+
+- `generate -t <type>` now emits a **deprecation warning** to stderr — the
+  command still works but will be removed in 0.6.0. Migrate to `render` with
+  sugar or raw elements.
+- `render_diagram` MCP/CLI tool description now documents the sugar schema.
+
+### Notes
+
+- Additive on the npm package side. `lib` (`src/index.mjs`) stays physically
+  importable; CLI + MCP remain the supported public surface.
+- The harold-skills plugin migration to *clarify → recipe → sugar → render* is
+  tracked separately; plugin versioning decouples from the npm version from
+  here on.
+
 ## 0.5.6
 
 ### Added

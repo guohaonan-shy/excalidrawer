@@ -36,7 +36,7 @@ npm install excalidrawer
 
 | Tool | What it does |
 |------|--------------|
-| `render_diagram` | Render an array of raw Excalidraw elements to `.excalidraw` / `.svg` / `.png` files. |
+| `render_diagram` | Render an array of sugar shorthand or raw Excalidraw elements to `.excalidraw` / `.svg` / `.png` files. |
 | `compute_layout` | Compute coordinates from a layout helper (grid, chain, swimlane, hub-and-spoke, edge anchors, U-routing, label anchors). |
 
 ### Claude Code
@@ -95,7 +95,7 @@ This npm package itself is unchanged — the `excalidrawer` CLI and `import 'exc
 ## CLI
 
 ```bash
-# Render raw Excalidraw elements to files
+# Render sugar / raw Excalidraw elements to files
 excalidrawer render -i elements.json -o docs/diagram
 cat elements.json | excalidrawer render -o docs/diagram -f svg,png
 
