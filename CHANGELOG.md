@@ -4,6 +4,31 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.5.8
+
+### Added
+
+- **Automatic CJK font support** (`autoRegisterCjkFont` in `src/export.mjs`).
+  When element text contains Chinese / Japanese / Korean characters,
+  `render()` discovers the first available system CJK font (PingFang on
+  macOS, Noto Sans CJK / WenQuanYi on Linux, Microsoft YaHei / SimSun on
+  Windows) and registers it with `resvg-js` so PNG output renders CJK
+  glyphs instead of empty boxes. Latin-only diagrams pay nothing.
+- SVG output extends its `font-family` chain with common CJK family names
+  (`PingFang SC`, `Hiragino Sans`, `Noto Sans CJK SC`, `Microsoft YaHei`,
+  ...) so the viewer's locally installed CJK font picks up the glyphs —
+  without bloating the SVG with a multi-MB embedded font.
+- `autoRegisterCjkFont` re-exported from the package root. Library users
+  calling `toSvg`/`toPng` directly can invoke it themselves.
+- Tests: `tests/cjk.test.mjs`.
+
+### Notes
+
+- Auto-loaded CJK fonts are **not** embedded in SVG (a full PingFang.ttc
+  is ~25 MB). For fully portable SVG (renders on systems without CJK
+  fonts), call `registerFonts(["/path/to/font.ttc"])` manually — that
+  path is embedded as a `@font-face` data URL.
+
 ## 0.5.7
 
 ### Added

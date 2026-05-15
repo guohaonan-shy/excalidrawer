@@ -1,6 +1,6 @@
 # excalidrawer roadmap
 
-> Status: living document. Last updated for the 0.5.7 release.
+> Status: living document. Last updated for the 0.5.8 release.
 
 ## Vision
 
@@ -67,7 +67,8 @@ track the package lock-step.
 | **0.5.5** | Layout helpers (`gridLayout`, `chain`, `swimlane`, `hubSpoke`, `edgePoint`, `routeU`, `labelAnchor`, `contrastText`, `triplet`); palette gaps filled (`bgOrange`, `bgGray`, `strokeRed`); `swimlane` default `laneGap: 24`; `node:test` suite; helper demo | **Untouched** — stays pinned at `@^0.5.4`. Helpers are groundwork for later versions, not consumed by current skills. | Additive |
 | **0.5.6** ✅ | Shared tool registry (`src/tools/`, `defineTool`); `render(elements)` serializer; CLI `render` + `compute-layout` subcommands; `excalidrawer-mcp` MCP server (`bin`, stdio, `@modelcontextprotocol/sdk`). MCP surface = 2 tools (`render_diagram`, `compute_layout`). `generate -t` untouched. | **Untouched** — MCP server is on npm; validated by stdio JSON-RPC smoke test. | Additive |
 | **0.5.7** ✅ | Sugar mode shipped: `desugar` translates `{ shape, at, size, fill, ... }` shorthand → full raw elements (4 arrow forms, auto orthogonal routing via `autoSides` + `orthoPath`, `dashed`/`head`/`fromT`/`toT`/`labelT`). Raw passthrough normalizes (closes the `opacity=NaN` trap). `generate -t` emits a deprecation warning. | **Migration in progress** (npm shipped; plugin side next). Plugin will: declare `mcpServers` in `plugin.json`, rewrite 4 SKILL.md to *clarify → recipe → sugar → render*, add `skills/<name>/recipes/*.md`, retire `custom-api.md`. **Plugin version decouples from npm version here.** | npm additive; skill internals change, user-facing triggers unchanged |
-| **0.5.8+** | Bug fixes; mid-granularity MCP tools as needed | Recipe iteration based on real usage | Additive |
+| **0.5.8** ✅ | Automatic CJK font support: `render()` detects CJK characters and loads a system CJK font (PingFang / Noto / YaHei) for PNG rendering; SVG output extends its font-family chain with common CJK family names. Latin-only diagrams unchanged. | Plugin migration shipped: skills repo rewrites `SKILL.md` to *clarify → recipe → sugar → render*; plugin version reset to 0.0.1 (decoupled). | Additive |
+| **0.5.9+** | Bug fixes; mid-granularity MCP tools as needed | Recipe iteration based on real usage | Additive |
 | **0.6.0** | Remove `generate -t` template dispatch; delete `src/templates/` | Remove residual template references; re-pin `@^0.6.0`; recipes are the only path | **Breaking** |
 
 ## Design notes

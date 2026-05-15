@@ -5,7 +5,7 @@
  * PNG is rendered from SVG using the `sharp` library.
  */
 
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join, basename } from "path";
 
@@ -34,6 +34,78 @@ export function registerFonts(fontPaths) {
 }
 
 let _customFontFiles = [];
+
+// ---------------------------------------------------------------------------
+// Automatic CJK font support
+// ---------------------------------------------------------------------------
+
+/**
+ * Resvg-loaded fonts that are NOT embedded in SVG (full CJK fonts can be tens
+ * of MB; embedding would bloat every output). SVG output instead extends its
+ * font-family chain with common CJK family names so the viewer's locally
+ * installed CJK font (PingFang on macOS, Noto on Linux, YaHei on Windows)
+ * picks up the glyphs.
+ */
+let _autoFontFiles = [];
+let _hasCjkText = false;
+
+// First existing path wins. Order: macOS → Linux → Windows.
+const CJK_FONT_CANDIDATES = [
+  "/System/Library/Fonts/PingFang.ttc",
+  "/System/Library/Fonts/STHeiti Light.ttc",
+  "/System/Library/Fonts/Hiragino Sans GB.ttc",
+  "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+  "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+  "/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc",
+  "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+  "/usr/share/fonts/wqy-microhei/wqy-microhei.ttc",
+  "C:\\Windows\\Fonts\\msyh.ttc",
+  "C:\\Windows\\Fonts\\msyh.ttf",
+  "C:\\Windows\\Fonts\\simsun.ttc",
+];
+
+// CJK character ranges: Hiragana / Katakana / CJK Extension A / main CJK /
+// Compatibility Ideographs / Hangul Syllables, plus CJK Symbols & Punctuation.
+const CJK_REGEX = /[　-ヿ㐀-䶿一-鿿豈-﫿가-힯]/;
+
+// Family-name fallback chain for SVG viewers, listed by likelihood of presence.
+const CJK_SVG_FALLBACKS = [
+  "'PingFang SC'",
+  "'Hiragino Sans'",
+  "'Hiragino Sans GB'",
+  "'Microsoft YaHei'",
+  "'Noto Sans CJK SC'",
+  "'WenQuanYi Micro Hei'",
+];
+
+/**
+ * Detect CJK text in the given elements and, if found, load a system CJK font
+ * for PNG rendering. Idempotent (the resvg font path is cached after first
+ * discovery; re-runs reflect the CJK state of the current element batch in
+ * `_hasCjkText`, which drives the SVG font-family fallback chain).
+ *
+ * Called automatically by `render()`. Library users calling `toSvg`/`toPng`
+ * directly may call it themselves.
+ */
+export function autoRegisterCjkFont(elements) {
+  const hasCjk = Array.isArray(elements) && elements.some(
+    (el) => el && el.type === "text" && typeof el.text === "string" && CJK_REGEX.test(el.text)
+  );
+  _hasCjkText = hasCjk;
+  if (!hasCjk || _autoFontFiles.length > 0) return;
+  for (const candidate of CJK_FONT_CANDIDATES) {
+    try {
+      if (existsSync(candidate)) {
+        _autoFontFiles = [candidate];
+        return;
+      }
+    } catch {
+      // ignore permission / IO errors and try the next candidate
+    }
+  }
+  // No system CJK font found. PNG will render tofu boxes for CJK glyphs;
+  // SVG will fall back to viewer's system font via CJK_SVG_FALLBACKS.
+}
 
 /** Load Excalifont as base64 for SVG embedding. */
 let _excalifontBase64 = null;
@@ -65,17 +137,18 @@ function cssFontFamily(fontFamily) {
     })
     .join(", ");
   const fallback = customFamilies ? `, ${customFamilies}` : "";
+  const cjkFallback = _hasCjkText ? `, ${CJK_SVG_FALLBACKS.join(", ")}` : "";
 
   switch (fontFamily) {
     case 1:
     case 5:
-      return `Excalifont, Segoe UI Emoji${fallback}, sans-serif`;
+      return `Excalifont, Segoe UI Emoji${fallback}${cjkFallback}, sans-serif`;
     case 2:
-      return `Helvetica Neue, Helvetica, Arial${fallback}, sans-serif`;
+      return `Helvetica Neue, Helvetica, Arial${fallback}${cjkFallback}, sans-serif`;
     case 3:
-      return `Cascadia Code, Fira Code, ui-monospace${fallback}, monospace`;
+      return `Cascadia Code, Fira Code, ui-monospace${fallback}${cjkFallback}, monospace`;
     default:
-      return `Excalifont, Segoe UI Emoji${fallback}, sans-serif`;
+      return `Excalifont, Segoe UI Emoji${fallback}${cjkFallback}, sans-serif`;
   }
 }
 
@@ -446,7 +519,7 @@ export async function toPng(elements, scale = 2) {
   const { Resvg } = await import("@resvg/resvg-js");
   const resvg = new Resvg(svg, {
     font: {
-      fontFiles: [fontPath, ..._customFontFiles],
+      fontFiles: [fontPath, ..._customFontFiles, ..._autoFontFiles],
       loadSystemFonts: false,
       defaultFontFamily: "Excalifont",
     },

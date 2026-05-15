@@ -10,7 +10,7 @@
  */
 
 import { excalidraw } from "./elements.mjs";
-import { toSvg, toPng } from "./export.mjs";
+import { toSvg, toPng, autoRegisterCjkFont } from "./export.mjs";
 import { desugar } from "./sugar.mjs";
 
 export { SugarError } from "./sugar.mjs";
@@ -73,6 +73,10 @@ export async function render(elements, opts = {}) {
 
   const issues = validateElements(raw);
   if (issues.length > 0) throw new ElementValidationError(issues);
+
+  // Auto-load a system CJK font when Chinese / Japanese / Korean text is
+  // present. No-op for Latin-only diagrams.
+  autoRegisterCjkFont(raw);
 
   const formats = opts.formats && opts.formats.length ? opts.formats : VALID_FORMATS;
   const unknown = formats.filter((f) => !VALID_FORMATS.includes(f));
