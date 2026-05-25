@@ -1,5 +1,5 @@
 ---
-name: sequence
+name: excalidrawer-sequence
 description: 用 Excalidraw 手绘风生成时序图 / 多角色交互图 / API 调用顺序图。任何提到 sequence diagram / 时序图 / 交互流 / API 调用顺序 / handshake / OAuth 流程 / 异步交互 / 跨服务调用 / RPC 链路 / 谁先谁后 / 协议握手 的场景都触发本 skill。流程:AskUserQuestion clarify → 读 recipe → 拼 sugar(actor 头 + 虚线生命线 + 消息箭头) → 调 excalidrawer MCP server 的 render_diagram 输出 .excalidraw / .svg / .png。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./sequence-*.json), AskUserQuestion
 ---
@@ -95,6 +95,6 @@ mcp__excalidrawer__render_diagram({
 
 ## 8. 不适用本 skill(路由)
 
-- 决策 / 业务流转 → `flowchart`
-- 系统组件 / 分层 → `architecture`
-- 时间线 / 路线图 → `timeline`
+- 决策 / 业务流转 → `excalidrawer-flowchart`
+- 系统组件 / 分层 → `excalidrawer-architecture`
+- 时间线 / 路线图 → `excalidrawer-timeline`

@@ -81,10 +81,10 @@ reads its recipe, composes sugar elements, then calls the MCP server's
 
 | Skill | Use for | Trigger keywords |
 |-------|---------|------------------|
-| `flowchart` | Decision flows, process diagrams, branching logic | flowchart, 流程图, decision tree, yes/no, approval flow |
-| `timeline` | Timelines, roadmaps, project milestones | timeline, 时间线, roadmap, milestone, Q1/Q2 phases |
-| `architecture` | System architecture, layered components, topology | architecture, 架构图, 3-tier, microservices, data platform |
-| `sequence` | Sequence diagrams, multi-actor interactions, call chains | sequence diagram, 时序图, interaction, handshake, OAuth |
+| `excalidrawer-flowchart` | Decision flows, process diagrams, branching logic | flowchart, 流程图, decision tree, yes/no, approval flow |
+| `excalidrawer-timeline` | Timelines, roadmaps, project milestones | timeline, 时间线, roadmap, milestone, Q1/Q2 phases |
+| `excalidrawer-architecture` | System architecture, layered components, topology | architecture, 架构图, 3-tier, microservices, data platform |
+| `excalidrawer-sequence` | Sequence diagrams, multi-actor interactions, call chains | sequence diagram, 时序图, interaction, handshake, OAuth |
 
 `excalidrawer-shared` is a non-triggering reference pack (conventions, sugar
 schema, palette) the four skills read; it installs alongside them.

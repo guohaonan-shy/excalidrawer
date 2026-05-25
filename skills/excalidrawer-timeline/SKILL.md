@@ -1,5 +1,5 @@
 ---
-name: timeline
+name: excalidrawer-timeline
 description: 用 Excalidraw 手绘风生成时间线 / 路线图 / 里程碑图。任何提到 timeline / 时间线 / 路线图 / roadmap / milestone / 里程碑 / 项目阶段 / phase / 季度规划 / Q1Q2Q3Q4 / 周计划 / 时间节点 / chronology 的场景都触发本 skill。流程:AskUserQuestion clarify → 读 recipe → 拼 sugar(轴 + 里程碑圆点 + 上下交替标签) → 调 excalidrawer MCP server 的 render_diagram 输出 .excalidraw / .svg / .png。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./timeline-*.json), AskUserQuestion
 ---
@@ -85,6 +85,6 @@ mcp__excalidrawer__render_diagram({
 
 ## 8. 不适用本 skill(路由)
 
-- 流程 / 决策 → `flowchart`
-- 系统架构 → `architecture`
-- 多角色交互 → `sequence`
+- 流程 / 决策 → `excalidrawer-flowchart`
+- 系统架构 → `excalidrawer-architecture`
+- 多角色交互 → `excalidrawer-sequence`

@@ -74,10 +74,10 @@ user's conversation language — separate from diagram labels.
 
 If a request clearly fits a sibling skill in this plugin, route to it:
 
-- 决策流程 / yes-no 分支 / 业务流转 → **flowchart**
-- 时间线 / 路线图 / 里程碑 / 项目阶段 → **timeline**
-- 系统架构 / 分层 / 服务拓扑 / 微服务 → **architecture**
-- 多角色交互 / API 调用顺序 / handshake → **sequence**
+- 决策流程 / yes-no 分支 / 业务流转 → **excalidrawer-flowchart**
+- 时间线 / 路线图 / 里程碑 / 项目阶段 → **excalidrawer-timeline**
+- 系统架构 / 分层 / 服务拓扑 / 微服务 → **excalidrawer-architecture**
+- 多角色交互 / API 调用顺序 / handshake → **excalidrawer-sequence**
 
 If it fits **none** of the four (org chart, mind map, tree, custom topology),
 compose manually with sugar — the schema (`sugar.md`) supports

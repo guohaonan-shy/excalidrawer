@@ -1,5 +1,5 @@
 ---
-name: flowchart
+name: excalidrawer-flowchart
 description: 用 Excalidraw 手绘风生成流程图 / 决策流 / 分支判断图。任何提到 flowchart / 流程图 / 决策树 / decision flow / branching / 判断分支 / yes-no 流程 / 表单校验流 / 业务流转 / 审批流 / pipeline 流程 / process diagram 的场景都触发本 skill。流程:AskUserQuestion clarify → 读 recipe → 拼 sugar 元素数组 → 调 excalidrawer MCP server 的 render_diagram 输出 .excalidraw / .svg / .png。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./flowchart-*.json), AskUserQuestion
 ---
@@ -99,7 +99,7 @@ mcp__excalidrawer__render_diagram({
 
 ## 8. 不适用本 skill(路由)
 
-- 时间线 / 路线图 / 里程碑 → `timeline` skill
-- 系统架构 / 分层组件 → `architecture` skill
-- 多角色交互 / API 调用顺序 → `sequence` skill
+- 时间线 / 路线图 / 里程碑 → `excalidrawer-timeline` skill
+- 系统架构 / 分层组件 → `excalidrawer-architecture` skill
+- 多角色交互 / API 调用顺序 → `excalidrawer-sequence` skill
 - 树状 / 心智图 / 自由拓扑 → 直接用 sugar 手摆,输出 `./diagram-<name>.{...}`(见 conventions §5)

@@ -1,5 +1,5 @@
 ---
-name: architecture
+name: excalidrawer-architecture
 description: 用 Excalidraw 手绘风生成系统架构图 / 服务拓扑 / 分层组件图。任何提到 architecture / 架构图 / 分层 / 三层架构 / 微服务 / 数据中台 / system topology / service map / module map / tech stack 的场景都触发本 skill。支持单 lane 分层和"一行多 lane"(子分组)两种模式。流程:AskUserQuestion clarify → 读 recipe → 拼 sugar(用 `gridLayout` 或 `swimlane` helper 摆 lane 带) → 调 excalidrawer MCP server 的 render_diagram 输出 .excalidraw / .svg / .png。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./architecture-*.json), AskUserQuestion
 ---
@@ -103,7 +103,7 @@ mcp__excalidrawer__render_diagram({
 
 ## 8. 不适用本 skill(路由)
 
-- 流程 / 决策分支 → `flowchart`
-- 时间线 / 路线图 → `timeline`
-- 多角色交互 / 调用顺序 → `sequence`
+- 流程 / 决策分支 → `excalidrawer-flowchart`
+- 时间线 / 路线图 → `excalidrawer-timeline`
+- 多角色交互 / 调用顺序 → `excalidrawer-sequence`
 - 真自由拓扑(树 / 心智图) → 手摆 sugar
