@@ -1,8 +1,14 @@
 {
   "name": "excalidrawer",
-  "description": "Code-first Excalidraw diagram generation with SVG and PNG export. Create flowcharts, architecture diagrams, sequence diagrams, and timelines from JSON data.",
-  "version": "0.5.2",
+  "description": "Code-first Excalidraw diagram generation. Four skills (flowchart / timeline / architecture / sequence) that clarify intent via AskUserQuestion, then compose sugar elements + call the excalidrawer MCP server's render_diagram / compute_layout tools to produce .excalidraw / .svg / .png outputs.",
+  "version": "0.0.1",
   "author": {
-    "name": "guohaonan-shy"
+    "name": "Harold"
+  },
+  "mcpServers": {
+    "excalidrawer": {
+      "command": "npx",
+      "args": ["-y", "-p", "excalidrawer@^0.5.7", "-c", "excalidrawer-mcp"]
+    }
   }
 }

@@ -72,25 +72,52 @@ Add to `~/.codex/config.toml`:
 command = "excalidrawer-mcp"
 ```
 
-## Claude Code Skill (moved)
+## Claude Code Skills
 
-> ⚠️ **The Claude Code skill has moved to the [harold-skills](https://github.com/guohaonan-shy/harold-skills) marketplace** and was rebuilt as a 4-skill plugin (`flowchart` / `timeline` / `architecture` / `sequence`) with `AskUserQuestion`-driven clarification. New features only land there.
->
-> **Install the new version:**
-> ```text
-> /plugin marketplace add guohaonan-shy/harold-skills
-> /plugin install excalidrawer
-> /reload-plugins
-> ```
->
-> The previous single-skill install (`npx skills add guohaonan-shy/excalidrawer`) **still works but is frozen** — it won't receive updates. To migrate:
-> ```bash
-> rm ~/.claude/skills/excalidrawer
-> npx skills remove excalidrawer    # if you used npx skills add
-> # then run the /plugin commands above
-> ```
+Four diagram skills live in this repo's [`skills/`](skills/) directory — one per
+diagram type. Each clarifies intent with a couple of `AskUserQuestion` prompts,
+reads its recipe, composes sugar elements, then calls the MCP server's
+`render_diagram` tool to emit `.excalidraw` / `.svg` / `.png`.
 
-This npm package itself is unchanged — the `excalidrawer` CLI and `import 'excalidrawer'` continue to work and stay maintained here.
+| Skill | Use for | Trigger keywords |
+|-------|---------|------------------|
+| `flowchart` | Decision flows, process diagrams, branching logic | flowchart, 流程图, decision tree, yes/no, approval flow |
+| `timeline` | Timelines, roadmaps, project milestones | timeline, 时间线, roadmap, milestone, Q1/Q2 phases |
+| `architecture` | System architecture, layered components, topology | architecture, 架构图, 3-tier, microservices, data platform |
+| `sequence` | Sequence diagrams, multi-actor interactions, call chains | sequence diagram, 时序图, interaction, handshake, OAuth |
+
+`excalidrawer-shared` is a non-triggering reference pack (conventions, sugar
+schema, palette) the four skills read; it installs alongside them.
+
+### Install via npx (skills.sh)
+
+```bash
+# 1. Add the MCP server the skills call (skills.sh does not configure MCP for you)
+npm install -g excalidrawer
+claude mcp add excalidrawer -- excalidrawer-mcp
+
+# 2. Install the skills globally
+npx skills add guohaonan-shy/excalidrawer -y -g
+```
+
+`-y` auto-confirms; `-g` installs into `~/.claude/skills/` — drop it to install
+into the current project's `.claude/skills/`. The skills then show up in the
+`/` menu and fire on the natural-language keywords above.
+
+### Install as a Claude Code plugin
+
+This repo also ships a plugin manifest, so it can be added as a single-plugin
+marketplace. The plugin wires up the MCP server automatically — no separate
+`claude mcp add` step:
+
+```text
+/plugin marketplace add guohaonan-shy/excalidrawer
+/plugin install excalidrawer
+/reload-plugins
+```
+
+Whichever channel you use, the npm package is unchanged — the `excalidrawer`
+CLI and `import 'excalidrawer'` continue to work and stay maintained here.
 
 ## CLI
 
@@ -279,16 +306,6 @@ import { colors } from "excalidrawer";
 colors.blue / colors.green / colors.yellow / colors.purple / colors.red / colors.orange / colors.gray
 colors.bgBlue / colors.bgGreen / colors.bgYellow / colors.bgPurple  // section backgrounds
 colors.strokeBlue / colors.strokeGreen / colors.strokeYellow / colors.strokeOrange  // stroke accents
-```
-
-## AI Skill
-
-The bundled skill teaches AI assistants to use templates and the API instead of generating raw JSON.
-
-```bash
-npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer --agent claude-code
-npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer --agent cursor
-npx skills add https://github.com/guohaonan-shy/excalidrawer --skill excalidrawer --agent github-copilot
 ```
 
 ## License

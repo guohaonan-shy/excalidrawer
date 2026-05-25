@@ -1,0 +1,15 @@
+{
+  "name": "excalidrawer",
+  "owner": {
+    "name": "Harold",
+    "url": "https://github.com/guohaonan-shy"
+  },
+  "description": "Code-first Excalidraw diagram generation — the excalidrawer npm package (CLI + MCP server) plus its four diagram skills, installable as a Claude Code plugin.",
+  "plugins": [
+    {
+      "name": "excalidrawer",
+      "source": ".",
+      "description": "Code-first Excalidraw diagram generation. Four skills (flowchart / timeline / architecture / sequence) that clarify intent via AskUserQuestion, then compose sugar elements + call the excalidrawer MCP server's render_diagram / compute_layout tools to produce .excalidraw / .svg / .png outputs."
+    }
+  ]
+}
