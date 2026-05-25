@@ -2,7 +2,7 @@
 
 How to compose a timeline with sugar. Read AFTER clarifying milestones +
 style (SKILL.md §2). Sugar schema in
-`../../excalidrawer-shared/references/sugar.md`.
+`sugar.md`.
 
 ## Dimensions
 

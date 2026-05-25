@@ -2,7 +2,7 @@
 
 How to compose an architecture diagram with sugar. Read AFTER clarifying
 intent (SKILL.md §2). Sugar schema in
-`../../excalidrawer-shared/references/sugar.md`.
+`sugar.md`.
 
 ## Modeling — get the layers right first
 

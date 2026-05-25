@@ -28,7 +28,7 @@ npm run test:example  # node examples/basic.mjs
 - `src/templates/` — `timeline`, `flowchart`, `architecture`, `sequence`.
 - `src/tools/` — shared MCP/CLI tool definitions.
 - `tests/` — `node --test` files: cjk, layout, render, sugar, tools.
-- `skills/` — Claude Code skills, one folder per diagram type (`excalidrawer-flowchart`, `excalidrawer-timeline`, `excalidrawer-architecture`, `excalidrawer-sequence`) plus `excalidrawer-shared` (a non-triggering reference pack: `references/{conventions,sugar,colors}.md`). Skill names are prefixed `excalidrawer-` so they don't collide with other authors' generic `flowchart`/`timeline` skills when installed standalone via skills.sh. Each diagram skill links into the shared pack via relative paths (`../excalidrawer-shared/references/…`) and reads its own `recipes/<type>.md`. Installable standalone via `npx skills add guohaonan-shy/excalidrawer` (skills.sh). This is a *copy* of the canonical plugin in the [harold-skills](https://github.com/guohaonan-shy/harold-skills) marketplace — keep both in sync when editing skill content. The skills.sh channel does not auto-configure MCP, so the shared skill documents the `claude mcp add excalidrawer` prerequisite.
+- `skills/excalidrawer/` — a single self-contained Claude Code skill. `SKILL.md` is the dispatcher (detect diagram type → clarify → read recipe → compose sugar → `render_diagram`); `references/` holds the shared docs (`conventions.md`, `sugar.md`, `colors.md`) and one recipe per type (`flowchart.md`, `timeline.md`, `architecture.md`, `sequence.md`). Everything lives in the one folder so a single-skill `npx skills add` (skills.sh) pulls in all it needs — skills.sh installs per-folder with no sibling/shared-dependency resolution, so self-containment is required. The skill does NOT configure MCP; `references/conventions.md` documents the `claude mcp add excalidrawer -- excalidrawer-mcp` prerequisite.
 
 ## CLI usage
 
@@ -79,5 +79,5 @@ Colors: `colors.blue/green/yellow/purple/red/orange/gray`, `colors.bg*` (section
 
 - `arrow` points are relative `[dx, dy]` offsets from the arrow's `x, y` origin.
 - PNG rendering uses `@resvg/resvg-js` (fast native, no headless browser).
-- The Claude Code **skills** ship two ways: as a copy in `skills/` here (installable via `npx skills add`, skills.sh channel) and as a plugin in the [harold-skills](https://github.com/guohaonan-shy/harold-skills) marketplace (auto-configures MCP; new skill features land there first). This npm package (CLI + library + MCP) is the canonical home for the engine.
+- This repo is the open-source home for the **npm package (CLI + library + MCP) and one Claude Code skill** (`skills/excalidrawer/`, installable via `npx skills add`, skills.sh channel). It is NOT a plugin — no `.claude-plugin/`. A separate, more elaborate 4-skill **plugin** lives in the personal [harold-skills](https://github.com/guohaonan-shy/harold-skills) marketplace; the two share a common ancestor but iterate independently (see memory).
 - Version lives in `package.json` (currently 0.5.8); changes tracked in `CHANGELOG.md`.

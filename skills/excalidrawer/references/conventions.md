@@ -1,6 +1,6 @@
-# excalidrawer plugin conventions
+# excalidrawer skill conventions
 
-Cross-skill rules. Each SKILL.md's §0 必读约定 段 links here.
+Shared rules for every diagram type. SKILL.md §0 必读约定 段 links here.
 
 ## 1. Clarify before drawing
 
@@ -35,8 +35,9 @@ overwriting unless the user explicitly said "覆盖" / "overwrite".
 
 ## 3. MCP-first, CLI fallback
 
-Primary path: the **`excalidrawer` MCP server** declared in `plugin.json`'s
-`mcpServers`. Tools available in every session that loads this plugin:
+Primary path: the **`excalidrawer` MCP server** (`excalidrawer-mcp`, added via
+`claude mcp add excalidrawer -- excalidrawer-mcp`). Tools available once it is
+configured:
 
 - `mcp__excalidrawer__render_diagram(elements, output, formats?, scale?)`
   — translates sugar to raw, validates, writes files. `output` is the path
@@ -70,18 +71,18 @@ in the npm package (see package 0.5.8 changelog).
 The skill's own **clarifying prompts and progress messages** follow the
 user's conversation language — separate from diagram labels.
 
-## 5. Skill scope — route to the right skill
+## 5. Pick the diagram type (which recipe to read)
 
-If a request clearly fits a sibling skill in this plugin, route to it:
+Map the request to one diagram type, then read its recipe (SKILL.md §2–§3):
 
-- 决策流程 / yes-no 分支 / 业务流转 → **excalidrawer-flowchart**
-- 时间线 / 路线图 / 里程碑 / 项目阶段 → **excalidrawer-timeline**
-- 系统架构 / 分层 / 服务拓扑 / 微服务 → **excalidrawer-architecture**
-- 多角色交互 / API 调用顺序 / handshake → **excalidrawer-sequence**
+- 决策流程 / yes-no 分支 / 业务流转 → **flowchart** (`flowchart.md`)
+- 时间线 / 路线图 / 里程碑 / 项目阶段 → **timeline** (`timeline.md`)
+- 系统架构 / 分层 / 服务拓扑 / 微服务 → **architecture** (`architecture.md`)
+- 多角色交互 / API 调用顺序 / handshake → **sequence** (`sequence.md`)
 
 If it fits **none** of the four (org chart, mind map, tree, custom topology),
-compose manually with sugar — the schema (`sugar.md`) supports
-arbitrary shapes and arrows. Output goes to `./diagram-<name>.{excalidraw,svg,png}`.
+compose manually with sugar — the schema (`sugar.md`) supports arbitrary
+shapes and arrows. Output goes to `./diagram-<name>.{excalidraw,svg,png}`.
 
 ## 6. Output format selection
 

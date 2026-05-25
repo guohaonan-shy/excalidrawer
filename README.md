@@ -72,52 +72,38 @@ Add to `~/.codex/config.toml`:
 command = "excalidrawer-mcp"
 ```
 
-## Claude Code Skills
+## Claude Code Skill
 
-Four diagram skills live in this repo's [`skills/`](skills/) directory — one per
-diagram type. Each clarifies intent with a couple of `AskUserQuestion` prompts,
-reads its recipe, composes sugar elements, then calls the MCP server's
+A single self-contained `excalidrawer` skill lives in this repo's
+[`skills/`](skills/) directory. It covers four diagram types — flowchart,
+timeline, architecture, and sequence (plus freeform). Given a request, it
+clarifies intent with a couple of `AskUserQuestion` prompts, reads the matching
+recipe under `references/`, composes sugar elements, then calls the MCP server's
 `render_diagram` tool to emit `.excalidraw` / `.svg` / `.png`.
 
-| Skill | Use for | Trigger keywords |
-|-------|---------|------------------|
-| `excalidrawer-flowchart` | Decision flows, process diagrams, branching logic | flowchart, 流程图, decision tree, yes/no, approval flow |
-| `excalidrawer-timeline` | Timelines, roadmaps, project milestones | timeline, 时间线, roadmap, milestone, Q1/Q2 phases |
-| `excalidrawer-architecture` | System architecture, layered components, topology | architecture, 架构图, 3-tier, microservices, data platform |
-| `excalidrawer-sequence` | Sequence diagrams, multi-actor interactions, call chains | sequence diagram, 时序图, interaction, handshake, OAuth |
-
-`excalidrawer-shared` is a non-triggering reference pack (conventions, sugar
-schema, palette) the four skills read; it installs alongside them.
+| Diagram type | Use for | Trigger keywords |
+|--------------|---------|------------------|
+| flowchart | Decision flows, process diagrams, branching logic | flowchart, 流程图, decision tree, yes/no, approval flow |
+| timeline | Timelines, roadmaps, project milestones | timeline, 时间线, roadmap, milestone, Q1/Q2 phases |
+| architecture | System architecture, layered components, topology | architecture, 架构图, 3-tier, microservices, data platform |
+| sequence | Sequence diagrams, multi-actor interactions, call chains | sequence diagram, 时序图, interaction, handshake, OAuth |
 
 ### Install via npx (skills.sh)
 
 ```bash
-# 1. Add the MCP server the skills call (skills.sh does not configure MCP for you)
+# 1. Add the MCP server the skill calls (skills.sh does not configure MCP for you)
 npm install -g excalidrawer
 claude mcp add excalidrawer -- excalidrawer-mcp
 
-# 2. Install the skills globally
+# 2. Install the skill
 npx skills add guohaonan-shy/excalidrawer -y -g
 ```
 
 `-y` auto-confirms; `-g` installs into `~/.claude/skills/` — drop it to install
-into the current project's `.claude/skills/`. The skills then show up in the
-`/` menu and fire on the natural-language keywords above.
-
-### Install as a Claude Code plugin
-
-This repo also ships a plugin manifest, so it can be added as a single-plugin
-marketplace. The plugin wires up the MCP server automatically — no separate
-`claude mcp add` step:
-
-```text
-/plugin marketplace add guohaonan-shy/excalidrawer
-/plugin install excalidrawer
-/reload-plugins
-```
-
-Whichever channel you use, the npm package is unchanged — the `excalidrawer`
-CLI and `import 'excalidrawer'` continue to work and stay maintained here.
+into the current project's `.claude/skills/`. The skill is self-contained (its
+recipes and references live inside the one folder), so a single-skill install
+pulls in everything it needs. It then shows up in the `/` menu and fires on the
+natural-language keywords above.
 
 ## CLI
 
