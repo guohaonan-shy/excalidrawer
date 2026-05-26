@@ -1,13 +1,13 @@
 # Flowchart recipe
 
 How to compose a flowchart with sugar elements. Read this AFTER clarifying
-intent (see SKILL.md §2). Sugar schema basics live in
-`sugar.md` — this file only covers
-flowchart-specific composition.
+intent (SKILL.md §1). Sugar schema basics live in
+[`../../excalidrawer-shared/references/sugar.md`](../../excalidrawer-shared/references/sugar.md) —
+this file only covers flowchart-specific composition.
 
 ## Layout
 
-Pick a direction from clarify §2.
+Pick a direction from clarify §1.
 
 **Horizontal** (left-to-right) — default for ≤ 5 mainline nodes:
 

@@ -1,8 +1,8 @@
 # Architecture recipe
 
 How to compose an architecture diagram with sugar. Read AFTER clarifying
-intent (SKILL.md §2). Sugar schema in
-`sugar.md`.
+intent (SKILL.md §1). Sugar schema in
+[`../../excalidrawer-shared/references/sugar.md`](../../excalidrawer-shared/references/sugar.md).
 
 ## Modeling — get the layers right first
 
@@ -111,7 +111,7 @@ Default rotation, extends to ≥ 4 tiers:
 Same color family within a tier (light tint for lane bg, mid tone for
 items) keeps the visual grammar consistent.
 
-## Connections (only when clarify §2 selected them)
+## Connections (only when clarify §1 selected them)
 
 If clarify said "纯拓扑,不画连线" — just don't push any arrows. The lane
 composition tells the story by structure alone.

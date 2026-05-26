@@ -1,8 +1,8 @@
 # Sequence recipe
 
 How to compose a sequence diagram with sugar. Read AFTER clarifying actors
-+ messages + return-style (SKILL.md §2). Sugar schema in
-`sugar.md`.
++ messages + return-style (SKILL.md §1). Sugar schema in
+[`../../excalidrawer-shared/references/sugar.md`](../../excalidrawer-shared/references/sugar.md).
 
 ## Layout
 
@@ -72,7 +72,7 @@ steps.forEach((s, i) => {
 });
 ```
 
-## Response style (from clarify §3)
+## Response style (from clarify §1)
 
 Pick one rule and apply uniformly:
 

@@ -95,44 +95,68 @@ Add to `~/.codex/config.toml`:
 command = "excalidrawer-mcp"
 ```
 
-## Agent Skill
+## Agent Skills
 
-A single self-contained `excalidrawer` skill lives in this repo's
-[`skills/`](skills/) directory. It is agent-agnostic — installable into Claude
-Code, Cursor, Codex, and any other agent the [`skills`](https://www.skills.sh)
-CLI supports. It covers four diagram types — flowchart, timeline, architecture,
-and sequence (plus freeform). Given a request, it clarifies intent with a couple
-of `AskUserQuestion` prompts, reads the matching recipe under `references/`,
-composes sugar elements, then calls the MCP server's `render_diagram` tool to
-emit `.excalidraw` / `.svg` / `.png`.
+The [`skills/`](skills/) directory holds one skill per diagram type plus a
+shared base they all read first:
 
-| Diagram type | Use for | Trigger keywords |
-|--------------|---------|------------------|
-| flowchart | Decision flows, process diagrams, branching logic | flowchart, 流程图, decision tree, yes/no, approval flow |
-| timeline | Timelines, roadmaps, project milestones | timeline, 时间线, roadmap, milestone, Q1/Q2 phases |
-| architecture | System architecture, layered components, topology | architecture, 架构图, 3-tier, microservices, data platform |
-| sequence | Sequence diagrams, multi-actor interactions, call chains | sequence diagram, 时序图, interaction, handshake, OAuth |
+| Skill | Use for | Trigger keywords |
+|-------|---------|------------------|
+| `excalidrawer-flowchart` | Decision flows, process diagrams, branching logic | flowchart, 流程图, decision tree, yes/no, approval flow |
+| `excalidrawer-timeline` | Timelines, roadmaps, project milestones | timeline, 时间线, roadmap, milestone, Q1/Q2 phases |
+| `excalidrawer-architecture` | System architecture, layered components, topology | architecture, 架构图, 3-tier, microservices, data platform |
+| `excalidrawer-sequence` | Sequence diagrams, multi-actor interactions, call chains | sequence diagram, 时序图, interaction, handshake, OAuth |
+| `excalidrawer-shared` | Common base — conventions, sugar schema, palette, output rules (read first, not invoked directly) | — |
 
-### Install via npx (skills.sh)
+Each type skill declares a prerequisite — *read `../excalidrawer-shared/SKILL.md`
+first* — so the cross-cutting rules live in one place instead of being copied
+four times. Given a request, a type skill clarifies intent with a couple of
+`AskUserQuestion` prompts, reads its recipe under `references/`, composes sugar
+elements, then calls the MCP server's `render_diagram` tool to emit
+`.excalidraw` / `.svg` / `.png`.
+
+> All skills require the `excalidrawer-mcp` server. Install it once, regardless
+> of how you install the skills:
+>
+> ```bash
+> npm install -g excalidrawer
+> claude mcp add excalidrawer -- excalidrawer-mcp
+> ```
+
+### Install everything (recommended)
+
+Because the type skills reference `excalidrawer-shared` as a sibling, install
+the **whole repo** so they all land side by side and the shared base resolves.
+
+As a Claude Code / Cursor / Codex **plugin** (bundles all skills):
 
 ```bash
-# 1. Add the MCP server the skill calls (skills.sh does not configure MCP for you)
-npm install -g excalidrawer
-claude mcp add excalidrawer -- excalidrawer-mcp
+# Claude Code
+/plugin marketplace add guohaonan-shy/excalidrawer
+/plugin install excalidrawer@excalidrawer-dev
+```
 
-# 2. Install the skill
+Or via the [`skills`](https://www.skills.sh) CLI (agent-agnostic — lays every
+skill flat under `.agents/skills/` and symlinks each detected agent to it):
+
+```bash
 npx skills add guohaonan-shy/excalidrawer -y -g
 ```
 
-`-y` auto-confirms; `-g` installs globally. The CLI keeps one canonical copy of
-the skill — `~/.agents/skills/excalidrawer/` for `-g`, or the project's
-`.agents/skills/excalidrawer/` without it — and symlinks each detected agent to
-it (Claude Code → `~/.claude/skills/`, Cursor / Codex → `.agents/…`), so every
-agent shares a single source of truth (pass `--copy` for independent copies
-instead). The skill is self-contained (its recipes and references live inside the
-one folder), so a single-skill install pulls in everything it needs. It then
-shows up in the agent's skill menu and fires on the natural-language keywords
-above.
+`-y` auto-confirms; `-g` installs globally (drop it for the current project).
+Pass `--copy` for independent copies instead of symlinks.
+
+### Install a single type skill
+
+You can pull just one type — but it depends on `excalidrawer-shared`, so install
+that alongside it (the CLI does not auto-resolve the dependency):
+
+```bash
+npx skills add guohaonan-shy/excalidrawer --skill excalidrawer-flowchart -g
+npx skills add guohaonan-shy/excalidrawer --skill excalidrawer-shared   -g
+```
+
+When in doubt, just install everything — the full set is small.
 
 ## CLI
 

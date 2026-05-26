@@ -1,0 +1,42 @@
+{
+  "name": "excalidrawer",
+  "version": "0.0.1",
+  "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence. Generate hand-drawn-style diagrams and export to .excalidraw / SVG / PNG — no browser.",
+  "author": {
+    "name": "guohaonan-shy",
+    "email": "guohaonan980421@gmail.com",
+    "url": "https://github.com/guohaonan-shy"
+  },
+  "homepage": "https://github.com/guohaonan-shy/excalidrawer",
+  "repository": "https://github.com/guohaonan-shy/excalidrawer",
+  "license": "MIT",
+  "keywords": [
+    "excalidraw",
+    "diagram",
+    "flowchart",
+    "timeline",
+    "architecture",
+    "sequence",
+    "svg",
+    "png",
+    "skills"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Excalidrawer",
+    "shortDescription": "Code-first Excalidraw diagrams: flowchart, timeline, architecture, sequence",
+    "longDescription": "Generate hand-drawn-style Excalidraw diagrams from code or natural-language intent and export to .excalidraw / SVG / PNG — no browser. Covers flowcharts, timelines, architecture diagrams, and sequence diagrams via dedicated skills sharing one conventions base. Requires the excalidrawer-mcp server.",
+    "developerName": "guohaonan-shy",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Draw a flowchart for this process.",
+      "Make a timeline of the project milestones."
+    ],
+    "websiteURL": "https://github.com/guohaonan-shy/excalidrawer"
+  }
+}

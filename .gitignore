@@ -6,3 +6,11 @@ examples/*.png
 *.svg
 *.png
 .npmrc
+
+# local agent/IDE skill installs (not part of the package)
+.agent/
+.agents/
+.claude/
+.kiro/
+.windsurf/
+skills-lock.json

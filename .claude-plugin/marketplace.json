@@ -1,0 +1,20 @@
+{
+  "name": "excalidrawer-dev",
+  "description": "Single-plugin marketplace for the excalidrawer diagram skills.",
+  "owner": {
+    "name": "guohaonan-shy",
+    "email": "guohaonan980421@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "excalidrawer",
+      "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence.",
+      "version": "0.0.1",
+      "source": "./",
+      "author": {
+        "name": "guohaonan-shy",
+        "email": "guohaonan980421@gmail.com"
+      }
+    }
+  ]
+}

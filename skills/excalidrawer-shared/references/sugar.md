@@ -1,9 +1,10 @@
 # excalidrawer sugar schema
 
 The MCP tools `render_diagram` and `compute_layout` (from the `excalidrawer-mcp`
-server declared in this plugin's `plugin.json`) take elements in the **sugar
-shorthand** below. Skills compose arrays of sugar elements; `render_diagram`
-translates them into full Excalidraw JSON and writes the output files.
+server, added via `claude mcp add excalidrawer -- excalidrawer-mcp`) take
+elements in the **sugar shorthand** below. Skills compose arrays of sugar
+elements; `render_diagram` translates them into full Excalidraw JSON and writes
+the output files.
 
 ## Shape sugar
 
