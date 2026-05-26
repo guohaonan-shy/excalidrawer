@@ -72,14 +72,16 @@ Add to `~/.codex/config.toml`:
 command = "excalidrawer-mcp"
 ```
 
-## Claude Code Skill
+## Agent Skill
 
 A single self-contained `excalidrawer` skill lives in this repo's
-[`skills/`](skills/) directory. It covers four diagram types — flowchart,
-timeline, architecture, and sequence (plus freeform). Given a request, it
-clarifies intent with a couple of `AskUserQuestion` prompts, reads the matching
-recipe under `references/`, composes sugar elements, then calls the MCP server's
-`render_diagram` tool to emit `.excalidraw` / `.svg` / `.png`.
+[`skills/`](skills/) directory. It is agent-agnostic — installable into Claude
+Code, Cursor, Codex, and any other agent the [`skills`](https://www.skills.sh)
+CLI supports. It covers four diagram types — flowchart, timeline, architecture,
+and sequence (plus freeform). Given a request, it clarifies intent with a couple
+of `AskUserQuestion` prompts, reads the matching recipe under `references/`,
+composes sugar elements, then calls the MCP server's `render_diagram` tool to
+emit `.excalidraw` / `.svg` / `.png`.
 
 | Diagram type | Use for | Trigger keywords |
 |--------------|---------|------------------|
@@ -99,11 +101,15 @@ claude mcp add excalidrawer -- excalidrawer-mcp
 npx skills add guohaonan-shy/excalidrawer -y -g
 ```
 
-`-y` auto-confirms; `-g` installs into `~/.claude/skills/` — drop it to install
-into the current project's `.claude/skills/`. The skill is self-contained (its
-recipes and references live inside the one folder), so a single-skill install
-pulls in everything it needs. It then shows up in the `/` menu and fires on the
-natural-language keywords above.
+`-y` auto-confirms; `-g` installs globally. The CLI keeps one canonical copy of
+the skill — `~/.agents/skills/excalidrawer/` for `-g`, or the project's
+`.agents/skills/excalidrawer/` without it — and symlinks each detected agent to
+it (Claude Code → `~/.claude/skills/`, Cursor / Codex → `.agents/…`), so every
+agent shares a single source of truth (pass `--copy` for independent copies
+instead). The skill is self-contained (its recipes and references live inside the
+one folder), so a single-skill install pulls in everything it needs. It then
+shows up in the agent's skill menu and fires on the natural-language keywords
+above.
 
 ## CLI
 
