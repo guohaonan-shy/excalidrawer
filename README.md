@@ -2,6 +2,29 @@
 
 Code-first Excalidraw diagram generation — CLI, MCP server, built-in templates, and SVG/PNG export.
 
+## Why not just use Excalidraw directly?
+
+[Excalidraw](https://excalidraw.com) is a fantastic *drawing* tool — you open a
+canvas and arrange boxes by hand. excalidrawer is a *generation* tool: it turns
+code (or a structured spec, or an agent's intent) into the same hand-drawn-style
+diagrams, with **no browser and no manual dragging**.
+
+Use Excalidraw when a human is sketching once. Reach for excalidrawer when the
+diagram needs to come out of an automated pipeline:
+
+- **In code / scripts** — build diagrams from data, keep them in version control,
+  and regenerate deterministically (fixed seed → clean diffs) instead of
+  re-dragging boxes every time the source changes.
+- **In CI / docs builds** — render `.svg` / `.png` as a build step so the diagrams
+  in your README or docs site never drift from the system they describe.
+- **In an AI agent** — the MCP server and Claude Code / Cursor / Codex skill let an
+  agent produce a diagram in-context ("draw the auth flow") without leaving the
+  conversation.
+
+It produces real `.excalidraw` files, so the output is still fully editable in
+Excalidraw afterward — generate the first draft programmatically, hand-tweak if
+you want.
+
 ## Install
 
 excalidrawer has three entry points; pick whichever fits.
