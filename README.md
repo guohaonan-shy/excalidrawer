@@ -27,11 +27,36 @@ you want.
 
 ## Install
 
-excalidrawer has three entry points; pick whichever fits.
+Most users want the **agent plugin** — it bundles the flowchart / timeline /
+architecture / sequence skills and wires them to the MCP server, so you can
+just say *"draw the auth flow"* inside Claude Code, Cursor, or Codex. The CLI
+and library entry points are below for scripting and custom use cases.
 
-### CLI & MCP server
+### Agent plugin (recommended)
 
-Install globally:
+The plugin is two pieces: the **MCP server** (a binary; same one all agents
+talk to) and the **skills** (one per diagram type). Install both:
+
+```bash
+# 1. The MCP server the skills call
+npm install -g excalidrawer
+claude mcp add excalidrawer -- excalidrawer-mcp
+
+# 2. The plugin — bundles all four diagram skills + the shared base
+/plugin marketplace add guohaonan-shy/excalidrawer
+/plugin install excalidrawer@excalidrawer-dev
+```
+
+The plugin install is shown for Claude Code; the same `skills/` source ships
+multi-platform manifests in `.cursor-plugin/` and `.codex-plugin/`. For an
+agent-agnostic install via [`skills`](https://www.skills.sh) (lays every skill
+flat and symlinks each detected agent to it), or to pull a single type skill,
+see [Agent Skills](#agent-skills) below.
+
+### CLI & MCP server only (no skills)
+
+If you only want the binaries (e.g. to script `excalidrawer render` in a build,
+or to wire up the MCP server with a different skill set):
 
 ```bash
 npm install -g excalidrawer
@@ -123,21 +148,14 @@ elements, then calls the MCP server's `render_diagram` tool to emit
 > claude mcp add excalidrawer -- excalidrawer-mcp
 > ```
 
-### Install everything (recommended)
+### Install paths
 
-Because the type skills reference `excalidrawer-shared` as a sibling, install
-the **whole repo** so they all land side by side and the shared base resolves.
+The recommended path is the plugin install in [Install](#install) above. Two
+other paths share the same `skills/` source — pick whichever fits:
 
-As a Claude Code / Cursor / Codex **plugin** (bundles all skills):
-
-```bash
-# Claude Code
-/plugin marketplace add guohaonan-shy/excalidrawer
-/plugin install excalidrawer@excalidrawer-dev
-```
-
-Or via the [`skills`](https://www.skills.sh) CLI (agent-agnostic — lays every
-skill flat under `.agents/skills/` and symlinks each detected agent to it):
+**Agent-agnostic via skills.sh** (whole repo, lays all skills flat as siblings
+so the shared base resolves; symlinks each detected agent — Claude Code,
+Cursor, Codex, kiro, windsurf — to it):
 
 ```bash
 npx skills add guohaonan-shy/excalidrawer -y -g
@@ -146,10 +164,9 @@ npx skills add guohaonan-shy/excalidrawer -y -g
 `-y` auto-confirms; `-g` installs globally (drop it for the current project).
 Pass `--copy` for independent copies instead of symlinks.
 
-### Install a single type skill
-
-You can pull just one type — but it depends on `excalidrawer-shared`, so install
-that alongside it (the CLI does not auto-resolve the dependency):
+**One type skill only** — you can pull just one type, but it depends on
+`excalidrawer-shared`, so install that alongside (the CLI does not auto-resolve
+the dependency):
 
 ```bash
 npx skills add guohaonan-shy/excalidrawer --skill excalidrawer-flowchart -g
