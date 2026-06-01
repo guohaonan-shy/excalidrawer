@@ -34,24 +34,27 @@ and library entry points are below for scripting and custom use cases.
 
 ### Agent plugin (recommended)
 
-The plugin is two pieces: the **MCP server** (a binary; same one all agents
-talk to) and the **skills** (one per diagram type). Install both:
+In Claude Code, two commands and you're done — the plugin bundles the
+skills **and** auto-registers the MCP server via a shipped `.mcp.json`
+(no global npm install, no separate `claude mcp add`):
 
 ```bash
-# 1. The MCP server the skills call
-npm install -g excalidrawer
-claude mcp add excalidrawer -- excalidrawer-mcp
-
-# 2. The plugin — bundles all four diagram skills + the shared base
 /plugin marketplace add guohaonan-shy/excalidrawer
 /plugin install excalidrawer@excalidrawer-dev
 ```
 
-The plugin install is shown for Claude Code; the same `skills/` source ships
-multi-platform manifests in `.cursor-plugin/` and `.codex-plugin/`. For an
-agent-agnostic install via [`skills`](https://www.skills.sh) (lays every skill
-flat and symlinks each detected agent to it), or to pull a single type skill,
-see [Agent Skills](#agent-skills) below.
+The MCP server runs via `npx -y -p excalidrawer excalidrawer-mcp`, so the
+first invocation downloads the package into the npx cache (~5-10 s); subsequent
+runs use the cache. To pin a version or avoid the cold start, install the
+package globally (`npm install -g excalidrawer`) and override the MCP entry
+under `~/.claude/mcp.json` to call `excalidrawer-mcp` directly.
+
+The same `skills/` source ships multi-platform manifests in `.cursor-plugin/`
+and `.codex-plugin/`. **Auto-MCP via the plugin manifest is currently a
+Claude-Code-only feature** — Cursor / Codex users still configure the MCP
+server through their own client config (see [MCP Server](#mcp-server) below).
+For an agent-agnostic install via [`skills`](https://www.skills.sh), or to
+pull a single type skill, see [Agent Skills](#agent-skills) below.
 
 ### CLI & MCP server only (no skills)
 
@@ -140,13 +143,10 @@ four times. Given a request, a type skill clarifies intent with a couple of
 elements, then calls the MCP server's `render_diagram` tool to emit
 `.excalidraw` / `.svg` / `.png`.
 
-> All skills require the `excalidrawer-mcp` server. Install it once, regardless
-> of how you install the skills:
->
-> ```bash
-> npm install -g excalidrawer
-> claude mcp add excalidrawer -- excalidrawer-mcp
-> ```
+> All skills call the `excalidrawer-mcp` server. The recommended Claude Code
+> plugin path above ships an `.mcp.json` that registers it automatically. For
+> any other install path (skills.sh, single-skill, Cursor, Codex, Claude Desktop),
+> wire up the MCP server per [MCP Server](#mcp-server).
 
 ### Install paths
 

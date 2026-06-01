@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "excalidrawer": {
+      "command": "npx",
+      "args": ["-y", "-p", "excalidrawer", "excalidrawer-mcp"]
+    }
+  }
+}
