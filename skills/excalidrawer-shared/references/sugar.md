@@ -15,9 +15,10 @@ the output files.
   at:       [x, y],                                  // top-left, px
   size:     [w, h],                                  // px
   fill?:    "blue" | "bgBlue" | "#rrggbb" | "transparent",
-  stroke?:  "blue" | "#rrggbb",                      // palette key → matching strokeXxx
+  stroke?:  "blue" | "#rrggbb",                      // palette key → matching strokeXxx; the SHAPE border
   dashed?:  true,                                    // dashed outline
   text?:    string,                                  // non-empty → auto-binds a centered text child
+  textColor?: "blue" | "#rrggbb",                    // label color (since 0.5.9); `stroke` does NOT reach it
   fontSize?: number                                  // default 16; diamond 14
 }
 ```
@@ -25,6 +26,14 @@ the output files.
 A non-empty `text` expands a `rect`/`diamond`/`ellipse` into a `[shape, text]`
 pair with the text bound (Excalidraw `containerId`), so labels stay centered
 when you drag the shape later.
+
+- **`stroke` colors the border; `textColor` colors the label.** `stroke` never
+  reaches bound text — to color a label, use `textColor` (palette key or
+  `#rrggbb`). Without it the label is the default ink. *(textColor: since 0.5.9.)*
+- **Bound text auto-wraps and the box grows to fit** *(since 0.5.9)*. A label
+  longer than its `size[w]` wraps to the box width, and the box height grows to
+  contain the lines — you no longer hand-insert `\n` or pre-size the box for
+  long labels. (Earlier versions rendered long labels overflowing the box.)
 
 ## Arrow sugar — id-anchored (auto-routed)
 
