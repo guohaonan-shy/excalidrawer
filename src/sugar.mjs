@@ -5,8 +5,10 @@
  * with terse, high-level objects instead of the ~20-field raw element schema.
  *
  *   shape sugar:  { shape:"rect"|"diamond"|"ellipse"|"text", id?, at:[x,y],
- *                   size:[w,h], fill?, stroke?, dashed?, text?, fontSize? }
+ *                   size:[w,h], fill?, stroke?, dashed?, text?, textColor?, fontSize? }
  *                 — a non-empty `text` auto-expands into a [shape, boundText] pair.
+ *                   `stroke` colors the shape's border; `textColor` colors the label
+ *                   (palette key or #rrggbb) — `stroke` does NOT reach bound text.
  *   arrow sugar:  L1 { shape:"arrow", from, to }                       (auto sides + route)
  *                 L2 { shape:"arrow", from, to, fromSide, toSide,      (pinned sides; fromT/
  *                       fromT?, toT? }                                  toT slide the anchor)
@@ -112,8 +114,22 @@ export function desugar(elements) {
       extra.strokeColor = s;
     }
 
+    // `textColor` colors the label. A text element's color IS its strokeColor,
+    // so resolve it once here and apply it to a standalone `text` shape and to
+    // the bound text of a rect/diamond/ellipse — `stroke` (the shape border)
+    // never reaches bound text, which is why it needs its own field.
+    let textStroke;
+    if (el.textColor != null) {
+      textStroke = resolveColor(el.textColor, "stroke");
+      if (textStroke === undefined) {
+        issues.push(`element[${i}] (${id}): unknown textColor "${el.textColor}"`);
+        return;
+      }
+    }
+
     if (kind === "text") {
-      raw.push(textEl(id, x, y, w, h, el.text ?? "", el.fontSize ?? 16, extra));
+      const textExtra = textStroke ? { ...extra, strokeColor: textStroke } : extra;
+      raw.push(textEl(id, x, y, w, h, el.text ?? "", el.fontSize ?? 16, textExtra));
       bboxes.set(id, { x, y, w, h, type: "text" });
       return;
     }
@@ -145,6 +161,7 @@ export function desugar(elements) {
           verticalAlign: "middle",
           roundness: null,
           containerId: id,
+          ...(textStroke ? { strokeColor: textStroke } : {}),
         })
       );
     } else {

@@ -44,6 +44,37 @@ test("text sugar: standalone text element", () => {
   assert.equal(t.fontSize, 18);
 });
 
+test("textColor: colors bound text without touching the shape border", () => {
+  const raw = desugar([
+    { shape: "rect", id: "a", at: [0, 0], size: [100, 50], text: "hi", stroke: "blue", textColor: "#0b5cad" },
+  ]);
+  const [rect, text] = raw;
+  assert.equal(rect.strokeColor, "#1971c2"); // border still from `stroke`
+  assert.equal(text.type, "text");
+  assert.equal(text.strokeColor, "#0b5cad"); // label colored by `textColor`
+});
+
+test("textColor: palette key resolves to the stroke accent", () => {
+  const [, text] = desugar([
+    { shape: "rect", id: "a", at: [0, 0], size: [100, 50], text: "hi", textColor: "blue" },
+  ]);
+  assert.equal(text.strokeColor, "#1971c2");
+});
+
+test("textColor: applies to a standalone text shape too", () => {
+  const [t] = desugar([
+    { shape: "text", id: "t", at: [0, 0], size: [100, 20], text: "hi", textColor: "#0b5cad" },
+  ]);
+  assert.equal(t.strokeColor, "#0b5cad");
+});
+
+test("textColor: unknown value raises a SugarError", () => {
+  assert.throws(
+    () => desugar([{ shape: "rect", id: "a", at: [0, 0], size: [10, 10], text: "hi", textColor: "chartreuse" }]),
+    SugarError,
+  );
+});
+
 test("shape sugar: unknown fill color throws SugarError with issue", () => {
   try {
     desugar([{ shape: "rect", id: "a", at: [0, 0], size: [10, 10], fill: "bogus" }]);

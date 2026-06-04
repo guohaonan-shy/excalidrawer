@@ -11,8 +11,9 @@ export const renderDiagram = defineTool({
     "The terminal step of diagram creation.\n" +
     "Elements use the sugar shorthand:\n" +
     "  shape:   { shape:'rect'|'diamond'|'ellipse'|'text', id?, at:[x,y], " +
-    "size:[w,h], fill?, stroke?, dashed?, text?, fontSize? } " +
-    "— non-empty `text` auto-binds a centered text child.\n" +
+    "size:[w,h], fill?, stroke?, dashed?, text?, textColor?, fontSize? } " +
+    "— non-empty `text` auto-binds a centered text child. `stroke` colors the " +
+    "border, `textColor` (palette key or #rrggbb) colors the label.\n" +
     "  arrow:   { shape:'arrow', from, to, fromSide?, toSide?, fromT?, toT?, " +
     "via?, head?:'arrow'|'none', dashed?, labelT?, text? } " +
     "— id-anchored arrows auto-route orthogonally (straight / L-bend / Z-route). " +
