@@ -5,8 +5,10 @@
  * with terse, high-level objects instead of the ~20-field raw element schema.
  *
  *   shape sugar:  { shape:"rect"|"diamond"|"ellipse"|"text", id?, at:[x,y],
- *                   size:[w,h], fill?, stroke?, dashed?, text?, fontSize? }
+ *                   size:[w,h], fill?, stroke?, dashed?, text?, textColor?, fontSize? }
  *                 — a non-empty `text` auto-expands into a [shape, boundText] pair.
+ *                   `stroke` colors the shape's border; `textColor` colors the label
+ *                   (palette key or #rrggbb) — `stroke` does NOT reach bound text.
  *   arrow sugar:  L1 { shape:"arrow", from, to }                       (auto sides + route)
  *                 L2 { shape:"arrow", from, to, fromSide, toSide,      (pinned sides; fromT/
  *                       fromT?, toT? }                                  toT slide the anchor)
@@ -32,6 +34,12 @@
 
 import { base, rect, diamond, ellipse, textEl, arrow, colors } from "./elements.mjs";
 import { edgePoint, routeU, labelAnchor } from "./layout.mjs";
+import { wrapText, textHeight } from "./text.mjs";
+
+// Horizontal inset (each side) used when wrapping bound text to a box's width,
+// so the label doesn't kiss the border. A touch wider than Excalidraw's 5px
+// padding to absorb the ~0.62×fontSize width estimate's slack.
+const TEXT_PAD_X = 10;
 
 export class SugarError extends Error {
   constructor(issues) {
@@ -112,8 +120,22 @@ export function desugar(elements) {
       extra.strokeColor = s;
     }
 
+    // `textColor` colors the label. A text element's color IS its strokeColor,
+    // so resolve it once here and apply it to a standalone `text` shape and to
+    // the bound text of a rect/diamond/ellipse — `stroke` (the shape border)
+    // never reaches bound text, which is why it needs its own field.
+    let textStroke;
+    if (el.textColor != null) {
+      textStroke = resolveColor(el.textColor, "stroke");
+      if (textStroke === undefined) {
+        issues.push(`element[${i}] (${id}): unknown textColor "${el.textColor}"`);
+        return;
+      }
+    }
+
     if (kind === "text") {
-      raw.push(textEl(id, x, y, w, h, el.text ?? "", el.fontSize ?? 16, extra));
+      const textExtra = textStroke ? { ...extra, strokeColor: textStroke } : extra;
+      raw.push(textEl(id, x, y, w, h, el.text ?? "", el.fontSize ?? 16, textExtra));
       bboxes.set(id, { x, y, w, h, type: "text" });
       return;
     }
@@ -129,25 +151,36 @@ export function desugar(elements) {
     if (el.dashed) extra.strokeStyle = "dashed";
 
     const factory = kind === "rect" ? rect : kind === "diamond" ? diamond : ellipse;
-    const shapeEl = factory(id, x, y, w, h, fill, extra);
-    bboxes.set(id, { x, y, w, h, type: shapeEl.type });
 
     if (el.text != null && el.text !== "") {
       const tid = `${id}-t`;
+      const fontSize = el.fontSize ?? (kind === "diamond" ? 14 : 16);
+      // The renderer splits bound text only on existing "\n" — it never
+      // re-wraps. So wrap to the box's inner width here, then grow the box
+      // height so the (vertically centered) lines stay inside instead of
+      // spilling out. Grows only when the text genuinely needs the room.
+      const text = wrapText(el.text, Math.max(1, w - TEXT_PAD_X * 2), fontSize);
+      const bh = Math.max(h, textHeight(text, fontSize));
+
+      const shapeEl = factory(id, x, y, w, bh, fill, extra);
       shapeEl.boundElements = [{ id: tid, type: "text" }];
+      bboxes.set(id, { x, y, w, h: bh, type: shapeEl.type });
       raw.push(
         shapeEl,
-        base(tid, "text", x, y, w, h, {
-          text: el.text,
-          fontSize: el.fontSize ?? (kind === "diamond" ? 14 : 16),
+        base(tid, "text", x, y, w, bh, {
+          text,
+          fontSize,
           fontFamily: 1,
           textAlign: "center",
           verticalAlign: "middle",
           roundness: null,
           containerId: id,
+          ...(textStroke ? { strokeColor: textStroke } : {}),
         })
       );
     } else {
+      const shapeEl = factory(id, x, y, w, h, fill, extra);
+      bboxes.set(id, { x, y, w, h, type: shapeEl.type });
       raw.push(shapeEl);
     }
   });

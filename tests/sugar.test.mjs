@@ -44,6 +44,56 @@ test("text sugar: standalone text element", () => {
   assert.equal(t.fontSize, 18);
 });
 
+test("textColor: colors bound text without touching the shape border", () => {
+  const raw = desugar([
+    { shape: "rect", id: "a", at: [0, 0], size: [100, 50], text: "hi", stroke: "blue", textColor: "#0b5cad" },
+  ]);
+  const [rect, text] = raw;
+  assert.equal(rect.strokeColor, "#1971c2"); // border still from `stroke`
+  assert.equal(text.type, "text");
+  assert.equal(text.strokeColor, "#0b5cad"); // label colored by `textColor`
+});
+
+test("textColor: palette key resolves to the stroke accent", () => {
+  const [, text] = desugar([
+    { shape: "rect", id: "a", at: [0, 0], size: [100, 50], text: "hi", textColor: "blue" },
+  ]);
+  assert.equal(text.strokeColor, "#1971c2");
+});
+
+test("textColor: applies to a standalone text shape too", () => {
+  const [t] = desugar([
+    { shape: "text", id: "t", at: [0, 0], size: [100, 20], text: "hi", textColor: "#0b5cad" },
+  ]);
+  assert.equal(t.strokeColor, "#0b5cad");
+});
+
+test("textColor: unknown value raises a SugarError", () => {
+  assert.throws(
+    () => desugar([{ shape: "rect", id: "a", at: [0, 0], size: [10, 10], text: "hi", textColor: "chartreuse" }]),
+    SugarError,
+  );
+});
+
+test("bound text: long label wraps to the box width (renderer never re-wraps)", () => {
+  const long = "Some people learn better studying alone or in groups";
+  const [, text] = desugar([{ shape: "rect", id: "a", at: [0, 0], size: [180, 60], text: long }]);
+  assert.ok(text.text.includes("\n"), "long label should be wrapped with newlines");
+});
+
+test("bound text: box grows in height to contain the wrapped lines", () => {
+  const long = "Some people learn better studying alone or in groups together now";
+  const [rect, text] = desugar([{ shape: "rect", id: "a", at: [0, 0], size: [160, 40], text: long }]);
+  assert.ok(rect.height > 40, "box should grow to fit wrapped text");
+  assert.equal(rect.height, text.height, "container and bound text height stay in sync");
+});
+
+test("bound text: short label in a roomy box is untouched", () => {
+  const [rect, text] = desugar([{ shape: "rect", id: "a", at: [0, 0], size: [200, 80], text: "hi" }]);
+  assert.equal(text.text, "hi");
+  assert.equal(rect.height, 80);
+});
+
 test("shape sugar: unknown fill color throws SugarError with issue", () => {
   try {
     desugar([{ shape: "rect", id: "a", at: [0, 0], size: [10, 10], fill: "bogus" }]);

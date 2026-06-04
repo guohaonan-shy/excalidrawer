@@ -130,13 +130,13 @@ shared base they all read first:
 
 | Skill | Use for | Trigger keywords |
 |-------|---------|------------------|
-| `excalidrawer-flowchart` | Decision flows, process diagrams, branching logic | flowchart, 流程图, decision tree, yes/no, approval flow |
-| `excalidrawer-timeline` | Timelines, roadmaps, project milestones | timeline, 时间线, roadmap, milestone, Q1/Q2 phases |
-| `excalidrawer-architecture` | System architecture, layered components, topology | architecture, 架构图, 3-tier, microservices, data platform |
-| `excalidrawer-sequence` | Sequence diagrams, multi-actor interactions, call chains | sequence diagram, 时序图, interaction, handshake, OAuth |
-| `excalidrawer-shared` | Common base — conventions, sugar schema, palette, output rules (read first, not invoked directly) | — |
+| `flowchart` | Decision flows, process diagrams, branching logic | flowchart, 流程图, decision tree, yes/no, approval flow |
+| `timeline` | Timelines, roadmaps, project milestones | timeline, 时间线, roadmap, milestone, Q1/Q2 phases |
+| `architecture` | System architecture, layered components, topology | architecture, 架构图, 3-tier, microservices, data platform |
+| `sequence` | Sequence diagrams, multi-actor interactions, call chains | sequence diagram, 时序图, interaction, handshake, OAuth |
+| `shared` | Common base — conventions, sugar schema, palette, output rules (read first, not invoked directly) | — |
 
-Each type skill declares a prerequisite — *read `../excalidrawer-shared/SKILL.md`
+Each type skill declares a prerequisite — *read `../shared/SKILL.md`
 first* — so the cross-cutting rules live in one place instead of being copied
 four times. Given a request, a type skill clarifies intent with a couple of
 `AskUserQuestion` prompts, reads its recipe under `references/`, composes sugar
@@ -145,7 +145,7 @@ elements, then calls the MCP server's `render_diagram` tool to emit
 
 > All skills call the `excalidrawer-mcp` server. The recommended Claude Code
 > plugin path above ships an `.mcp.json` that registers it automatically. For
-> any other install path (skills.sh, single-skill, Cursor, Codex, Claude Desktop),
+> any other install path (skills.sh, Cursor, Codex, Claude Desktop),
 > wire up the MCP server per [MCP Server](#mcp-server).
 
 ### Install paths
@@ -162,18 +162,9 @@ npx skills add guohaonan-shy/excalidrawer -y -g
 ```
 
 `-y` auto-confirms; `-g` installs globally (drop it for the current project).
-Pass `--copy` for independent copies instead of symlinks.
-
-**One type skill only** — you can pull just one type, but it depends on
-`excalidrawer-shared`, so install that alongside (the CLI does not auto-resolve
-the dependency):
-
-```bash
-npx skills add guohaonan-shy/excalidrawer --skill excalidrawer-flowchart -g
-npx skills add guohaonan-shy/excalidrawer --skill excalidrawer-shared   -g
-```
-
-When in doubt, just install everything — the full set is small.
+Pass `--copy` for independent copies instead of symlinks. This installs the
+whole set — the type skills share the `shared` base as a sibling, so always
+take the full repo rather than a single skill.
 
 ## CLI
 

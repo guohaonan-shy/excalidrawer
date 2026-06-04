@@ -1,5 +1,5 @@
 ---
-name: excalidrawer-timeline
+name: timeline
 description: Generate a hand-drawn-style Excalidraw timeline from code and export to .excalidraw / SVG / PNG — no browser. For timelines, roadmaps, project milestones, release phases, Q1–Q4 plans. Triggers on draw a timeline / roadmap / milestones / project phases. Flow detect → clarify milestones & axis style → read references/timeline.md → compose sugar → render_diagram. 中文触发词：时间线 / 路线图 / roadmap / 里程碑 / 项目阶段 / 发布计划 / Q1Q2Q3Q4。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
@@ -8,7 +8,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 前置条件（必做）
 
-先用 Read 工具读取 [`../excalidrawer-shared/SKILL.md`](../excalidrawer-shared/SKILL.md)
+先用 Read 工具读取 [`../shared/SKILL.md`](../shared/SKILL.md)
 ——它定义了所有图表类型通用的 MCP 前置检查 / CLI fallback、sugar schema、配色、
 文件命名、输出语言、导出格式选择、迭代规则。**缺一不可**，本 skill 只补充时间线专属的
 clarify 问题与 layout recipe。

@@ -4,6 +4,34 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.5.9
+
+### Added
+
+- **`textColor` on shape sugar** — a `textColor` field (palette key or
+  `#rrggbb`) colors a shape's label. Before this, `stroke` only reached the
+  shape border, so bound text always rendered the default ink (`#1e1e1e`) and
+  the only way to color a label was to hand-author a raw text element. Now
+  `textColor` applies to both a standalone `text` shape and the bound text of a
+  rect / diamond / ellipse; `stroke` still controls the border independently.
+  Unknown values raise a `SugarError` like other color fields.
+
+### Fixed
+
+- **Bound text no longer overflows its box.** The SVG renderer (`renderBoundText`)
+  splits bound text only on existing `\n` and never re-wraps to the container,
+  so a label longer than its box rendered as one centered line spilling out
+  both sides (and tall text spilled below). Only the template generators
+  pre-wrapped; hand-composed sugar got raw text. The sugar path now wraps bound
+  text to the box's inner width and grows the box height (and its bbox, so
+  arrows stay anchored) to contain the vertically-centered lines — growing only
+  when the text needs the room; short labels in roomy boxes are untouched.
+
+### Tests
+
+- `tests/sugar.test.mjs`: `textColor` (bound text, standalone text, palette key,
+  unknown value) and bound-text wrapping + height-growth + untouched-short-label.
+
 ## 0.5.8
 
 ### Added

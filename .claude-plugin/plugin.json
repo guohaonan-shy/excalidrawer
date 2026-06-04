@@ -1,10 +1,16 @@
 {
   "name": "excalidrawer",
-  "version": "0.0.1",
-  "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence. Generate hand-drawn-style diagrams and export to .excalidraw / SVG / PNG — no browser. Requires the excalidrawer-mcp server (npm i -g excalidrawer && claude mcp add excalidrawer -- excalidrawer-mcp).",
+  "version": "0.0.2",
+  "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence. Generate hand-drawn-style diagrams and export to .excalidraw / SVG / PNG — no browser. Installing the plugin auto-registers the excalidrawer-mcp server via npx.",
   "author": {
     "name": "guohaonan-shy",
     "email": "guohaonan980421@gmail.com"
+  },
+  "mcpServers": {
+    "excalidrawer": {
+      "command": "npx",
+      "args": ["-y", "-p", "excalidrawer@^0.5.9", "-c", "excalidrawer-mcp"]
+    }
   },
   "homepage": "https://github.com/guohaonan-shy/excalidrawer",
   "repository": "https://github.com/guohaonan-shy/excalidrawer",
