@@ -1,6 +1,6 @@
 # excalidrawer
 
-Code-first Excalidraw diagram generation — CLI, MCP server, built-in templates, and SVG/PNG export.
+Code-first Excalidraw diagram generation — CLI, MCP server, and SVG/PNG export.
 
 ## Why not just use Excalidraw directly?
 
@@ -17,7 +17,7 @@ diagram needs to come out of an automated pipeline:
   re-dragging boxes every time the source changes.
 - **In CI / docs builds** — render `.svg` / `.png` as a build step so the diagrams
   in your README or docs site never drift from the system they describe.
-- **In an AI agent** — the MCP server and Claude Code / Cursor / Codex skill let an
+- **In an AI agent** — the MCP server (and the Claude Code plugin's skills) let an
   agent produce a diagram in-context ("draw the auth flow") without leaving the
   conversation.
 
@@ -29,37 +29,31 @@ you want.
 
 Most users want the **agent plugin** — it bundles the flowchart / timeline /
 architecture / sequence skills and wires them to the MCP server, so you can
-just say *"draw the auth flow"* inside Claude Code, Cursor, or Codex. The CLI
-and library entry points are below for scripting and custom use cases.
+just say *"draw the auth flow"* inside Claude Code. The CLI and library entry
+points are below for scripting and custom use cases.
 
-### Agent plugin (recommended)
+### Agent plugin (Claude Code, recommended)
 
-In Claude Code, two commands and you're done — the plugin bundles the
-skills **and** auto-registers the MCP server via a shipped `.mcp.json`
-(no global npm install, no separate `claude mcp add`):
+Two commands and you're done — the plugin bundles the skills **and**
+auto-registers the MCP server via its manifest (no global npm install, no
+separate `claude mcp add`):
 
 ```bash
 /plugin marketplace add guohaonan-shy/excalidrawer
 /plugin install excalidrawer@excalidrawer-dev
 ```
 
-The MCP server runs via `npx -y -p excalidrawer excalidrawer-mcp`, so the
-first invocation downloads the package into the npx cache (~5-10 s); subsequent
-runs use the cache. To pin a version or avoid the cold start, install the
-package globally (`npm install -g excalidrawer`) and override the MCP entry
-under `~/.claude/mcp.json` to call `excalidrawer-mcp` directly.
+The MCP server runs via `npx -y -p excalidrawer@latest -c excalidrawer-mcp`, so
+the first invocation downloads the package into the npx cache (~5-10 s);
+subsequent runs use the cache.
 
-The same `skills/` source ships multi-platform manifests in `.cursor-plugin/`
-and `.codex-plugin/`. **Auto-MCP via the plugin manifest is currently a
-Claude-Code-only feature** — Cursor / Codex users still configure the MCP
-server through their own client config (see [MCP Server](#mcp-server) below).
-For an agent-agnostic install via [`skills`](https://www.skills.sh), or to
-pull a single type skill, see [Agent Skills](#agent-skills) below.
+> Plugin-manifest auto-MCP is a Claude-Code feature. In Cursor, Codex, or
+> Claude Desktop, register the MCP server directly — see
+> [MCP Server](#mcp-server) below.
 
-### CLI & MCP server only (no skills)
+### CLI & MCP server only
 
-If you only want the binaries (e.g. to script `excalidrawer render` in a build,
-or to wire up the MCP server with a different skill set):
+If you only want the binaries (e.g. to script `excalidrawer render` in a build):
 
 ```bash
 npm install -g excalidrawer
@@ -67,15 +61,12 @@ npm install -g excalidrawer
 
 This puts two commands on your PATH:
 
-- `excalidrawer` — the CLI (`render`, `compute-layout`, `generate`)
+- `excalidrawer` — the CLI (`render`, `compute-layout`)
 - `excalidrawer-mcp` — the MCP server that MCP clients launch
-
-See [MCP Server](#mcp-server) below for client configuration (Claude Code,
-Claude Desktop, Codex).
 
 ### Library
 
-Only needed if you want the programmatic API for [custom scripts](#custom-scripts):
+Only needed for the programmatic API (see [Custom Scripts](#custom-scripts)):
 
 ```bash
 npm install excalidrawer
@@ -90,11 +81,14 @@ npm install excalidrawer
 | `render_diagram` | Render an array of sugar shorthand or raw Excalidraw elements to `.excalidraw` / `.svg` / `.png` files. |
 | `compute_layout` | Compute coordinates from a layout helper (grid, chain, swimlane, hub-and-spoke, edge anchors, U-routing, label anchors). |
 
+Each command below registers the server with
+`npx -y -p excalidrawer@latest -c excalidrawer-mcp` — no global install needed,
+and always the latest published version.
+
 ### Claude Code
 
 ```bash
-npm install -g excalidrawer
-claude mcp add excalidrawer -- excalidrawer-mcp
+claude mcp add excalidrawer -- npx -y -p excalidrawer@latest -c excalidrawer-mcp
 ```
 
 Verify with `claude mcp list` — it should report `✓ Connected`.
@@ -108,7 +102,8 @@ or `%APPDATA%\Claude\claude_desktop_config.json` (Windows), then restart the app
 {
   "mcpServers": {
     "excalidrawer": {
-      "command": "excalidrawer-mcp"
+      "command": "npx",
+      "args": ["-y", "-p", "excalidrawer@latest", "-c", "excalidrawer-mcp"]
     }
   }
 }
@@ -116,17 +111,15 @@ or `%APPDATA%\Claude\claude_desktop_config.json` (Windows), then restart the app
 
 ### Codex
 
-Add to `~/.codex/config.toml`:
-
-```toml
-[mcp_servers.excalidrawer]
-command = "excalidrawer-mcp"
+```bash
+codex mcp add excalidrawer -- npx -y -p excalidrawer@latest -c excalidrawer-mcp
 ```
 
 ## Agent Skills
 
 The [`skills/`](skills/) directory holds one skill per diagram type plus a
-shared base they all read first:
+shared base they all read first. They ship as part of the Claude Code plugin
+above.
 
 | Skill | Use for | Trigger keywords |
 |-------|---------|------------------|
@@ -143,28 +136,9 @@ four times. Given a request, a type skill clarifies intent with a couple of
 elements, then calls the MCP server's `render_diagram` tool to emit
 `.excalidraw` / `.svg` / `.png`.
 
-> All skills call the `excalidrawer-mcp` server. The recommended Claude Code
-> plugin path above ships an `.mcp.json` that registers it automatically. For
-> any other install path (skills.sh, Cursor, Codex, Claude Desktop),
-> wire up the MCP server per [MCP Server](#mcp-server).
-
-### Install paths
-
-The recommended path is the plugin install in [Install](#install) above. Two
-other paths share the same `skills/` source — pick whichever fits:
-
-**Agent-agnostic via skills.sh** (whole repo, lays all skills flat as siblings
-so the shared base resolves; symlinks each detected agent — Claude Code,
-Cursor, Codex, kiro, windsurf — to it):
-
-```bash
-npx skills add guohaonan-shy/excalidrawer -y -g
-```
-
-`-y` auto-confirms; `-g` installs globally (drop it for the current project).
-Pass `--copy` for independent copies instead of symlinks. This installs the
-whole set — the type skills share the `shared` base as a sibling, so always
-take the full repo rather than a single skill.
+> All skills call the `excalidrawer-mcp` server. The plugin install above ships
+> a manifest that registers it automatically; for any other client, wire up the
+> MCP server per [MCP Server](#mcp-server).
 
 ## CLI
 
@@ -175,175 +149,68 @@ cat elements.json | excalidrawer render -o docs/diagram -f svg,png
 
 # Compute layout coordinates (prints JSON)
 excalidrawer compute-layout --helper gridLayout -a '{"count":6,"cols":3,"cellW":140,"cellH":50}'
-
-# Generate from a built-in template (legacy)
-excalidrawer generate -t timeline -i data.json -o docs/timeline
-excalidrawer types
 ```
 
 `render` accepts either a bare element array or `{ "elements": [...] }`. The
 `render` / `compute-layout` commands share the exact tool definitions the MCP
 server uses, so the two surfaces never drift.
 
-## Quick Start: CLI Templates
-
-For supported diagram types, just provide JSON data — no code needed.
-
-```bash
-# Generate timeline from JSON
-excalidrawer generate -t timeline -i data.json -o docs/timeline
-
-# Only SVG and PNG
-excalidrawer generate -t timeline -i data.json -o docs/timeline -f svg,png
-
-# List available types
-excalidrawer types
-```
-
-### Built-in Templates
-
-| Type | Use for | Input |
-|------|---------|-------|
-| `timeline` | Project timelines, roadmaps, milestones | `{ title, items: [{ label, time, desc, color? }] }` |
-| `flowchart` | Process flows, decision trees | `{ title?, direction?, nodes: [{ id, label, type?, color? }], edges: [{ from, to, label? }] }` |
-| `architecture` | System architecture, layered diagrams | `{ title?, sections: [{ label, color?, items }], connections? }` |
-| `sequence` | Sequence diagrams, interaction flows | `{ title?, actors: [{ label, color? }], steps: [{ actor, text, from?, arrow?, style? }] }` |
-
-### Timeline
-
-```json
-{
-  "title": "Project Timeline",
-  "items": [
-    { "label": "MVP", "time": "Jan", "desc": "Core features ready" },
-    { "label": "Beta", "time": "Mar", "desc": "User testing" },
-    { "label": "Launch", "time": "Jun", "desc": "Public release" }
-  ]
-}
-```
-
-### Flowchart
-
-Node types: `start`, `end`, `process`, `decision`, `io`
-
-```json
-{
-  "title": "Login Flow",
-  "direction": "horizontal",
-  "nodes": [
-    { "id": "start", "label": "Start", "type": "start" },
-    { "id": "input", "label": "Enter Credentials", "type": "process" },
-    { "id": "check", "label": "Valid?", "type": "decision" },
-    { "id": "ok", "label": "Dashboard", "type": "end" },
-    { "id": "err", "label": "Show Error", "type": "process" }
-  ],
-  "edges": [
-    { "from": "start", "to": "input" },
-    { "from": "input", "to": "check" },
-    { "from": "check", "to": "ok", "label": "Yes" },
-    { "from": "check", "to": "err", "label": "No" }
-  ]
-}
-```
-
-### Architecture
-
-```json
-{
-  "title": "System Architecture",
-  "sections": [
-    { "label": "Frontend", "color": "blue", "items": ["Web App", "Mobile App"] },
-    { "label": "Backend", "color": "green", "items": ["API Gateway", "Auth Service"] },
-    { "label": "Data", "color": "yellow", "items": ["PostgreSQL", "Redis"] }
-  ],
-  "connections": [
-    { "from": "Web App", "to": "API Gateway" },
-    { "from": "API Gateway", "to": "PostgreSQL" }
-  ]
-}
-```
-
-### Sequence
-
-```json
-{
-  "title": "OAuth Login Flow",
-  "actors": [
-    { "label": "User", "color": "yellow" },
-    { "label": "Client", "color": "blue" },
-    { "label": "Auth Server", "color": "purple" }
-  ],
-  "steps": [
-    { "actor": "User", "text": "1. Login request" },
-    { "actor": "Client", "text": "2. Start callback server", "from": "User" },
-    { "actor": "Auth Server", "text": "3. Show login page", "from": "Client", "arrow": "GET /authorize" },
-    { "actor": "User", "text": "4. User authorizes", "from": "Auth Server", "style": "dashed" },
-    { "actor": "Client", "text": "5. Receive token", "color": "green", "from": "Auth Server", "arrow": "200 OK" }
-  ]
-}
-```
-
 ## Custom Scripts
 
-For diagram types not covered by templates, use the library API directly:
+`render()` takes the same sugar shorthand the MCP server uses and returns the
+rendered outputs — drop it into any script:
 
 ```javascript
 import { writeFileSync } from "fs";
-import { setSeed, box, arrow, textEl, colors, excalidraw, toSvg, toPng } from "excalidrawer";
-
-setSeed(100000);
-const CY = 120, BH = 56, BY = CY - BH / 2;
+import { render } from "excalidrawer";
 
 const elements = [
-  textEl("title", 20, 12, 500, 28, "My Flow", 22),
-  ...box("s1", "s1t", 20,  BY, 130, BH, colors.yellow, "Start", 15),
-  arrow("a1", 150, CY, [[0,0],[40,0]]),
-  ...box("s2", "s2t", 190, BY, 150, BH, colors.blue,   "Process", 14),
-  arrow("a2", 340, CY, [[0,0],[40,0]]),
-  ...box("s3", "s3t", 380, BY, 130, BH, colors.green,  "Done", 15),
+  { shape: "rect", id: "start",   at: [20, 80],  size: [130, 56], fill: "yellow", text: "Start" },
+  { shape: "rect", id: "process", at: [240, 80], size: [150, 56], fill: "blue",   text: "Process" },
+  { shape: "rect", id: "done",    at: [460, 80], size: [130, 56], fill: "green",  text: "Done" },
+  { shape: "arrow", from: "start",   to: "process" },
+  { shape: "arrow", from: "process", to: "done" },
 ];
 
-writeFileSync("diagram.excalidraw", excalidraw(elements));
-writeFileSync("diagram.svg", toSvg(elements));
-writeFileSync("diagram.png", await toPng(elements, 2));
+const { outputs } = await render(elements, { formats: ["excalidraw", "svg", "png"] });
+writeFileSync("diagram.excalidraw", outputs.excalidraw);
+writeFileSync("diagram.svg", outputs.svg);
+writeFileSync("diagram.png", outputs.png);
 ```
+
+The full sugar schema (shapes, arrows, layout helpers, `fill` / `stroke` /
+`textColor`) is documented in
+[`skills/shared/references/sugar.md`](skills/shared/references/sugar.md).
 
 ## API Reference
 
-### Elements
+### Core
 
 | Function | Returns | Description |
 |----------|---------|-------------|
-| `box(rid, tid, x, y, w, h, bg, text, fontSize?)` | `[rect, text]` | Rounded rectangle with centered label |
-| `diamondBox(rid, tid, x, y, w, h, bg, text, fontSize?)` | `[diamond, text]` | Diamond with centered label |
-| `arrow(id, x, y, points, extra?)` | element | Arrow; `points` are relative `[dx, dy]` offsets |
-| `textEl(id, x, y, w, h, text, fontSize, extra?)` | element | Standalone text |
-| `rect(id, x, y, w, h, bg, extra?)` | element | Plain rounded rectangle |
-| `ellipse(id, x, y, w, h, bg, extra?)` | element | Ellipse |
+| `render(elements, opts?)` | `Promise<{ outputs, elementCount }>` | Desugar + render to `{ excalidraw, svg, png }`. `opts.formats` subsets the output; `opts.scale` (1–4) sets PNG scale. |
+| `desugar(elements)` | `element[]` | Expand sugar shorthand into raw Excalidraw elements without rendering. |
 
 ### Layout helpers
 
 | Function | Description |
 |----------|-------------|
-| `row(count, startX, y, itemW, gap, builder)` | Horizontal row of items |
-| `grid(cols, count, startX, startY, itemW, itemH, gapX, gapY, builder)` | Grid of items |
+| `gridLayout`, `chain`, `swimlane`, `hubSpoke` | Position helpers — coordinates for grids, chains, swimlanes, hub-and-spoke. |
+| `edgePoint`, `routeU`, `labelAnchor` | Edge anchors, U-route detours, and label anchors for arrows. |
 
-### Templates (programmatic)
-
-| Function | Description |
-|----------|-------------|
-| `timeline(data, opts?)` | Generate timeline elements from JSON data |
-| `flowchart(data, opts?)` | Generate flowchart elements from JSON data |
-| `architecture(data, opts?)` | Generate architecture diagram elements from JSON data |
-| `sequence(data, opts?)` | Generate sequence diagram elements from JSON data |
+These back the `compute_layout` MCP tool — see
+[`skills/shared/references/sugar.md`](skills/shared/references/sugar.md) for usage.
 
 ### Output
 
 | Function | Returns | Description |
 |----------|---------|-------------|
-| `excalidraw(elements)` | `string` | JSON for `.excalidraw` file |
+| `excalidraw(elements)` | `string` | JSON for a `.excalidraw` file |
 | `toSvg(elements)` | `string` | SVG markup with embedded fonts |
-| `toPng(elements, scale?)` | `Promise<Buffer>` | PNG buffer (uses resvg-js for fast native rendering) |
+| `toPng(elements, scale?)` | `Promise<Buffer>` | PNG buffer (resvg-js native rendering) |
+
+`excalidraw` / `toSvg` / `toPng` take already-desugared elements; call
+`desugar()` first if you're starting from sugar.
 
 ### Colors
 
@@ -354,6 +221,9 @@ colors.blue / colors.green / colors.yellow / colors.purple / colors.red / colors
 colors.bgBlue / colors.bgGreen / colors.bgYellow / colors.bgPurple  // section backgrounds
 colors.strokeBlue / colors.strokeGreen / colors.strokeYellow / colors.strokeOrange  // stroke accents
 ```
+
+In sugar, set `fill` for the background, `stroke` for the border, and
+`textColor` (palette key or `#rrggbb`) for a bound label.
 
 ## License
 
