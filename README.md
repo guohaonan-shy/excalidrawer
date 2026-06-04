@@ -145,7 +145,7 @@ elements, then calls the MCP server's `render_diagram` tool to emit
 
 > All skills call the `excalidrawer-mcp` server. The recommended Claude Code
 > plugin path above ships an `.mcp.json` that registers it automatically. For
-> any other install path (skills.sh, single-skill, Cursor, Codex, Claude Desktop),
+> any other install path (skills.sh, Cursor, Codex, Claude Desktop),
 > wire up the MCP server per [MCP Server](#mcp-server).
 
 ### Install paths
@@ -162,18 +162,9 @@ npx skills add guohaonan-shy/excalidrawer -y -g
 ```
 
 `-y` auto-confirms; `-g` installs globally (drop it for the current project).
-Pass `--copy` for independent copies instead of symlinks.
-
-**One type skill only** — you can pull just one type, but it depends on
-`shared`, so install that alongside (the CLI does not auto-resolve
-the dependency):
-
-```bash
-npx skills add guohaonan-shy/excalidrawer --skill flowchart -g
-npx skills add guohaonan-shy/excalidrawer --skill shared   -g
-```
-
-When in doubt, just install everything — the full set is small.
+Pass `--copy` for independent copies instead of symlinks. This installs the
+whole set — the type skills share the `shared` base as a sibling, so always
+take the full repo rather than a single skill.
 
 ## CLI
 
