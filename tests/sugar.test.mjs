@@ -75,6 +75,25 @@ test("textColor: unknown value raises a SugarError", () => {
   );
 });
 
+test("bound text: long label wraps to the box width (renderer never re-wraps)", () => {
+  const long = "Some people learn better studying alone or in groups";
+  const [, text] = desugar([{ shape: "rect", id: "a", at: [0, 0], size: [180, 60], text: long }]);
+  assert.ok(text.text.includes("\n"), "long label should be wrapped with newlines");
+});
+
+test("bound text: box grows in height to contain the wrapped lines", () => {
+  const long = "Some people learn better studying alone or in groups together now";
+  const [rect, text] = desugar([{ shape: "rect", id: "a", at: [0, 0], size: [160, 40], text: long }]);
+  assert.ok(rect.height > 40, "box should grow to fit wrapped text");
+  assert.equal(rect.height, text.height, "container and bound text height stay in sync");
+});
+
+test("bound text: short label in a roomy box is untouched", () => {
+  const [rect, text] = desugar([{ shape: "rect", id: "a", at: [0, 0], size: [200, 80], text: "hi" }]);
+  assert.equal(text.text, "hi");
+  assert.equal(rect.height, 80);
+});
+
 test("shape sugar: unknown fill color throws SugarError with issue", () => {
   try {
     desugar([{ shape: "rect", id: "a", at: [0, 0], size: [10, 10], fill: "bogus" }]);
