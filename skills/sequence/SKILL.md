@@ -1,5 +1,5 @@
 ---
-name: excalidrawer-sequence
+name: sequence
 description: Generate a hand-drawn-style Excalidraw sequence diagram from code and export to .excalidraw / SVG / PNG — no browser. For sequence diagrams, multi-actor interactions, API call order, handshakes, OAuth / auth flows, request-response chains. Triggers on draw a sequence diagram / interaction flow / call order / handshake. Flow detect → clarify actors & messages & return-style → read references/sequence.md → compose sugar → render_diagram. 中文触发词：时序图 / 序列图 / 多角色交互 / API 调用顺序 / 握手 / OAuth 流程 / 请求响应。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
@@ -8,7 +8,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 前置条件（必做）
 
-先用 Read 工具读取 [`../excalidrawer-shared/SKILL.md`](../excalidrawer-shared/SKILL.md)
+先用 Read 工具读取 [`../shared/SKILL.md`](../shared/SKILL.md)
 ——它定义了所有图表类型通用的 MCP 前置检查 / CLI fallback、sugar schema、配色、
 文件命名、输出语言、导出格式选择、迭代规则。**缺一不可**，本 skill 只补充时序图专属的
 clarify 问题与 layout recipe。

@@ -2,7 +2,7 @@
 
 How to compose a sequence diagram with sugar. Read AFTER clarifying actors
 + messages + return-style (SKILL.md §1). Sugar schema in
-[`../../excalidrawer-shared/references/sugar.md`](../../excalidrawer-shared/references/sugar.md).
+[`../../shared/references/sugar.md`](../../shared/references/sugar.md).
 
 ## Layout
 

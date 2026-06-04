@@ -2,7 +2,7 @@
 
 How to compose a flowchart with sugar elements. Read this AFTER clarifying
 intent (SKILL.md §1). Sugar schema basics live in
-[`../../excalidrawer-shared/references/sugar.md`](../../excalidrawer-shared/references/sugar.md) —
+[`../../shared/references/sugar.md`](../../shared/references/sugar.md) —
 this file only covers flowchart-specific composition.
 
 ## Layout
