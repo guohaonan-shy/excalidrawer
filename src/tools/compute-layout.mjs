@@ -1,6 +1,7 @@
 import { defineTool } from "./schema.mjs";
 import {
   gridLayout, chain, swimlane, hubSpoke, edgePoint, routeU, labelAnchor,
+  fitContainer, titledBox,
 } from "../layout.mjs";
 
 /**
@@ -16,6 +17,8 @@ const DISPATCH = {
   edgePoint:   (a) => edgePoint(a.target, a.side, a.t),
   routeU:      (a) => routeU(a.from, a.to, a),
   labelAnchor: (a) => labelAnchor(a.points, a),
+  fitContainer:(a) => fitContainer(a.children, a),
+  titledBox:   (a) => titledBox(a),
 };
 
 export const HELPERS = Object.keys(DISPATCH);
@@ -34,6 +37,8 @@ export const computeLayout = defineTool({
     "  edgePoint   — { target:{x,y,w,h,type?}, side:'top'|'right'|'bottom'|'left', t? } → {x,y}\n" +
     "  routeU      — { from:{x,y}, to:{x,y}, side:'above'|'below'|'left'|'right', clearance } → [[dx,dy]...] relative offsets\n" +
     "  labelAnchor — { points:[[x,y]...], padding?, preferSide? } → {x,y,side,segmentIdx}\n" +
+    "  fitContainer— { children:[{x,y,w,h}], padding?, minW?, minH? } → {x,y,w,h} (wraps children, equal pad incl. bottom)\n" +
+    "  titledBox   — { x, y, w, title, body?, titleFontSize?, bodyFontSize?, padding?, gap? } → {box,title,body} (header+body, auto-height)\n" +
     "On bad input it returns { error }.",
   params: {
     helper: {

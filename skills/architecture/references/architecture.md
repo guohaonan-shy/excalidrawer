@@ -96,6 +96,13 @@ chain({ start: { x: startX, y: cell.y + 80 }, count: items.length, dx: ITEM_W + 
 Recommended item dimensions: `ITEM_W = 150`, `ITEM_H = 50`, `ITEM_GAP = 30`,
 items y = `cell.y + 80` (leaves ~ 60 px for the lane label).
 
+For an item that carries a **title + bullet list** (not just a one-line label),
+use `compute_layout` `titledBox` instead of a fixed `ITEM_H` — it auto-sizes to
+header + body with equal padding (no flush-to-edge last line). To size an outer
+container to the bounding box of a set of placed items (equal padding on all
+sides, including the bottom), use `compute_layout` `fitContainer` rather than a
+hand-computed height formula.
+
 ## Colors per tier
 
 Default rotation, extends to ≥ 4 tiers:

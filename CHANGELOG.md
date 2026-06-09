@@ -4,6 +4,24 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.5.10
+
+### Added
+
+- **`fitContainer` and `titledBox` layout helpers** (exposed via `compute_layout`).
+  Both are pure coordinate math, consistent with the other layout helpers.
+  - `fitContainer({ children, padding?, minW?, minH? })` → `{x,y,w,h}` sizes a
+    container to wrap already-placed children with **equal padding on all four
+    sides, including the bottom** — the edge most often left flush against the
+    content or floating in a loose gap when a container height was hand-authored.
+  - `titledBox({ x, y, w, title, body?, titleFontSize?, bodyFontSize?, padding?, gap? })`
+    → `{ box, title, body }` geometry for a header line over a body block (e.g. a
+    bullet list) inside one auto-sized rect, with the header and body free to use
+    different font sizes (the case a single bound-text box can't express). Render
+    `rect(box)` first, then the two `textEl`s on top.
+  - The flowchart and architecture recipes now point to these helpers instead of
+    hand-sizing content boxes.
+
 ## 0.5.9
 
 ### Added
