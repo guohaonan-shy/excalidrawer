@@ -33,3 +33,35 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "${{ github.ref_name }}" --verify-tag --generate-notes --title "${{ github.ref_name }}"
+
+  # After a successful publish, bump the excalidrawer submodule pointer in the
+  # harold-skills marketplace to this tag and push it to main, so installed
+  # skills pick up the new recipes. Cross-repo push needs RELEASE_PAT
+  # (GITHUB_TOKEN cannot write to another repo). Tag pushes only.
+  sync-submodule:
+    needs: publish
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout harold-skills
+        uses: actions/checkout@v4
+        with:
+          repository: guohaonan-shy/harold-skills
+          ref: main
+          token: ${{ secrets.RELEASE_PAT }}
+          fetch-depth: 0
+
+      - name: Bump excalidrawer submodule to ${{ github.ref_name }}
+        run: |
+          git submodule update --init excalidrawer
+          git -C excalidrawer fetch origin --tags
+          git -C excalidrawer checkout "${{ github.ref_name }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add excalidrawer
+          if git diff --cached --quiet; then
+            echo "Submodule already at ${{ github.ref_name }} — nothing to do."
+            exit 0
+          fi
+          git commit -m "chore: bump excalidrawer submodule to ${{ github.ref_name }}"
+          git push origin HEAD:main
