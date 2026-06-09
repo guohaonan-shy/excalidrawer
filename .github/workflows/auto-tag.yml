@@ -1,0 +1,40 @@
+name: Auto-tag on version bump
+
+# When main advances and package.json carries a version that has no matching
+# vX.Y.Z tag yet, create and push that tag. The push is done with RELEASE_PAT
+# (NOT the default GITHUB_TOKEN) on purpose: a tag pushed by GITHUB_TOKEN does
+# not trigger other workflows, so publish.yml would never fire. A PAT push is
+# treated as a normal push and triggers publish.yml.
+#
+# Version + CHANGELOG are still bumped by hand in the PR (A1) — this only
+# removes the manual `git tag && git push` step.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read # we push the tag via RELEASE_PAT, not GITHUB_TOKEN
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_PAT }}
+
+      - name: Create tag if package.json version is untagged
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          TAG="v$VERSION"
+          if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "refs/tags/$TAG"; then
+            echo "Tag $TAG already exists — nothing to do."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "$TAG"
+          git push origin "$TAG"
+          echo "Pushed $TAG → publish workflow will run."
