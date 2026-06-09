@@ -8,9 +8,12 @@ import {
   edgePoint,
   routeU,
   labelAnchor,
+  fitContainer,
+  titledBox,
   contrastText,
   triplet,
   colors,
+  textHeight,
 } from "../src/index.mjs";
 
 // Float helper — geometry has rounding noise.
@@ -361,4 +364,85 @@ test("triplet: white (missing bgWhite / strokeWhite) → falls back", () => {
 
 test("triplet: unknown color throws", () => {
   assert.throws(() => triplet("magenta"), /unknown color key "magenta"/);
+});
+
+// ===========================================================================
+// fitContainer
+// ===========================================================================
+
+test("fitContainer: wraps children with equal padding on all sides incl. bottom", () => {
+  const kids = [
+    { x: 100, y: 100, w: 50, h: 40 },
+    { x: 100, y: 160, w: 50, h: 40 },
+  ];
+  const c = fitContainer(kids, { padding: 16 });
+  assert.deepEqual(c, { x: 84, y: 84, w: 82, h: 132 });
+  // the invariant we actually care about: top inset === bottom inset
+  const topGap = kids[0].y - c.y;                       // 100 - 84 = 16
+  const bottomGap = (c.y + c.h) - (kids[1].y + kids[1].h); // 216 - 200 = 16
+  assert.equal(topGap, 16);
+  assert.equal(bottomGap, 16);
+  assert.equal(topGap, bottomGap);
+});
+
+test("fitContainer: union spans the widest/tallest extent of mixed children", () => {
+  const c = fitContainer(
+    [
+      { x: 0, y: 0, w: 100, h: 20 },
+      { x: 200, y: 50, w: 40, h: 100 },
+    ],
+    { padding: 10 },
+  );
+  assert.deepEqual(c, { x: -10, y: -10, w: 260, h: 170 }); // (240-0)+20, (150-0)+20
+});
+
+test("fitContainer: minW / minH act as floors (grow from content origin)", () => {
+  const c = fitContainer([{ x: 50, y: 50, w: 30, h: 30 }], { padding: 10, minW: 200, minH: 200 });
+  assert.equal(c.x, 40);
+  assert.equal(c.y, 40);
+  assert.equal(c.w, 200); // 30+20=50 < 200 → floor wins
+  assert.equal(c.h, 200);
+});
+
+test("fitContainer: empty / invalid children throw", () => {
+  assert.throws(() => fitContainer([]), /non-empty array/);
+  assert.throws(() => fitContainer("nope"), /non-empty array/);
+  assert.throws(() => fitContainer([{ x: 1, y: 2 }]), /numeric x, y, w, h/);
+});
+
+// ===========================================================================
+// titledBox
+// ===========================================================================
+
+test("titledBox: header + body box bottom padding equals top padding", () => {
+  const t = titledBox({
+    x: 40, y: 40, w: 200, title: "Delivery",
+    body: "• Pace & pauses\n• Pronunciation\n• Rhythm & intonation",
+    titleFontSize: 18, bodyFontSize: 15, padding: 16, gap: 10,
+  });
+  const titleH = textHeight("Delivery", 18, 0);                 // 26
+  const bodyH = textHeight("a\nb\nc", 15, 0);                   // 63 (3 lines)
+  assert.equal(t.box.h, 16 + titleH + 10 + bodyH + 16);        // 131
+  // title sits at top padding
+  assert.equal(t.title.y, 40 + 16);
+  // body sits below title + gap
+  assert.equal(t.body.y, 40 + 16 + titleH + 10);
+  // THE invariant: gap below the last content === top padding
+  const bottomGap = (t.box.y + t.box.h) - (t.body.y + t.body.h);
+  assert.equal(bottomGap, 16);
+  // inner text is inset horizontally by padding on both sides
+  assert.equal(t.title.x, 40 + 16);
+  assert.equal(t.title.w, 200 - 32);
+});
+
+test("titledBox: no body → height is just padding + title + padding, no gap", () => {
+  const t = titledBox({ x: 0, y: 0, w: 160, title: "Score", padding: 12, gap: 10 });
+  const titleH = textHeight("Score", 18, 0);
+  assert.equal(t.box.h, 12 + titleH + 12);
+  assert.equal(t.body.h, 0);
+  assert.equal(t.body.y, t.title.y + titleH); // no gap added
+});
+
+test("titledBox: missing numeric x/y/w throws", () => {
+  assert.throws(() => titledBox({ y: 0, w: 100, title: "x" }), /numeric `x`, `y`, `w`/);
 });

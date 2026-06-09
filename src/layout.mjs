@@ -13,6 +13,7 @@
 // ============================================================================
 
 import { colors } from "./elements.mjs";
+import { textHeight } from "./text.mjs";
 
 // ---------------------------------------------------------------------------
 // gridLayout
@@ -510,4 +511,124 @@ export function triplet(key) {
   const bg = colors[`bg${cap}`] ?? mid;
   const stroke = colors[`stroke${cap}`] ?? "#000000";
   return { bg, mid, stroke };
+}
+
+// ---------------------------------------------------------------------------
+// fitContainer
+// ---------------------------------------------------------------------------
+
+/**
+ * Size a container rect to wrap a set of already-placed children with equal
+ * padding on all four sides — including the bottom edge, the one most often
+ * left flush or floating when a container height is hand-authored.
+ *
+ * Pure math: returns container geometry only. Render the rect BEFORE the
+ * children so the children paint on top.
+ *
+ * @param {Array<{x:number,y:number,w:number,h:number}>} children - placed child bboxes
+ * @param {object} [opts]
+ * @param {number} [opts.padding=16] - equal inset on all four sides
+ * @param {number} [opts.minW=0]     - width floor (grows rightward from the content)
+ * @param {number} [opts.minH=0]     - height floor (grows downward from the content)
+ *
+ * @returns {{ x: number, y: number, w: number, h: number }}
+ *
+ * @example
+ *   // Wrap 3 stacked sub-boxes — the bottom gets the same gap as the top.
+ *   const kids = chain({ x: 40, y: 40 }, 3, { dy: 70 }).map((p) => ({ x: p.x, y: p.y, w: 160, h: 50 }));
+ *   const c = fitContainer(kids, { padding: 20 });
+ *   const els = [rect("c", c.x, c.y, c.w, c.h, colors.bgBlue), ...kids.flatMap(renderKid)];
+ */
+export function fitContainer(children, opts = {}) {
+  if (!Array.isArray(children) || children.length === 0) {
+    throw new Error("fitContainer: `children` must be a non-empty array of {x,y,w,h}");
+  }
+  const padding = opts.padding ?? 16;
+  const minW = opts.minW ?? 0;
+  const minH = opts.minH ?? 0;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const c of children) {
+    if (![c?.x, c?.y, c?.w, c?.h].every((n) => typeof n === "number" && Number.isFinite(n))) {
+      throw new Error("fitContainer: each child needs numeric x, y, w, h");
+    }
+    minX = Math.min(minX, c.x);
+    minY = Math.min(minY, c.y);
+    maxX = Math.max(maxX, c.x + c.w);
+    maxY = Math.max(maxY, c.y + c.h);
+  }
+  return {
+    x: minX - padding,
+    y: minY - padding,
+    w: Math.max(minW, (maxX - minX) + padding * 2),
+    h: Math.max(minH, (maxY - minY) + padding * 2),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// titledBox
+// ---------------------------------------------------------------------------
+
+/**
+ * Geometry for a "titled box": a header line above a body block (e.g. a bullet
+ * list) inside one rect, auto-sized to fit both with equal top/bottom padding.
+ * Header and body may use different font sizes — the case a single bound-text
+ * box can't express, and the reason a hand-sized container drifts flush/loose.
+ *
+ * Pure math: returns coordinates for the rect and the two text elements; you
+ * render them (rect first, then the two `textEl`s on top).
+ *
+ * @param {object} opts
+ * @param {number} opts.x   - container top-left X
+ * @param {number} opts.y   - container top-left Y
+ * @param {number} opts.w   - container width
+ * @param {string} opts.title - header text (single line)
+ * @param {string} [opts.body=""] - body text; use "\n" between bullet lines
+ * @param {number} [opts.titleFontSize=18]
+ * @param {number} [opts.bodyFontSize=15]
+ * @param {number} [opts.padding=16] - equal inset on all four sides
+ * @param {number} [opts.gap=10]     - vertical gap between header and body
+ *
+ * @returns {{
+ *   box:   { x:number, y:number, w:number, h:number },
+ *   title: { x:number, y:number, w:number, h:number, fontSize:number },
+ *   body:  { x:number, y:number, w:number, h:number, fontSize:number }
+ * }}
+ *
+ * @example
+ *   const t = titledBox({
+ *     x: 40, y: 40, w: 200, title: "Delivery",
+ *     body: "• Pace & pauses\n• Pronunciation\n• Rhythm & intonation",
+ *   });
+ *   const els = [
+ *     rect("d", t.box.x, t.box.y, t.box.w, t.box.h, colors.bgGreen, { strokeColor: colors.strokeGreen }),
+ *     textEl("d-h", t.title.x, t.title.y, "Delivery", t.title.fontSize),
+ *     textEl("d-b", t.body.x, t.body.y, "• Pace & pauses\n• Pronunciation\n• Rhythm & intonation", t.body.fontSize),
+ *   ];
+ */
+export function titledBox(opts = {}) {
+  const { x, y, w, title = "", body = "" } = opts;
+  if (![x, y, w].every((n) => typeof n === "number" && Number.isFinite(n))) {
+    throw new Error("titledBox: numeric `x`, `y`, `w` are required");
+  }
+  const titleFontSize = opts.titleFontSize ?? 18;
+  const bodyFontSize = opts.bodyFontSize ?? 15;
+  const padding = opts.padding ?? 16;
+  const gap = opts.gap ?? 10;
+
+  // Raw content heights — pass padding=0 so spacing is owned by `padding`/`gap` here.
+  const titleH = textHeight(title, titleFontSize, 0);
+  const hasBody = body.length > 0;
+  const bodyH = hasBody ? textHeight(body, bodyFontSize, 0) : 0;
+
+  const innerX = x + padding;
+  const innerW = w - padding * 2;
+  const titleY = y + padding;
+  const bodyY = titleY + titleH + (hasBody ? gap : 0);
+  const boxH = padding + titleH + (hasBody ? gap + bodyH : 0) + padding;
+
+  return {
+    box: { x, y, w, h: boxH },
+    title: { x: innerX, y: titleY, w: innerW, h: titleH, fontSize: titleFontSize },
+    body: { x: innerX, y: bodyY, w: innerW, h: bodyH, fontSize: bodyFontSize },
+  };
 }

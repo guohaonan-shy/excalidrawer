@@ -49,6 +49,20 @@ Either way, leave room above the first node for the title (~ 100 px).
 Don't pass `fill:"red"` for non-error nodes — red reads as "bad" in this
 visual style. Reserve it.
 
+### Boxes with a header + bullet list (or any container)
+
+Don't hand-size a box that has a **title over a body** (header + bullet list) —
+a hand-authored height leaves the last line flush against the bottom edge or
+floating in a loose gap. Instead:
+
+- **`compute_layout` `titledBox`** — `{ x, y, w, title, body, titleFontSize?, bodyFontSize?, padding?, gap? }`
+  → `{ box, title, body }` geometry, auto-sized to fit header + body with equal
+  top/bottom padding. Render `rect(box…)` first, then the two `textEl`s.
+- **`compute_layout` `fitContainer`** — `{ children:[{x,y,w,h}…], padding?, minW?, minH? }`
+  → `{x,y,w,h}` that wraps already-placed sub-boxes with equal padding on all
+  four sides (including the bottom). Use it for an outer container around a group
+  of nodes; never hand-author the wrapper height.
+
 ## Title + subtitle
 
 - Title at `y = 30`, fontSize `28`, size width = full diagram span.

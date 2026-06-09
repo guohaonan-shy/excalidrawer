@@ -27,6 +27,8 @@ export {
   edgePoint,
   routeU,
   labelAnchor,
+  fitContainer,
+  titledBox,
   contrastText,
   triplet,
 } from "./layout.mjs";
