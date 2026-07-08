@@ -4,6 +4,36 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.5.12
+
+_engine 0.5.12 · plugin 0.0.3_
+
+### Changed
+
+- **`box()` / `diamondBox()` are now correct by construction.** They wrap the
+  label to the box's inner width and grow the box height to contain it (only
+  when needed — a short label in a roomy box is untouched), so bound text no
+  longer spills out the bottom or sides. Previously only the sugar path did this;
+  the raw primitives (used by templates and library callers) placed text at the
+  container's fixed size and relied on the renderer, so a long label overflowed.
+  `h` is now a floor, not a fixed height — callers that positioned elements
+  directly below a `box()` assuming a fixed height may need to read the returned
+  rect height.
+- The wrap-and-grow logic is extracted into a single source of truth,
+  `fitBoundText(text, boxW, boxH, fontSize) → { text, height }` (exported from
+  the package root), shared by `box`/`diamondBox` and the sugar path. Layer A's
+  `TEXT_OVERFLOW_X` lint now only fires on the true residual: an unbreakable
+  token (long URL/word) wider than a fixed box, or hand-authored raw elements.
+
+### Version alignment
+
+- Plugin manifests bumped and unified to **0.0.3** across `.claude-plugin`,
+  `.cursor-plugin`, and `.codex-plugin` (cursor/codex had drifted at 0.0.1) —
+  they bundle `skills/`, whose §7.5 quality gate changed in 0.5.11.
+- The MCP dependency pin (`.claude-plugin/plugin.json`) and the SKILL.md CLI
+  fallback commands are lifted to `excalidrawer@^0.5.11` — the floor where the
+  `warnings` field the §7.5 gate depends on first appears.
+
 ## 0.5.11
 
 ### Added

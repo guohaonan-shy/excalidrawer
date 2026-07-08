@@ -153,3 +153,35 @@ export function textHeight(text, fontSize, padding = 20) {
   const lines = lineCount(text);
   return Math.ceil(lines * fontSize * 1.4 + padding);
 }
+
+// Horizontal inset (each side) used when wrapping bound text to a box's width,
+// so the label doesn't kiss the border. A touch wider than Excalidraw's 5px
+// padding to absorb the ~0.62×fontSize width-estimate slack.
+export const BOUND_TEXT_PAD_X = 10;
+
+/**
+ * Fit bound text to a box: wrap it to the box's inner width and return the
+ * height the box needs to contain the (vertically-centered) lines. The single
+ * source of truth for "a label must not spill out of its box" — used by the
+ * `box`/`diamondBox` primitives and the sugar path alike, so every code path is
+ * correct by construction.
+ *
+ * The renderer only splits bound text on existing "\n" (it never re-wraps), so
+ * the wrapping has to happen here. Grows height only when the text genuinely
+ * needs the room; a short label in a roomy box is returned unchanged.
+ *
+ * Note: this fits height + wrapping, not width — a single unbreakable token
+ * (long URL / long word) wider than the box still overflows horizontally. That
+ * residual is what the `TEXT_OVERFLOW_X` lint catches.
+ *
+ * @param {string} text     - label text (may contain \n)
+ * @param {number} boxW     - box width
+ * @param {number} boxH     - box height (a floor; the result never shrinks below it)
+ * @param {number} fontSize
+ * @returns {{ text: string, height: number }}
+ */
+export function fitBoundText(text, boxW, boxH, fontSize) {
+  if (text == null || text === "") return { text: text ?? "", height: boxH };
+  const wrapped = wrapText(text, Math.max(1, boxW - BOUND_TEXT_PAD_X * 2), fontSize);
+  return { text: wrapped, height: Math.max(boxH, textHeight(wrapped, fontSize)) };
+}

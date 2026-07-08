@@ -34,12 +34,7 @@
 
 import { base, rect, diamond, ellipse, textEl, arrow, colors } from "./elements.mjs";
 import { edgePoint, routeU, labelAnchor } from "./layout.mjs";
-import { wrapText, textHeight } from "./text.mjs";
-
-// Horizontal inset (each side) used when wrapping bound text to a box's width,
-// so the label doesn't kiss the border. A touch wider than Excalidraw's 5px
-// padding to absorb the ~0.62×fontSize width estimate's slack.
-const TEXT_PAD_X = 10;
+import { fitBoundText } from "./text.mjs";
 
 export class SugarError extends Error {
   constructor(issues) {
@@ -155,12 +150,9 @@ export function desugar(elements) {
     if (el.text != null && el.text !== "") {
       const tid = `${id}-t`;
       const fontSize = el.fontSize ?? (kind === "diamond" ? 14 : 16);
-      // The renderer splits bound text only on existing "\n" — it never
-      // re-wraps. So wrap to the box's inner width here, then grow the box
-      // height so the (vertically centered) lines stay inside instead of
-      // spilling out. Grows only when the text genuinely needs the room.
-      const text = wrapText(el.text, Math.max(1, w - TEXT_PAD_X * 2), fontSize);
-      const bh = Math.max(h, textHeight(text, fontSize));
+      // Wrap to inner width + grow height so the label stays inside the box.
+      // Single source of truth shared with the box()/diamondBox() primitives.
+      const { text, height: bh } = fitBoundText(el.text, w, h, fontSize);
 
       const shapeEl = factory(id, x, y, w, bh, fill, extra);
       shapeEl.boundElements = [{ id: tid, type: "text" }];

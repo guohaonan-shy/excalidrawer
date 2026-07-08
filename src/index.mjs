@@ -16,7 +16,7 @@ export {
 
 export { toSvg, toPng, registerFonts, autoRegisterCjkFont } from "./export.mjs";
 
-export { estimateTextWidth, wrapText, lineCount, textHeight } from "./text.mjs";
+export { estimateTextWidth, wrapText, lineCount, textHeight, fitBoundText } from "./text.mjs";
 
 // Layout helpers (0.6.0+): pure coordinate math, no element creation.
 export {
