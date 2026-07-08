@@ -18,13 +18,15 @@ test("clean, well-sized diagram produces no warnings", () => {
   assert.deepEqual(validate(els), []);
 });
 
-test("bound text wider than its box is flagged TEXT_OVERFLOW_X", () => {
-  // Long label in a narrow box, no wrapping (raw box() never wraps).
+test("an unbreakable token wider than its box is flagged TEXT_OVERFLOW_X", () => {
+  // box() wraps + grows, but a single long token can't break — the residual
+  // horizontal-overflow case the linter still has to catch.
   const els = box("b1", "b1t", 0, 0, 80, 50, "#a5d8ff",
-    "A really long label that cannot fit", 16).flat();
+    "supercalifragilisticexpialidocious", 16).flat();
   const w = validate(els);
   assert.ok(codes(w).includes("TEXT_OVERFLOW_X"), "expected overflow-x");
-  assert.ok(w[0].ids.includes("b1") && w[0].ids.includes("b1t"));
+  const of = w.find((x) => x.code === "TEXT_OVERFLOW_X");
+  assert.ok(of.ids.includes("b1") && of.ids.includes("b1t"));
 });
 
 test("bound text shorter than its box does not warn", () => {
@@ -32,9 +34,14 @@ test("bound text shorter than its box does not warn", () => {
   assert.deepEqual(codes(validate(els)), []);
 });
 
-test("multi-line text taller than a fixed box is flagged TEXT_OVERFLOW_Y", () => {
-  const els = box("b1", "b1t", 0, 0, 400, 30, "#a5d8ff",
-    "line one\nline two\nline three", 16).flat();
+test("multi-line RAW text taller than a fixed box is flagged TEXT_OVERFLOW_Y", () => {
+  // box() auto-grows height, so Y-overflow only survives on hand-authored raw
+  // elements that pin a height too short for the text.
+  const els = [
+    rect("b1", 0, 0, 400, 30, "#a5d8ff", { boundElements: [{ id: "b1t", type: "text" }] }),
+    textEl("b1t", 0, 0, 400, 30, "line one\nline two\nline three", 16,
+      { containerId: "b1", verticalAlign: "middle" }),
+  ];
   assert.ok(codes(validate(els)).includes("TEXT_OVERFLOW_Y"));
 });
 
@@ -118,9 +125,11 @@ test("default dark text on a light palette fill does NOT warn", () => {
 });
 
 test("render() surfaces warnings in its result", async () => {
-  const els = box("b1", "b1t", 0, 0, 60, 40, "#a5d8ff",
-    "text far too wide for this tiny box", 16).flat();
-  const res = await render(els, { formats: ["excalidraw"] });
+  // Unbreakable token in a narrow sugar box → overflow survives wrapping.
+  const res = await render(
+    [{ shape: "rect", id: "n1", at: [0, 0], size: [80, 50], text: "supercalifragilisticexpialidocious", fill: "blue" }],
+    { formats: ["excalidraw"] }
+  );
   assert.ok(Array.isArray(res.warnings));
   assert.ok(res.warnings.length > 0);
 });

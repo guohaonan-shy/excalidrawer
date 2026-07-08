@@ -86,4 +86,4 @@ Colors: `colors.blue/green/yellow/purple/red/orange/gray`, `colors.bg*` (section
 - `arrow` points are relative `[dx, dy]` offsets from the arrow's `x, y` origin.
 - PNG rendering uses `@resvg/resvg-js` (fast native, no headless browser).
 - This repo is the open-source home for the **npm package (CLI + library + MCP) and the diagram skills** under `skills/`. The skills install two ways from the same source: as a multi-platform **plugin** (`.claude-plugin/` / `.cursor-plugin/` / `.codex-plugin/`) or à la carte via **`npx skills add`** (skills.sh channel). A separate, more elaborate skill set also lives in the personal [harold-skills](https://github.com/guohaonan-shy/harold-skills) marketplace; the two share a common ancestor but iterate independently (see memory).
-- Version lives in `package.json` (currently 0.5.11); changes tracked in `CHANGELOG.md`.
+- Version lives in `package.json` (currently 0.5.12); changes tracked in `CHANGELOG.md`.

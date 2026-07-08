@@ -38,8 +38,8 @@ If the MCP tools aren't available (server failed to start, older host,
 sandboxed env), fall back to the CLI shipped by the same package:
 
 ```bash
-npx -y -p excalidrawer@^0.5.8 -c 'excalidrawer render -i elements.json -o ./flowchart-foo'
-npx -y -p excalidrawer@^0.5.8 -c "excalidrawer compute-layout --helper gridLayout -a '{...}'"
+npx -y -p excalidrawer@^0.5.11 -c 'excalidrawer render -i elements.json -o ./flowchart-foo'
+npx -y -p excalidrawer@^0.5.11 -c "excalidrawer compute-layout --helper gridLayout -a '{...}'"
 ```
 
 `elements.json` accepts either a bare sugar array or `{ "elements": [...] }`.

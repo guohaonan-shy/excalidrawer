@@ -7,6 +7,8 @@
  * Coordinate system: x/y are top-left corners, all units in pixels.
  */
 
+import { fitBoundText } from "./text.mjs";
+
 // ---------------------------------------------------------------------------
 // Internal state
 // ---------------------------------------------------------------------------
@@ -95,15 +97,20 @@ export function textEl(id, x, y, w, h, text, fontSize, extra = {}) {
 /**
  * Rectangle with vertically and horizontally centered bound text.
  * Returns [rectElement, textElement] — spread with `...box(...)`.
+ *
+ * Correct by construction: the label is wrapped to the box's inner width and
+ * the box height grows to contain it (only when needed), so text never spills
+ * out the bottom or sides. `h` is a floor, not a fixed height.
  */
 export function box(rid, tid, x, y, w, h, bg, text, fontSize = 16, extra = {}) {
+  const fit = fitBoundText(text, w, h, fontSize);
   return [
-    rect(rid, x, y, w, h, bg, {
+    rect(rid, x, y, w, fit.height, bg, {
       boundElements: [{ id: tid, type: "text" }],
       ...extra,
     }),
-    base(tid, "text", x, y, w, h, {
-      text,
+    base(tid, "text", x, y, w, fit.height, {
+      text: fit.text,
       fontSize,
       fontFamily: 1,
       textAlign: "center",
@@ -116,16 +123,18 @@ export function box(rid, tid, x, y, w, h, bg, text, fontSize = 16, extra = {}) {
 
 /**
  * Diamond with centered bound text.
- * Returns [diamondElement, textElement].
+ * Returns [diamondElement, textElement]. Same correct-by-construction wrapping
+ * and height-growth as `box` (see above).
  */
 export function diamondBox(rid, tid, x, y, w, h, bg, text, fontSize = 14, extra = {}) {
+  const fit = fitBoundText(text, w, h, fontSize);
   return [
-    diamond(rid, x, y, w, h, bg, {
+    diamond(rid, x, y, w, fit.height, bg, {
       boundElements: [{ id: tid, type: "text" }],
       ...extra,
     }),
-    base(tid, "text", x, y, w, h, {
-      text,
+    base(tid, "text", x, y, w, fit.height, {
+      text: fit.text,
       fontSize,
       fontFamily: 1,
       textAlign: "center",
