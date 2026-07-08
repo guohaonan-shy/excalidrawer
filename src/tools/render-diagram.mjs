@@ -23,7 +23,11 @@ export const renderDiagram = defineTool({
     "Use `compute_layout` for geometry (grids, chains, swimlanes, hub-and-spoke, " +
     "edge anchors, U-routing, label anchors). " +
     "On invalid input it returns { error, issues } listing each problem by " +
-    "element index — fix and retry.",
+    "element index — fix and retry. " +
+    "On success it returns { written, elementCount, warnings? }. `warnings` is a " +
+    "non-fatal quality lint (text overflow, shape overlap, degenerate arrows); " +
+    "each has { code, ids, message }. Treat a non-empty `warnings` as NOT DONE — " +
+    "fix the flagged elements and re-render until it is absent.",
   params: {
     elements: {
       type: "array",
@@ -67,6 +71,10 @@ export const renderDiagram = defineTool({
       writeFileSync(path, content);
       written.push(path);
     }
-    return { written, elementCount: result.elementCount };
+    const out = { written, elementCount: result.elementCount };
+    if (result.warnings && result.warnings.length > 0) {
+      out.warnings = result.warnings;
+    }
+    return out;
   },
 });
