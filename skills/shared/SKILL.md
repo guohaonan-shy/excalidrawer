@@ -16,7 +16,7 @@ their own clarify questions and layout recipe on top.
 
 ```text
 detect type → clarify (AskUserQuestion) → read the type recipe → compose sugar
-            → render_diagram → give the user the paths → iterate
+            → render_diagram → resolve any warnings (§7.5) → give the user the paths → iterate
 ```
 
 Each type skill owns steps "clarify" and "read recipe + compose"; everything
@@ -129,11 +129,62 @@ mcp__excalidrawer__render_diagram({
 })
 ```
 
-- success: `{ written: [...paths], elementCount: N }` — tell the user the paths.
-  `.svg` for Markdown / GitHub, `.png` for Notion / 飞书 / slides, `.excalidraw`
-  for further editing.
+- success: `{ written: [...paths], elementCount: N, warnings? }` — tell the user
+  the paths. `.svg` for Markdown / GitHub, `.png` for Notion / 飞书 / slides,
+  `.excalidraw` for further editing.
 - failure: `{ error, issues: [...] }` — fix the sugar by issue index and retry;
   no files are written on failure.
+
+## 7.5 Quality gate — two layers, and a diagram is done only when BOTH pass
+
+A diagram is **not finished** until it clears both gates below. Layer A is a
+deterministic code lint (free, exact, always runs). Layer B is a visual pass you
+perform with your own vision on the PNG (catches what geometry can't). Never
+report paths to the user while either gate is failing, and never ask the user to
+accept a defect — they are all fixable.
+
+### Layer A — deterministic lint (always)
+
+`render_diagram` runs a geometry lint on every success and returns a `warnings`
+array **only when something is wrong** (files are still written — warnings are
+non-fatal). **A non-empty `warnings` means NOT done: fix the flagged elements and
+re-render until `warnings` is absent.**
+
+Each warning is `{ code, ids, message }`; `ids` names the offending element(s),
+`message` states the fix:
+
+| code | meaning | fix |
+|---|---|---|
+| `TEXT_OVERFLOW_X` | a label is wider than its box → spills past the border (looks "off-center") | widen the box `size` to the suggested px, lower `fontSize`, or insert `\n` breaks |
+| `TEXT_OVERFLOW_Y` | multi-line text is taller than a fixed box | grow the box height |
+| `SHAPE_OVERLAP` | two shapes partially overlap (not clean nesting) | move one, add a gap, or nest one fully inside the other |
+| `ARROW_CROSSES_SHAPE` | a connector runs through a module it doesn't connect | reroute with `via` / `fromSide` / `toSide`, or move the module out of the path |
+| `LOW_CONTRAST` | label vs fill contrast below 3:1 → unreadable | pick a darker/lighter label color or change the fill (`contrastText()` gives a safe one) |
+| `DEGENERATE_ARROW` | an arrow has < 2 real points / start ≈ end → renders as nothing | give it real endpoints (prefer id-anchored `from`/`to` arrows) |
+
+Most `TEXT_OVERFLOW_X` comes from hand-written boxes too narrow for their label —
+the sugar path auto-wraps and grows height, so composing via sugar avoids most
+warnings by construction. Layer A is the safety net for what still slips through.
+
+### Layer B — visual self-check (required for user-facing diagrams)
+
+The lint proves geometry; only your eyes catch composition. **After Layer A is
+clean, `Read` the exported `.png` and score it against this rubric — one explicit
+PASS/FAIL per line:**
+
+1. **Labels** — every label sits centered and fully inside its shape; none clipped or touching a border.
+2. **Arrows** — each connects the correct two nodes, points the right way, and no line visually plows through an unrelated box or another line.
+3. **Spacing** — rows/columns are aligned; gaps are even; nothing is cramped or lost in whitespace.
+4. **Canvas** — nothing is cut off at the edges; the diagram is balanced, not crowded to one side.
+5. **Readability** — colors are distinguishable and every label is legible against its fill.
+
+If any line is FAIL, fix the elements and re-render, then re-check — **loop until
+all five PASS.** Report done only after that. Skip Layer B only for quick,
+throwaway diagrams the user won't publish (say so when you skip it).
+
+> Layer B runs at the skill/agent layer, using the vision of the model running
+> this skill — the `excalidrawer` package stays deterministic and offline (no LLM
+> dependency). Keep it that way: don't push visual judgment into the tool.
 
 ## 8. Iteration
 

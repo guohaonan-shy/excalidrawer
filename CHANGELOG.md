@@ -4,6 +4,35 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.5.11
+
+### Added
+
+- **Deterministic quality linter (`validate`)** — a geometry safety net that runs
+  automatically on every `render` / `render_diagram` success and returns a
+  non-fatal `warnings` array (only when something is wrong). Catches the defects
+  that repeatedly make AI-generated diagrams look wrong:
+  - `TEXT_OVERFLOW_X` / `TEXT_OVERFLOW_Y` — a label wider/taller than its box
+    (the root cause of "text not centered": it centers but spills past the border).
+  - `SHAPE_OVERLAP` — two shapes partially overlap (full containment / nesting is
+    left alone as intentional).
+  - `ARROW_CROSSES_SHAPE` — a node-to-node connector runs through a module it
+    doesn't connect ("line over a module"). Backbone lines (timeline axis,
+    sequence lifelines) are excluded — only arrows anchored to a shape at both
+    ends are checked.
+  - `LOW_CONTRAST` — label vs fill contrast below WCAG 3:1 (unreadable label),
+    via relative-luminance math.
+  - `DEGENERATE_ARROW` — an arrow with < 2 real points or start ≈ end.
+
+  Each warning is `{ code, ids, message }` with an actionable fix. Exported as
+  `validate(elements)` for library use. All four built-in templates lint clean.
+- **Two-layer skill quality gate** — `skills/shared/SKILL.md` §7.5 codifies that a
+  diagram is done only when BOTH pass: Layer A (resolve every lint `warning`) and
+  Layer B (a required visual self-check — `Read` the PNG and score it PASS/FAIL
+  against an explicit rubric, loop until clean). Layer B runs at the skill/agent
+  layer using the model's own vision; the package stays deterministic and
+  LLM-free.
+
 ## 0.5.10
 
 ### Added

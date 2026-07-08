@@ -36,6 +36,9 @@ export {
 // Serializer: sugar/raw elements → output formats (0.5.6+).
 export { render, validateElements, ElementValidationError, VALID_FORMATS } from "./render.mjs";
 
+// Deterministic quality linter: geometry warnings (overflow / overlap / arrows).
+export { validate } from "./validate.mjs";
+
 // Sugar translation: shorthand → raw elements (0.5.7+).
 export { desugar, SugarError } from "./sugar.mjs";
 

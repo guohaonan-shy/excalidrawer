@@ -22,7 +22,8 @@ npm run test:example  # node examples/basic.mjs
 - `src/elements.mjs` — primitive builders: `box`, `diamondBox`, `arrow`, `textEl`, `rect`, `ellipse`.
 - `src/layout.mjs` — layout helpers: `row`, `grid`, plus gridLayout / chain / swimlane / hub-and-spoke / edge anchors / U-routing / label anchors.
 - `src/sugar.mjs` — sugar shorthand element parsing.
-- `src/render.mjs` — serializes elements to the render output.
+- `src/render.mjs` — serializes elements to the render output; runs the linter and returns `warnings`.
+- `src/validate.mjs` — deterministic quality linter → non-fatal `warnings`: text overflow (X/Y), shape overlap, arrow-crosses-shape, low text/fill contrast (WCAG), degenerate arrows. This is Layer A of the skill quality gate; Layer B (visual PNG self-check) lives in `skills/shared/SKILL.md` §7.5 and runs at the agent layer (no LLM in the package).
 - `src/export.mjs` — `excalidraw()` (JSON), `toSvg()` (embedded fonts), `toPng()` (resvg-js native).
 - `src/text.mjs`, `src/fonts/` — text measurement + font handling (auto-loads system CJK font for Chinese/Japanese/Korean text).
 - `src/templates/` — `timeline`, `flowchart`, `architecture`, `sequence`.
@@ -85,4 +86,4 @@ Colors: `colors.blue/green/yellow/purple/red/orange/gray`, `colors.bg*` (section
 - `arrow` points are relative `[dx, dy]` offsets from the arrow's `x, y` origin.
 - PNG rendering uses `@resvg/resvg-js` (fast native, no headless browser).
 - This repo is the open-source home for the **npm package (CLI + library + MCP) and the diagram skills** under `skills/`. The skills install two ways from the same source: as a multi-platform **plugin** (`.claude-plugin/` / `.cursor-plugin/` / `.codex-plugin/`) or à la carte via **`npx skills add`** (skills.sh channel). A separate, more elaborate skill set also lives in the personal [harold-skills](https://github.com/guohaonan-shy/harold-skills) marketplace; the two share a common ancestor but iterate independently (see memory).
-- Version lives in `package.json` (currently 0.5.8); changes tracked in `CHANGELOG.md`.
+- Version lives in `package.json` (currently 0.5.11); changes tracked in `CHANGELOG.md`.

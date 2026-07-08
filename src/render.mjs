@@ -12,6 +12,7 @@
 import { excalidraw } from "./elements.mjs";
 import { toSvg, toPng, autoRegisterCjkFont } from "./export.mjs";
 import { desugar } from "./sugar.mjs";
+import { validate } from "./validate.mjs";
 
 export { SugarError } from "./sugar.mjs";
 
@@ -62,7 +63,7 @@ export function validateElements(elements) {
 /**
  * @param {Array} elements - sugar and/or raw Excalidraw elements (may be nested; flattened)
  * @param {{ formats?: string[], scale?: number }} [opts]
- * @returns {Promise<{ outputs: Record<string,string|Buffer>, formats: string[], elementCount: number }>}
+ * @returns {Promise<{ outputs: Record<string,string|Buffer>, formats: string[], elementCount: number, warnings: Array }>}
  * @throws {SugarError|ElementValidationError}
  */
 export async function render(elements, opts = {}) {
@@ -73,6 +74,10 @@ export async function render(elements, opts = {}) {
 
   const issues = validateElements(raw);
   if (issues.length > 0) throw new ElementValidationError(issues);
+
+  // Non-fatal quality lint (text overflow / overlap / degenerate arrows).
+  // Surfaced to the caller so the render loop can self-heal before done.
+  const warnings = validate(raw);
 
   // Auto-load a system CJK font when Chinese / Japanese / Korean text is
   // present. No-op for Latin-only diagrams.
@@ -92,5 +97,5 @@ export async function render(elements, opts = {}) {
     else if (fmt === "png") outputs.png = await toPng(raw, scale);
   }
 
-  return { outputs, formats, elementCount: raw.length };
+  return { outputs, formats, elementCount: raw.length, warnings };
 }
