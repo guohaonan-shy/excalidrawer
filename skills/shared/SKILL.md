@@ -28,9 +28,10 @@ Primary path: the **`excalidrawer` MCP server** (`excalidrawer-mcp`, added via
 `claude mcp add excalidrawer -- excalidrawer-mcp`). Confirm both tools are
 visible before drawing:
 
-- `mcp__excalidrawer__render_diagram(elements, output, formats?, scale?)`
+- `mcp__excalidrawer__render_diagram(elements, output, formats?, scale?, canvas?)`
   — translates sugar to raw, validates, writes files. `output` is the path
   **without** extension; one file per requested format is written alongside.
+  `canvas` pins the SVG/PNG to a fixed size (see §6 + `references/canvas.md`).
 - `mcp__excalidrawer__compute_layout(helper, args)` — pure geometry. Returns
   coordinates only; no elements are emitted. Use for grid/chain/swimlane/etc.
 
@@ -38,8 +39,8 @@ If the MCP tools aren't available (server failed to start, older host,
 sandboxed env), fall back to the CLI shipped by the same package:
 
 ```bash
-npx -y -p excalidrawer@^0.5.11 -c 'excalidrawer render -i elements.json -o ./flowchart-foo'
-npx -y -p excalidrawer@^0.5.11 -c "excalidrawer compute-layout --helper gridLayout -a '{...}'"
+npx -y -p excalidrawer@^0.5.13 -c 'excalidrawer render -i elements.json -o ./flowchart-foo'
+npx -y -p excalidrawer@^0.5.13 -c "excalidrawer compute-layout --helper gridLayout -a '{...}'"
 ```
 
 `elements.json` accepts either a bare sugar array or `{ "elements": [...] }`.
@@ -118,6 +119,25 @@ AskUserQuestion (single-select, header: `Format` / `用途`):
 If the user already stated the target in the request ("画一个流程图贴 Notion"),
 skip the question and infer.
 
+### 目标画布（尺寸固定的投放位）
+
+上面的问题问的是**格式**；如果用户还提到了**投放位置或尺寸** —— 小红书 / 封面 /
+朋友圈 / 3:4 / 竖版 / PPT / 16:9 / A4 / 打印 / 具体像素 —— 那么产物尺寸也是固定的，
+**先读 [`references/canvas.md`](references/canvas.md)**，按它排版并给
+`render_diagram` 传 `canvas`。
+
+两条铁律（细节在 canvas.md）：
+
+1. **画布是结果，不是前提。** 用户只说了平台没说比例（"发小红书"）时，**不要**
+   直接挑一个比例开画。顺序是 内容 → 布局 → 量出比例 → 选画布：横轴无语义的图
+   （流程 / 架构）排成接近方形；横轴有语义的图（时间线 / 泳道）**不能折行但可以
+   转轴** —— 竖画布下转成纵向（时间从上往下），这是标准做法不是妥协。排完量出
+   宽高比再对照 canvas.md §2 选画布。
+2. **为目标比例重新排版，而不是把现成的图缩进去。** 一条横向流程塞进 3:4 封面
+   会被压成中间一条细线 —— 尺寸对了，图废了。这就是 `CANVAS_UNDERFILL`。
+
+用户没提投放位置就不要加 `canvas`，内容自适应是更好的默认。
+
 ## 7. Render call
 
 ```text
@@ -125,7 +145,8 @@ mcp__excalidrawer__render_diagram({
   elements: <sugar 数组>,
   output: "./<type>-<name>",   // no extension; gstack naming (§5)
   formats: <per §6>,
-  scale: <3 for hi-res presentation; omit otherwise>
+  scale: <3 for hi-res presentation; omit otherwise>,
+  canvas: <only when the target has a fixed size — see §6 + references/canvas.md>
 })
 ```
 
@@ -161,6 +182,9 @@ Each warning is `{ code, ids, message }`; `ids` names the offending element(s),
 | `ARROW_CROSSES_SHAPE` | a connector runs through a module it doesn't connect | reroute with `via` / `fromSide` / `toSide`, or move the module out of the path |
 | `LOW_CONTRAST` | label vs fill contrast below 3:1 → unreadable | pick a darker/lighter label color or change the fill (`contrastText()` gives a safe one) |
 | `DEGENERATE_ARROW` | an arrow has < 2 real points / start ≈ end → renders as nothing | give it real endpoints (prefer id-anchored `from`/`to` arrows) |
+| `CANVAS_UNDERFILL` | (canvas only) 内容比例和画布差太远，被缩成一小块 | 按目标比例**重排**（见 `references/canvas.md` §3），不是调 padding |
+| `TEXT_TOO_SMALL` | (canvas only) 缩放后字号在成品上看不清 | 调大 `fontSize`、砍内容，或重排以减少缩放 |
+| `CANVAS_OVERFLOW` | (canvas only) 内容超出画布 | 用默认 `fit:"contain"`，或缩小布局 |
 
 Most `TEXT_OVERFLOW_X` comes from hand-written boxes too narrow for their label —
 the sugar path auto-wraps and grows height, so composing via sugar avoids most

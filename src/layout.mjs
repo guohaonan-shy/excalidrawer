@@ -12,8 +12,74 @@
 //   - These helpers are the bridge: pure math, no styling decisions.
 // ============================================================================
 
+import { parseRatio } from "./canvas.mjs";
 import { colors } from "./elements.mjs";
 import { textHeight } from "./text.mjs";
+
+// ---------------------------------------------------------------------------
+// chooseGrid — aspect-aware column count
+// ---------------------------------------------------------------------------
+
+/**
+ * Pick the column count whose resulting block best matches a target aspect
+ * ratio. This is what makes a diagram fit a fixed canvas by RE-LAYING-OUT
+ * rather than by being scaled down: six nodes are 6×1 on a 16:9 slide and
+ * 2×3 on a 3:4 cover.
+ *
+ * Error is measured on a log scale so that "twice too wide" and "twice too
+ * tall" are penalised equally — a linear difference would quietly favour
+ * squat layouts. A ragged last row is penalised on top of that: 5×2 for six
+ * items has a defensible aspect ratio but leaves a lone straggler, and 3×2
+ * reads better for the sake of a slightly worse fit.
+ *
+ * @param {number} count
+ * @param {object} opts
+ * @param {number|string} opts.targetAspect - desired width/height, e.g. 0.75 or "3:4"
+ * @param {number} opts.cellW
+ * @param {number} opts.cellH
+ * @param {number} [opts.colGap=24]
+ * @param {number} [opts.rowGap=24]
+ * @param {number} [opts.maxCols]  - cap, e.g. to keep a readable row length
+ * @returns {{ cols:number, rows:number, w:number, h:number, aspect:number }}
+ *
+ * @example
+ *   chooseGrid(6, { targetAspect: "3:4", cellW: 180, cellH: 70 }) // → cols 2, rows 3
+ */
+export function chooseGrid(count, opts) {
+  const { cellW, cellH } = opts;
+  const colGap = opts.colGap ?? 24;
+  const rowGap = opts.rowGap ?? 24;
+  const target = parseRatio(opts.targetAspect);
+  const n = Math.max(1, Math.floor(count));
+
+  const measure = (cols) => {
+    const rows = Math.ceil(n / cols);
+    const w = cols * cellW + (cols - 1) * colGap;
+    const h = rows * cellH + (rows - 1) * rowGap;
+    return { cols, rows, w, h, aspect: w / h };
+  };
+
+  if (!Number.isFinite(target) || target <= 0) return measure(n);
+
+  const maxCols = Math.min(n, opts.maxCols ?? n);
+  let best = measure(1);
+  let bestErr = Infinity;
+  for (let cols = 1; cols <= maxCols; cols++) {
+    const cand = measure(cols);
+    const empty = cand.cols * cand.rows - n; // unfilled cells in the last row
+    const err =
+      Math.abs(Math.log(cand.aspect / target)) + (empty / n) * RAGGED_PENALTY;
+    if (err < bestErr) {
+      bestErr = err;
+      best = cand;
+    }
+  }
+  return best;
+}
+
+// How much aspect-ratio error a full last row is worth. At 0.3 a layout may
+// take a ~35% worse fit to avoid leaving a whole row's worth of holes.
+const RAGGED_PENALTY = 0.3;
 
 // ---------------------------------------------------------------------------
 // gridLayout
@@ -24,13 +90,17 @@ import { textHeight } from "./text.mjs";
  *
  * @param {number} count - number of items
  * @param {object} opts
- * @param {number} opts.cols          - columns per row
+ * @param {number} [opts.cols]        - columns per row; omit and pass
+ *                                      `targetAspect` to have it chosen
+ * @param {number|string} [opts.targetAspect] - target width/height ("3:4", 0.75)
  * @param {number} opts.cellW         - per-cell width
  * @param {number} opts.cellH         - per-cell height
  * @param {number} [opts.colGap=24]   - horizontal gap between cells
  * @param {number} [opts.rowGap=24]   - vertical gap between cells
  * @param {number} [opts.originX=0]   - top-left X of the grid
  * @param {number} [opts.originY=0]   - top-left Y of the grid
+ * @param {boolean} [opts.serpentine] - reverse every other row, so a wrapped
+ *                                      linear flow stays connected end-to-end
  *
  * @returns {Array<{ x: number, y: number, w: number, h: number, col: number, row: number }>}
  *
@@ -39,17 +109,30 @@ import { textHeight } from "./text.mjs";
  *   const els = cells.flatMap((c, i) =>
  *     box(`b${i}`, `t${i}`, c.x, c.y, c.w, c.h, colors.blue, `Item ${i}`)
  *   );
+ *
+ * @example
+ *   // A 7-step flow wrapped to fit a 3:4 cover, snaking so consecutive
+ *   // steps stay adjacent.
+ *   gridLayout(7, { targetAspect: "3:4", cellW: 180, cellH: 70, serpentine: true });
  */
 export function gridLayout(count, opts) {
-  const { cols, cellW, cellH } = opts;
+  const { cellW, cellH } = opts;
   const colGap  = opts.colGap  ?? 24;
   const rowGap  = opts.rowGap  ?? 24;
   const originX = opts.originX ?? 0;
   const originY = opts.originY ?? 0;
+
+  const cols =
+    opts.cols ??
+    chooseGrid(count, { ...opts, cellW, cellH, colGap, rowGap }).cols;
+
   const out = [];
   for (let i = 0; i < count; i++) {
-    const col = i % cols;
     const row = Math.floor(i / cols);
+    const seq = i % cols;
+    // Serpentine rows run right-to-left on every odd row, so step N and N+1
+    // remain neighbours across the wrap instead of jumping the full width.
+    const col = opts.serpentine && row % 2 === 1 ? cols - 1 - seq : seq;
     out.push({
       x: originX + col * (cellW + colGap),
       y: originY + row * (cellH + rowGap),

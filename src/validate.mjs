@@ -50,11 +50,32 @@ const CANVAS_WHITE = { r: 255, g: 255, b: 255 };
 
 const SHAPE_TYPES = new Set(["rectangle", "diamond", "ellipse"]);
 
+// --- canvas fit thresholds -------------------------------------------------
+
+// Under `fit: contain` one axis always fills the usable area completely, so
+// the fill fraction reduces to the ratio between the two aspect ratios:
+//   fill = min(contentAspect, canvasAspect) / max(contentAspect, canvasAspect)
+// 0.55 therefore tolerates roughly a 1.8x aspect mismatch. Past that the
+// content has been shrunk to fit a shape it was never laid out for, and the
+// fix is to re-lay-out, not to scale harder.
+const MIN_CANVAS_FILL = 0.55;
+
+// Minimum on-screen text size, as a fraction of the canvas's short edge.
+// Absolute pixels are the wrong unit here: the same 14px label is fine on a
+// 600px diagram and invisible on a 1242px cover. 1.8% of the short edge is
+// ~22px on a 3:4 phone cover — about the floor for phone-sized viewing.
+const MIN_TEXT_FRAC = 0.018;
+
+// Cap how many element ids a single aggregated warning names.
+const MAX_IDS_LISTED = 8;
+
 /**
  * @param {Array} elements - raw Excalidraw elements (may be nested; flattened)
+ * @param {{ canvas?: object }} [opts] - resolved canvas from resolveCanvas(),
+ *   enabling the fixed-size output checks (fit, readability, safe area).
  * @returns {Array<{code:string, ids:string[], message:string}>}
  */
-export function validate(elements) {
+export function validate(elements, opts = {}) {
   const warnings = [];
   if (!Array.isArray(elements)) return warnings;
   const flat = elements.flat(Infinity).filter((e) => e && !e.isDeleted);
@@ -68,7 +89,83 @@ export function validate(elements) {
   checkArrowCrossings(flat, warnings);
   checkContrast(flat, byId, warnings);
 
+  if (opts && opts.canvas) checkCanvasFit(flat, opts.canvas, warnings);
+
   return warnings;
+}
+
+// --- canvas fit ------------------------------------------------------------
+
+function formatRatio(w, h) {
+  if (!(w > 0) || !(h > 0)) return "?";
+  return `${(w / h).toFixed(2)}:1`;
+}
+
+/**
+ * Checks that only make sense once the output size is fixed: did the content
+ * actually fill the canvas, is the text still readable after scaling, and does
+ * anything land under the platform's own UI.
+ */
+function checkCanvasFit(flat, canvas, warnings) {
+  const { content, inner, scale, width, height, safe } = canvas;
+
+  if (canvas.overflow) {
+    warnings.push({
+      code: "CANVAS_OVERFLOW",
+      ids: [],
+      message:
+        `content (${Math.round(content.w)}x${Math.round(content.h)}) spills outside the ` +
+        `${width}x${height} canvas — use fit:"contain" to scale it down, or shrink the layout.`,
+    });
+  }
+
+  if (content.w > 0 && content.h > 0 && canvas.fill < MIN_CANVAS_FILL) {
+    const contentR = formatRatio(content.w, content.h);
+    const canvasR = formatRatio(inner.w, inner.h);
+    const tall = inner.h > inner.w;
+    warnings.push({
+      code: "CANVAS_UNDERFILL",
+      ids: [],
+      message:
+        `content is ${contentR} but the canvas is ${canvasR}, so it scales to ` +
+        `${Math.round(canvas.fill * 100)}% of the usable area and leaves large empty bands. ` +
+        `Re-lay-out for the target shape instead of scaling: ` +
+        (tall
+          ? `stack the nodes vertically (top-to-bottom flow, fewer columns, wrap long rows).`
+          : `spread the nodes horizontally (left-to-right flow, more columns per row).`),
+    });
+  }
+
+  // Readability is judged on the FINAL rendered size, so it needs the scale.
+  const floor = Math.min(width, height) * MIN_TEXT_FRAC;
+  const small = [];
+  let smallest = Infinity;
+  for (const el of flat) {
+    if (el.type !== "text" || !el.text) continue;
+    const rendered = (el.fontSize || 16) * scale;
+    if (rendered < floor) {
+      small.push(el.id);
+      smallest = Math.min(smallest, rendered);
+    }
+  }
+  if (small.length > 0) {
+    const shown = small.slice(0, MAX_IDS_LISTED);
+    const more = small.length - shown.length;
+    warnings.push({
+      code: "TEXT_TOO_SMALL",
+      ids: shown,
+      message:
+        `${small.length} text element(s) render at as little as ${smallest.toFixed(1)}px on a ` +
+        `${width}x${height} canvas (floor ~${Math.round(floor)}px) — raise fontSize, cut content, ` +
+        `or re-lay-out so the diagram needs less shrinking` +
+        (more > 0 ? ` (+${more} more not listed)` : "") + ".",
+    });
+  }
+
+  // There is deliberately no safe-area warning. A safe area shrinks the usable
+  // box inside resolveCanvas, so content is laid out clear of platform UI by
+  // construction; the only way to land inside one is to overflow the canvas
+  // entirely, which CANVAS_OVERFLOW above already reports.
 }
 
 // --- text overflow ---------------------------------------------------------

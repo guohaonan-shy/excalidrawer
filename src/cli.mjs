@@ -18,6 +18,7 @@ import { timeline, flowchart, architecture, sequence } from "./templates/index.m
 import { excalidraw } from "./elements.mjs";
 import { toSvg, toPng } from "./export.mjs";
 import { getTool, parseArgs as parseToolArgs } from "./tools/index.mjs";
+import { listPresets } from "./presets/index.mjs";
 
 const TEMPLATES = { timeline, flowchart, architecture, sequence };
 
@@ -31,12 +32,14 @@ excalidrawer — generate Excalidraw diagrams
 
 Usage:
   excalidrawer render --input <file> --output <path> [--format <formats>] [--scale <n>]
+                      [--preset <id> | --canvas <json>]
   excalidrawer compute-layout --helper <name> [--args <json|file>]
   excalidrawer generate --type <type> [--input <file>] --output <path>   (legacy)
 
 Commands:
   render          Render raw Excalidraw elements to files
   compute-layout  Compute coordinates from a layout helper (prints JSON)
+  presets         List canvas presets (social covers, slides, print)
   generate        Generate a diagram from a built-in template (legacy)
   types           List available template types
 
@@ -44,7 +47,9 @@ Options:
   --input, -i     Input JSON file (reads stdin if omitted)
   --output, -o    Output path without extension (e.g. ./docs/diagram)
   --format, -f    Comma-separated formats: excalidraw,svg,png (default: all)
-  --scale         PNG pixel scale 1-4 (default: 2)
+  --scale         PNG multiplier (default 2, or 1 when a canvas is set)
+  --preset        Canvas preset id, e.g. xhs:cover (see "excalidrawer presets")
+  --canvas        Canvas JSON, e.g. '{"ratio":"3:4","width":1242}'
   --helper        Layout helper name (for compute-layout)
   --args, -a      JSON args object or file path (for compute-layout)
   --type, -t      Template type (for generate)
@@ -55,6 +60,8 @@ Options:
 Examples:
   excalidrawer render -i elements.json -o ./docs/diagram
   cat elements.json | excalidrawer render -o ./docs/diagram -f svg,png
+  excalidrawer render -i elements.json -o ./cover --preset xhs:cover
+  excalidrawer render -i elements.json -o ./cover --canvas '{"ratio":"3:4","width":1242}'
   excalidrawer compute-layout --helper gridLayout -a '{"count":6,"cols":3,"cellW":140,"cellH":50}'
   excalidrawer generate -t timeline -i data.json -o ./docs/timeline
 `.trim());
@@ -69,6 +76,8 @@ function parseArgs(argv) {
     else if (a === "--output" || a === "-o") args.output = argv[++i];
     else if (a === "--format" || a === "-f") args.format = argv[++i];
     else if (a === "--scale") args.scale = Number(argv[++i]);
+    else if (a === "--canvas") args.canvas = argv[++i];
+    else if (a === "--preset") args.preset = argv[++i];
     else if (a === "--helper") args.helper = argv[++i];
     else if (a === "--args" || a === "-a") args.argsJson = argv[++i];
     else if (a === "--seed" || a === "-s") args.seed = Number(argv[++i]);
@@ -114,12 +123,19 @@ async function cmdRender(args) {
   // Accept either a bare array or { elements: [...] }.
   const elements = Array.isArray(input) ? input : input.elements;
 
+  // --preset is shorthand for --canvas '{"preset":"..."}'; both may be given,
+  // in which case --canvas supplies the overrides.
+  let canvas;
+  if (args.canvas) canvas = parseJson(args.canvas, "for --canvas");
+  if (args.preset) canvas = { ...(canvas || {}), preset: args.preset };
+
   const tool = getTool("render_diagram");
   const toolArgs = parseToolArgs(tool.params, {
     elements,
     output: args.output,
     formats: args.format ? args.format.split(",").map((f) => f.trim().toLowerCase()) : undefined,
     scale: args.scale,
+    canvas,
   });
   const result = await tool.run(toolArgs);
 
@@ -129,7 +145,34 @@ async function cmdRender(args) {
     process.exit(1);
   }
   for (const path of result.written) console.log(`  ✓ ${path}`);
+  if (result.canvas) {
+    const c = result.canvas;
+    console.log(`  canvas ${c.width}×${c.height} · scale ${c.scale} · fill ${Math.round(c.fill * 100)}%`);
+  }
+  if (result.note) console.warn(`  note: ${result.note}`);
+  for (const w of result.warnings || []) console.warn(`  ! ${w.code}: ${w.message}`);
   console.log("Done!");
+}
+
+// ---------------------------------------------------------------------------
+// presets — list the canvas preset table
+// ---------------------------------------------------------------------------
+
+function cmdPresets() {
+  const rows = listPresets();
+  const idW = Math.max(...rows.map((p) => p.id.length));
+  console.log("Canvas presets (use with: render --preset <id>)\n");
+  // The label goes last: it is CJK, and padEnd counts code points rather than
+  // display columns, so anything after it would not line up.
+  for (const p of rows) {
+    const size = `${p.width}×${p.height}`;
+    const safe = p.safeVerified ? "safe✓" : "safe?";
+    console.log(`  ${p.id.padEnd(idW)}  ${p.ratio.padEnd(8)} ${size.padEnd(12)} ${safe}  ${p.label}`);
+  }
+  console.log(
+    "\nRatio is what matters — pixel sizes are just a high-enough output resolution." +
+    "\nsafe? = the platform's UI-covered band has not been measured for this entry."
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -251,6 +294,10 @@ async function main() {
       return cmdComputeLayout(args);
     case "generate":
       return cmdGenerate(args);
+    case "presets":
+      cmdPresets();
+      process.exit(0);
+      break;
     case "types":
       console.log("Available template types:");
       for (const name of Object.keys(TEMPLATES)) console.log(`  - ${name}`);

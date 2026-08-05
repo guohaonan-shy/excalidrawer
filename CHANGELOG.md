@@ -4,6 +4,69 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.5.13
+
+_engine 0.5.13 · plugin 0.0.4_
+
+Diagrams can now be rendered to a **fixed output size** — a 小红书 cover, a
+slide, a print page — instead of always being sized by their content.
+
+### Added
+
+- **`canvas` on `render_diagram` / `render()`** (`src/canvas.mjs`). Accepts
+  `{ width, height }`, `{ ratio, width }`, `{ ratio, height }`, or
+  `{ preset }`, plus `padding`, `safe`, `fit` (`contain` / `pad` / `none`),
+  `align`, and `background`. SVG output becomes exactly the requested size with
+  the content fitted via a single wrapping `<g>` transform; PNG is pinned to an
+  exact pixel width rather than a zoom factor. **`.excalidraw` always keeps the
+  authored coordinates** — a canvas is an export concern, and Excalidraw has no
+  notion of a fixed page. `scale` now defaults to 1 with a canvas (the pixel
+  size is already exact) and stays 2 without one.
+- **Canvas presets** (`src/presets/`, also exported as `excalidrawer/presets`).
+  A lookup table of publishing surfaces — 小红书 / 微信 / 抖音 / B站 / X /
+  LinkedIn / Instagram / slides / A4 — resolved to plain geometry in the tool
+  layer. The engine never imports it, so platform data can change without
+  touching rendering logic. Each entry carries `verifiedAt`; using one over 12
+  months old returns a freshness `note`. `safe` (the band platform UI covers)
+  ships **unverified and inert** on every entry: an unmeasured safe area would
+  produce warnings nobody has confirmed. New CLI command `excalidrawer presets`,
+  and `render --preset <id>` / `--canvas <json>`.
+- **`chooseGrid(count, opts)`** (layout helper + `compute_layout`). Picks the
+  column count whose block best matches a `targetAspect`, so six nodes become
+  3×2 on a 16:9 slide and 2×3 on a 3:4 cover. Aspect error is measured on a log
+  scale (so "twice too wide" and "twice too tall" cost the same), with a penalty
+  on a ragged last row — 3×2 beats 4×2 for six items despite a slightly worse
+  fit. `gridLayout` accepts `targetAspect` in place of `cols`, plus
+  `serpentine` to snake alternate rows so a wrapped linear flow stays connected.
+- **Three canvas lints** (Layer A): `CANVAS_UNDERFILL` when the content's aspect
+  disagrees with the canvas's by more than ~1.8× (the fix is to re-lay-out, not
+  to scale harder — the message says which direction to stack), `TEXT_TOO_SMALL`
+  judged on the **final rendered size** as a fraction of the canvas's short edge
+  rather than in raw px, and `CANVAS_OVERFLOW` under `fit:"none"`.
+- `skills/shared/references/canvas.md` — when a fixed size is called for, and
+  the decision chain for picking one: **content → layout → measured ratio →
+  canvas**. A canvas is an outcome, not a premise. The axis rule separates two
+  things that are easy to conflate: **wrapping** (moving item 4 to the start of
+  row 2) breaks order and is banned when the horizontal axis carries meaning,
+  but **transposing** (running the whole axis top-to-bottom) preserves it and is
+  usually the right move on a tall canvas — a vertical timeline is standard
+  practice, not a compromise. Only genuinely un-transposable diagrams (Gantt
+  charts, sequence diagrams) are locked landscape; the rest lay out near-square
+  (shortest scan path), and
+  the resulting ratio selects the canvas via the same 1.8× mismatch threshold
+  the `CANVAS_UNDERFILL` lint uses. Feed-placement gains (a 3:4 小红书 cover
+  occupies 33% more height than 1:1) act only as a tiebreaker between two
+  workable canvases, never as the default. Content wider than 2.4:1 is a
+  content problem, not a ratio problem — split it across the multi-image post.
+  `SKILL.md` §6 gains a 目标画布 clarify step and §7.5 lists the new warnings.
+
+### Notes
+
+- There is deliberately **no safe-area warning**. `safe` shrinks the usable box
+  inside `resolveCanvas`, so content is laid out clear of platform UI by
+  construction; the only way inside one is to overflow the canvas, which
+  `CANVAS_OVERFLOW` already reports.
+
 ## 0.5.12
 
 _engine 0.5.12 · plugin 0.0.3_

@@ -3,6 +3,7 @@ import { dirname } from "path";
 
 import { defineTool } from "./schema.mjs";
 import { render, VALID_FORMATS } from "../render.mjs";
+import { presetIds, presetToCanvas } from "../presets/index.mjs";
 
 export const renderDiagram = defineTool({
   name: "render_diagram",
@@ -27,7 +28,12 @@ export const renderDiagram = defineTool({
     "On success it returns { written, elementCount, warnings? }. `warnings` is a " +
     "non-fatal quality lint (text overflow, shape overlap, degenerate arrows); " +
     "each has { code, ids, message }. Treat a non-empty `warnings` as NOT DONE — " +
-    "fix the flagged elements and re-render until it is absent.",
+    "fix the flagged elements and re-render until it is absent.\n" +
+    "Pass `canvas` when the image must come out at a specific size (a social " +
+    "cover, a slide, a print page) instead of being sized by its content. " +
+    "Lay the diagram out FOR that shape — a wide flow forced into a 3:4 cover " +
+    "gets scaled down until it is unreadable, which is what CANVAS_UNDERFILL " +
+    "and TEXT_TOO_SMALL report.",
   params: {
     elements: {
       type: "array",
@@ -45,20 +51,50 @@ export const renderDiagram = defineTool({
       items: "string",
       description: `Subset of [${VALID_FORMATS.join(", ")}]. Omit for all three. svg suits Markdown/GitHub, png suits slides/Notion, excalidraw is editable.`,
     },
+    canvas: {
+      type: "object",
+      description:
+        "Fixed output size for svg/png. Omit for content-sized output (the default). " +
+        `Either { preset } — one of: ${presetIds().join(", ")} — or explicit ` +
+        "{ width, height } / { ratio, width } / { ratio, height } (ratio like \"3:4\"). " +
+        "Optional: padding (default 6% of the short edge), safe { top,right,bottom,left } " +
+        "for platform UI that covers the image, fit ('contain' scales to fit — default; " +
+        "'pad' only ever shrinks; 'none' keeps 1:1), align ('center' default, or " +
+        "top/bottom/left/right/top-left/...), background (hex, or 'transparent'). " +
+        "Explicit fields override the preset's. The .excalidraw output keeps the " +
+        "authored coordinates either way.",
+    },
     scale: {
       type: "number",
       min: 1,
       max: 4,
-      default: 2,
-      description: "PNG pixel scale multiplier (1–4). Ignored for svg/excalidraw.",
+      description:
+        "PNG multiplier. With `canvas` the pixel size is already exact, so this " +
+        "defaults to 1 and only matters for supersampling; without one it defaults " +
+        "to 2 (retina). Ignored for svg/excalidraw.",
     },
   },
   async run(args) {
+    // Resolve a platform preset into plain geometry before the engine sees it.
+    // Explicitly-passed fields win over the preset's.
+    let canvas = args.canvas;
+    let presetNote;
+    if (canvas && canvas.preset != null) {
+      const { preset, ...explicit } = canvas;
+      try {
+        const resolved = presetToCanvas(preset);
+        presetNote = resolved.note;
+        canvas = { ...resolved.canvas, ...explicit };
+      } catch (e) {
+        return { error: e.message };
+      }
+    }
+
     let result;
     try {
-      result = await render(args.elements, { formats: args.formats, scale: args.scale });
+      result = await render(args.elements, { formats: args.formats, scale: args.scale, canvas });
     } catch (e) {
-      // ElementValidationError and SugarError both carry `.issues`.
+      // ElementValidationError, SugarError and CanvasError all carry `.issues`.
       if (Array.isArray(e.issues)) return { error: e.message, issues: e.issues };
       return { error: e.message };
     }
@@ -72,6 +108,8 @@ export const renderDiagram = defineTool({
       written.push(path);
     }
     const out = { written, elementCount: result.elementCount };
+    if (result.canvas) out.canvas = result.canvas;
+    if (presetNote) out.note = presetNote;
     if (result.warnings && result.warnings.length > 0) {
       out.warnings = result.warnings;
     }

@@ -1,0 +1,187 @@
+{
+  "$comment": [
+    "Canvas presets for common publishing surfaces.",
+    "",
+    "PIXEL VALUES ARE A RESOLUTION CHOICE, NOT A PLATFORM REQUIREMENT.",
+    "Diagrams render from vectors, and every platform rescales what you upload.",
+    "What actually has to be right is `ratio` — that is what determines whether",
+    "the image gets letterboxed or cropped in the feed. `width`/`height` are",
+    "simply a sensibly-high output resolution that satisfies that ratio.",
+    "",
+    "`safe` describes pixels the platform's own UI covers (title bars, gradient",
+    "scrims, action rails). It is only honoured by the linter when",
+    "`safeVerified` is true. Entries start at false: an unmeasured safe area",
+    "produces false warnings, which is worse than no safe area at all. To",
+    "verify one, screenshot the surface on a real device, measure the covered",
+    "band, convert to this entry's coordinate space, then flip the flag.",
+    "",
+    "`verifiedAt` is the date the ratio was last checked against the platform.",
+    "Presets go stale; the tool warns when one is older than 12 months."
+  ],
+
+  "presets": [
+    {
+      "id": "xhs:cover",
+      "platform": "xiaohongshu",
+      "label": "小红书 · 封面（竖版 3:4）",
+      "ratio": "3:4",
+      "width": 1242,
+      "height": 1656,
+      "safe": null,
+      "safeVerified": false,
+      "notes": "小红书主推的封面比例，信息流中占位最大。竖版优先：宽图在这里会被压得很小。",
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "xhs:square",
+      "platform": "xiaohongshu",
+      "label": "小红书 · 方图（1:1）",
+      "ratio": "1:1",
+      "width": 1080,
+      "height": 1080,
+      "safe": null,
+      "safeVerified": false,
+      "notes": "信息流里比 3:4 矮，适合单点结论式内容。",
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "xhs:landscape",
+      "platform": "xiaohongshu",
+      "label": "小红书 · 横图（4:3）",
+      "ratio": "4:3",
+      "width": 1440,
+      "height": 1080,
+      "safe": null,
+      "safeVerified": false,
+      "notes": "横向流程图/架构图在这里最省事，但信息流占位最小。",
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "wechat:article-cover",
+      "platform": "wechat",
+      "label": "微信公众号 · 头图（2.35:1）",
+      "ratio": "2.35:1",
+      "width": 1080,
+      "height": 460,
+      "safe": null,
+      "safeVerified": false,
+      "notes": "极扁，只放得下标题 + 一条主线，不要塞多层结构。",
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "wechat:share",
+      "platform": "wechat",
+      "label": "微信 · 分享缩略图（1:1）",
+      "ratio": "1:1",
+      "width": 1080,
+      "height": 1080,
+      "safe": null,
+      "safeVerified": false,
+      "notes": "会话卡片中显示很小，字号要比正常图大一档。",
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "douyin:cover",
+      "platform": "douyin",
+      "label": "抖音 · 封面（3:4）",
+      "ratio": "3:4",
+      "width": 1080,
+      "height": 1440,
+      "safe": null,
+      "safeVerified": false,
+      "notes": "个人主页宫格会按 3:4 展示；播放页底部有文案与操作栏覆盖，务必留底部空间。",
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "bilibili:cover",
+      "platform": "bilibili",
+      "label": "B站 · 视频封面（16:10）",
+      "ratio": "16:10",
+      "width": 1146,
+      "height": 717,
+      "safe": null,
+      "safeVerified": false,
+      "notes": "右下角有时长角标覆盖。",
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "x:card",
+      "platform": "x",
+      "label": "X / Twitter · 卡片（16:9）",
+      "ratio": "16:9",
+      "width": 1200,
+      "height": 675,
+      "safe": null,
+      "safeVerified": false,
+      "notes": "时间线中会裁切边缘，重要内容不要贴边。",
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "linkedin:post",
+      "platform": "linkedin",
+      "label": "LinkedIn · 单图帖（1.91:1）",
+      "ratio": "1.91:1",
+      "width": 1200,
+      "height": 628,
+      "safe": null,
+      "safeVerified": false,
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "instagram:portrait",
+      "platform": "instagram",
+      "label": "Instagram · 竖版（4:5）",
+      "ratio": "4:5",
+      "width": 1080,
+      "height": 1350,
+      "safe": null,
+      "safeVerified": false,
+      "notes": "信息流允许的最高比例。",
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "slide:16-9",
+      "platform": "generic",
+      "label": "幻灯片 · 16:9",
+      "ratio": "16:9",
+      "width": 1920,
+      "height": 1080,
+      "safe": null,
+      "safeVerified": false,
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "slide:4-3",
+      "platform": "generic",
+      "label": "幻灯片 · 4:3",
+      "ratio": "4:3",
+      "width": 1600,
+      "height": 1200,
+      "safe": null,
+      "safeVerified": false,
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "a4:portrait",
+      "platform": "print",
+      "label": "A4 · 竖版（210×297mm @150dpi）",
+      "ratio": "210:297",
+      "width": 1240,
+      "height": 1754,
+      "safe": null,
+      "safeVerified": false,
+      "verifiedAt": "2026-08-04"
+    },
+    {
+      "id": "a4:landscape",
+      "platform": "print",
+      "label": "A4 · 横版（297×210mm @150dpi）",
+      "ratio": "297:210",
+      "width": 1754,
+      "height": 1240,
+      "safe": null,
+      "safeVerified": false,
+      "verifiedAt": "2026-08-04"
+    }
+  ]
+}

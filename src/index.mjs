@@ -21,6 +21,7 @@ export { estimateTextWidth, wrapText, lineCount, textHeight, fitBoundText } from
 // Layout helpers (0.6.0+): pure coordinate math, no element creation.
 export {
   gridLayout,
+  chooseGrid,
   chain,
   swimlane,
   hubSpoke,
@@ -32,6 +33,9 @@ export {
   contrastText,
   triplet,
 } from "./layout.mjs";
+
+// Fixed-size output geometry: fit content into a target canvas (0.6.0+).
+export { normalizeCanvas, resolveCanvas, contentBounds, CanvasError } from "./canvas.mjs";
 
 // Serializer: sugar/raw elements → output formats (0.5.6+).
 export { render, validateElements, ElementValidationError, VALID_FORMATS } from "./render.mjs";

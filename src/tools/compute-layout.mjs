@@ -1,6 +1,6 @@
 import { defineTool } from "./schema.mjs";
 import {
-  gridLayout, chain, swimlane, hubSpoke, edgePoint, routeU, labelAnchor,
+  gridLayout, chooseGrid, chain, swimlane, hubSpoke, edgePoint, routeU, labelAnchor,
   fitContainer, titledBox,
 } from "../layout.mjs";
 
@@ -11,6 +11,7 @@ import {
  */
 const DISPATCH = {
   gridLayout:  (a) => gridLayout(a.count, a),
+  chooseGrid:  (a) => chooseGrid(a.count, a),
   chain:       (a) => chain(a.start, a.count, a),
   swimlane:    (a) => swimlane(a.lanes, a.items, a),
   hubSpoke:    (a) => hubSpoke(a.center, a.spokeCount, a),
@@ -30,7 +31,10 @@ export const computeLayout = defineTool({
     "data only — no elements are created. Feed the coordinates into raw " +
     "Excalidraw element objects, then call `render_diagram`.\n" +
     "Pass `helper` plus a flat `args` object:\n" +
-    "  gridLayout  — { count, cols, cellW, cellH, colGap?, rowGap?, originX?, originY? } → [{x,y,w,h,col,row}]\n" +
+    "  gridLayout  — { count, cols?, targetAspect?, cellW, cellH, colGap?, rowGap?, originX?, originY?, serpentine? } → [{x,y,w,h,col,row}]\n" +
+    "                omit `cols` and pass `targetAspect` (\"3:4\", 0.75) to have the column count chosen to match that shape; `serpentine` snakes alternate rows so a wrapped linear flow stays connected.\n" +
+    "  chooseGrid  — { count, targetAspect, cellW, cellH, colGap?, rowGap?, maxCols? } → {cols,rows,w,h,aspect}\n" +
+    "                answers \"what shape should this be?\" before you commit to a layout — use it when rendering to a fixed canvas.\n" +
     "  chain       — { start:{x,y}, count, dx?, dy? } → [{x,y,i}]\n" +
     "  swimlane    — { lanes:[{label,color}], items:[{lane,...}], laneW, laneH, itemW, itemH, laneGap?, itemGap?, headerW?, originX?, originY? } → {laneRects, itemPositions}\n" +
     "  hubSpoke    — { center:{x,y}, spokeCount, radius, startAngleDeg?, clockwise? } → {centerPos, spokePositions}\n" +
