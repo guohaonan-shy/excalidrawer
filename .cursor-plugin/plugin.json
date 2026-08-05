@@ -2,7 +2,7 @@
   "name": "excalidrawer",
   "displayName": "Excalidrawer",
   "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence. Generate hand-drawn-style diagrams and export to .excalidraw / SVG / PNG — no browser.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": {
     "name": "guohaonan-shy",
     "email": "guohaonan980421@gmail.com"

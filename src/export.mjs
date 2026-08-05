@@ -9,6 +9,8 @@ import { readFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join, basename } from "path";
 
+import { contentBounds, normalizeCanvas, resolveCanvas } from "./canvas.mjs";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ---------------------------------------------------------------------------
@@ -421,52 +423,28 @@ function escapeXml(str) {
     .replace(/"/g, "&quot;");
 }
 
-/**
- * Compute the bounding box of all elements with a small padding.
- */
-function computeViewBox(elements, padding = 20) {
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-
-  for (const el of elements) {
-    if (el.type === "text" && el.containerId) continue; // skip bound text
-    if (el.type === "arrow" && el.points) {
-      for (const [dx, dy] of el.points) {
-        minX = Math.min(minX, el.x + dx);
-        minY = Math.min(minY, el.y + dy);
-        maxX = Math.max(maxX, el.x + dx);
-        maxY = Math.max(maxY, el.y + dy);
-      }
-    } else {
-      minX = Math.min(minX, el.x);
-      minY = Math.min(minY, el.y);
-      maxX = Math.max(maxX, el.x + (el.width || 0));
-      maxY = Math.max(maxY, el.y + (el.height || 0));
-    }
-  }
-
-  return {
-    x: minX - padding,
-    y: minY - padding,
-    w: maxX - minX + padding * 2,
-    h: maxY - minY + padding * 2,
-  };
-}
+/** Default slack around the content when no fixed canvas is given. */
+const AUTO_PADDING = 20;
 
 /**
  * Render an array of Excalidraw elements to an SVG string.
  *
+ * Without `opts.canvas` the output size is whatever the content turned out to
+ * be (content-driven, the historical behaviour). With it, the output is exactly
+ * the requested size and the content is fitted inside via a single wrapping
+ * <g> transform — element coordinates are never rewritten.
+ *
  * @param {Array} elements - flat array of element objects (from elements.mjs)
+ * @param {{ canvas?: object }} [opts]
  * @returns {string} SVG markup string
  */
-export function toSvg(elements) {
+export function toSvg(elements, opts = {}) {
   const flat = elements.flat(Infinity).filter((e) => !e.isDeleted);
-  const vb = computeViewBox(flat);
 
   const parts = [];
 
   // Embed font face declarations
   const fontCss = fontFaceCss(flat);
-  if (fontCss) parts.push(fontCss);
 
   for (const el of flat) {
     switch (el.type) {
@@ -491,12 +469,36 @@ export function toSvg(elements) {
     }
   }
 
+  if (opts.canvas) {
+    const c = resolveCanvas(flat, opts.canvas);
+    const bg =
+      c.background === "transparent"
+        ? ""
+        : `<rect x="0" y="0" width="${c.width}" height="${c.height}" fill="${c.background}"/>`;
+    return [
+      `<svg xmlns="${SVG_NS}" viewBox="0 0 ${c.width} ${c.height}" width="${c.width}" height="${c.height}">`,
+      ...(fontCss ? [fontCss] : []),
+      ...(bg ? [bg] : []),
+      `<g transform="translate(${round(c.tx)} ${round(c.ty)}) scale(${round(c.scale)})">`,
+      ...parts,
+      `</g>`,
+      `</svg>`,
+    ].join("\n");
+  }
+
+  const vb = contentBounds(flat, AUTO_PADDING);
   return [
     `<svg xmlns="${SVG_NS}" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" width="${vb.w}" height="${vb.h}">`,
+    ...(fontCss ? [fontCss] : []),
     `<rect x="${vb.x}" y="${vb.y}" width="${vb.w}" height="${vb.h}" fill="white"/>`,
     ...parts,
     `</svg>`,
   ].join("\n");
+}
+
+/** Trim float noise out of transform attributes. */
+function round(n) {
+  return Math.round(n * 1000) / 1000;
 }
 
 // ---------------------------------------------------------------------------
@@ -508,13 +510,27 @@ export function toSvg(elements) {
  *
  * Uses @resvg/resvg-js for fast native SVG-to-PNG rendering.
  *
+ * With a canvas, `canvas.width`/`height` ARE the pixel dimensions, so the
+ * renderer is pinned to an exact output width rather than a zoom factor —
+ * `scale` then acts as an extra multiplier on top (default 1, i.e. exact).
+ * Without a canvas, `scale` keeps its original meaning: a zoom over the
+ * content-sized SVG (default 2 for retina).
+ *
  * @param {Array} elements  - flat array of element objects
- * @param {number} scale    - output scale factor (default 2 for retina)
+ * @param {number|{scale?:number, canvas?:object}} [optsOrScale]
  * @returns {Promise<Buffer>} PNG buffer
  */
-export async function toPng(elements, scale = 2) {
-  const svg = toSvg(elements);
+export async function toPng(elements, optsOrScale) {
+  const opts = typeof optsOrScale === "number" ? { scale: optsOrScale } : (optsOrScale ?? {});
+  const canvas = opts.canvas;
+  const scale = opts.scale ?? (canvas ? 1 : 2);
+
+  const svg = toSvg(elements, canvas ? { canvas } : {});
   const fontPath = join(__dirname, "fonts", "Excalifont-Regular.ttf");
+
+  const fitTo = canvas
+    ? { mode: "width", value: Math.max(1, Math.round(normalizeCanvas(canvas).width * scale)) }
+    : { mode: "zoom", value: scale };
 
   const { Resvg } = await import("@resvg/resvg-js");
   const resvg = new Resvg(svg, {
@@ -523,7 +539,7 @@ export async function toPng(elements, scale = 2) {
       loadSystemFonts: false,
       defaultFontFamily: "Excalifont",
     },
-    fitTo: { mode: "zoom", value: scale },
+    fitTo,
   });
 
   return Buffer.from(resvg.render().asPng());

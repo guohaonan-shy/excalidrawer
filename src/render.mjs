@@ -9,12 +9,14 @@
  * IO (writing files) is the caller's job; render only produces strings/buffers.
  */
 
+import { resolveCanvas } from "./canvas.mjs";
 import { excalidraw } from "./elements.mjs";
 import { toSvg, toPng, autoRegisterCjkFont } from "./export.mjs";
 import { desugar } from "./sugar.mjs";
 import { validate } from "./validate.mjs";
 
 export { SugarError } from "./sugar.mjs";
+export { CanvasError } from "./canvas.mjs";
 
 export const VALID_FORMATS = ["excalidraw", "svg", "png"];
 
@@ -62,9 +64,11 @@ export function validateElements(elements) {
 
 /**
  * @param {Array} elements - sugar and/or raw Excalidraw elements (may be nested; flattened)
- * @param {{ formats?: string[], scale?: number }} [opts]
- * @returns {Promise<{ outputs: Record<string,string|Buffer>, formats: string[], elementCount: number, warnings: Array }>}
- * @throws {SugarError|ElementValidationError}
+ * @param {{ formats?: string[], scale?: number, canvas?: object }} [opts]
+ *   `canvas` pins the SVG/PNG output to a fixed size (see src/canvas.mjs).
+ *   The .excalidraw output always keeps the authored coordinates.
+ * @returns {Promise<{ outputs: Record<string,string|Buffer>, formats: string[], elementCount: number, warnings: Array, canvas?: object }>}
+ * @throws {SugarError|ElementValidationError|CanvasError}
  */
 export async function render(elements, opts = {}) {
   const flat = Array.isArray(elements) ? elements.flat(Infinity) : elements;
@@ -75,9 +79,15 @@ export async function render(elements, opts = {}) {
   const issues = validateElements(raw);
   if (issues.length > 0) throw new ElementValidationError(issues);
 
-  // Non-fatal quality lint (text overflow / overlap / degenerate arrows).
-  // Surfaced to the caller so the render loop can self-heal before done.
-  const warnings = validate(raw);
+  // Resolve the output canvas up front: the linter needs the final scale to
+  // judge on-screen readability, and a bad spec should fail before any file
+  // is written. May throw CanvasError.
+  const canvas = opts.canvas ? resolveCanvas(raw, opts.canvas) : null;
+
+  // Non-fatal quality lint (text overflow / overlap / degenerate arrows, plus
+  // canvas fit when one is given). Surfaced to the caller so the render loop
+  // can self-heal before done.
+  const warnings = validate(raw, canvas ? { canvas } : undefined);
 
   // Auto-load a system CJK font when Chinese / Japanese / Korean text is
   // present. No-op for Latin-only diagrams.
@@ -89,13 +99,24 @@ export async function render(elements, opts = {}) {
     throw new Error(`unknown format(s): ${unknown.join(", ")}. Valid: ${VALID_FORMATS.join(", ")}`);
   }
 
-  const scale = opts.scale ?? 2;
+  const svgOpts = opts.canvas ? { canvas: opts.canvas } : {};
   const outputs = {};
   for (const fmt of formats) {
+    // .excalidraw keeps the authored coordinates — a canvas is an export
+    // concern, and Excalidraw itself has no notion of a fixed page.
     if (fmt === "excalidraw") outputs.excalidraw = excalidraw(raw);
-    else if (fmt === "svg") outputs.svg = toSvg(raw);
-    else if (fmt === "png") outputs.png = await toPng(raw, scale);
+    else if (fmt === "svg") outputs.svg = toSvg(raw, svgOpts);
+    else if (fmt === "png") outputs.png = await toPng(raw, { scale: opts.scale, canvas: opts.canvas });
   }
 
-  return { outputs, formats, elementCount: raw.length, warnings };
+  const out = { outputs, formats, elementCount: raw.length, warnings };
+  if (canvas) {
+    out.canvas = {
+      width: canvas.width,
+      height: canvas.height,
+      scale: Math.round(canvas.scale * 1000) / 1000,
+      fill: Math.round(canvas.fill * 100) / 100,
+    };
+  }
+  return out;
 }
