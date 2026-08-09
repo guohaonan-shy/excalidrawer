@@ -17,7 +17,7 @@ diagram needs to come out of an automated pipeline:
   re-dragging boxes every time the source changes.
 - **In CI / docs builds** — render `.svg` / `.png` as a build step so the diagrams
   in your README or docs site never drift from the system they describe.
-- **In an AI agent** — the MCP server (and the Claude Code plugin's skills) let an
+- **In an AI agent** — the MCP server (and the agent plugin's skills) let an
   agent produce a diagram in-context ("draw the auth flow") without leaving the
   conversation.
 
@@ -29,27 +29,39 @@ you want.
 
 Most users want the **agent plugin** — it bundles the flowchart / timeline /
 architecture / sequence skills and wires them to the MCP server, so you can
-just say *"draw the auth flow"* inside Claude Code. The CLI and library entry
-points are below for scripting and custom use cases.
+just say *"draw the auth flow"* inside Claude Code or Codex. The CLI and
+library entry points are below for scripting and custom use cases.
 
-### Agent plugin (Claude Code, recommended)
+### Agent plugin (Claude Code / Codex, recommended)
 
 Two commands and you're done — the plugin bundles the skills **and**
 auto-registers the MCP server via its manifest (no global npm install, no
-separate `claude mcp add`):
+separate `claude mcp add` / `codex mcp add`).
+
+In Claude Code:
 
 ```bash
 /plugin marketplace add guohaonan-shy/excalidrawer
 /plugin install excalidrawer@excalidrawer-dev
 ```
 
-The MCP server runs via `npx -y -p excalidrawer@latest -c excalidrawer-mcp`, so
-the first invocation downloads the package into the npx cache (~5-10 s);
-subsequent runs use the cache.
+In Codex:
 
-> Plugin-manifest auto-MCP is a Claude-Code feature. In Cursor, Codex, or
-> Claude Desktop, register the MCP server directly — see
-> [MCP Server](#mcp-server) below.
+```bash
+codex plugin marketplace add guohaonan-shy/excalidrawer
+codex plugin add excalidrawer@excalidrawer-dev
+```
+
+Codex reads this repo's `.claude-plugin/marketplace.json` directly, so both
+clients get the same skills and the same auto-registered MCP server — verify
+with `codex plugin list` / `codex mcp list`.
+
+The MCP server runs via `npx`, so the first invocation downloads the package
+into the npx cache (~5-10 s); subsequent runs use the cache.
+
+> Auto-registering the MCP server from the plugin manifest is a plugin-host
+> feature. In a client that doesn't install plugins, register the MCP server
+> directly — see [MCP Server](#mcp-server) below.
 
 ### CLI & MCP server only
 
@@ -111,6 +123,12 @@ or `%APPDATA%\Claude\claude_desktop_config.json` (Windows), then restart the app
 
 ### Codex
 
+Only if you want the two MCP tools **without** the skills. The recommended
+Codex path is [the plugin](#agent-plugin-claude-code--codex-recommended), which
+brings the skills and this MCP server together — a bare `codex mcp add` gives
+you `render_diagram` / `compute_layout` but none of the recipes (palette
+conventions, back-edge routing, swimlane parameters, quality gates).
+
 ```bash
 codex mcp add excalidrawer -- npx -y -p excalidrawer@latest -c excalidrawer-mcp
 ```
@@ -118,8 +136,8 @@ codex mcp add excalidrawer -- npx -y -p excalidrawer@latest -c excalidrawer-mcp
 ## Agent Skills
 
 The [`skills/`](skills/) directory holds one skill per diagram type plus a
-shared base they all read first. They ship as part of the Claude Code plugin
-above.
+shared base they all read first. They ship as part of the agent plugin above —
+Claude Code and Codex both install them.
 
 | Skill | Use for | Trigger keywords |
 |-------|---------|------------------|
@@ -137,7 +155,7 @@ elements, then calls the MCP server's `render_diagram` tool to emit
 `.excalidraw` / `.svg` / `.png`.
 
 > All skills call the `excalidrawer-mcp` server. The plugin install above ships
-> a manifest that registers it automatically; for any other client, wire up the
+> a manifest that registers it automatically; without the plugin, wire up the
 > MCP server per [MCP Server](#mcp-server).
 
 ## CLI
