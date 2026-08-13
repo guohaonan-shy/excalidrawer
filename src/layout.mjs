@@ -13,7 +13,7 @@
 // ============================================================================
 
 import { colors } from "./elements.mjs";
-import { textHeight } from "./text.mjs";
+import { textHeight, fitBoundText } from "./text.mjs";
 
 // ---------------------------------------------------------------------------
 // gridLayout
@@ -468,15 +468,41 @@ export function labelAnchor(absPoints, opts = {}) {
  *   box("b1", "b1t", x, y, w, h, t.stroke, "Header", 14, { strokeColor: txt });
  */
 export function contrastText(hex) {
+  return relativeLuminance(hex, "contrastText") > 0.179 ? "#000000" : "#ffffff";
+}
+
+/**
+ * Keep an accent color as a label only while it stays legible on its
+ * background; otherwise fall back to a color that is.
+ *
+ * The palette's light accents (yellow, orange) drop under the 3:1 WCAG floor
+ * on their own `bg*` tint — the same threshold the `LOW_CONTRAST` lint uses —
+ * so tinting a label with its section color is safe for some hues and not
+ * others. This picks per-hue instead of per-diagram.
+ *
+ * @param {string} hex   - "#RRGGBB" the label would like to be
+ * @param {string} bgHex - "#RRGGBB" it sits on
+ * @param {object} [opts]
+ * @param {number} [opts.min=3] - minimum contrast ratio to keep `hex`
+ * @returns {string} `hex` when it clears `min`, else `contrastText(bgHex)`
+ */
+export function readableOn(hex, bgHex, opts = {}) {
+  const min = opts.min ?? 3;
+  const la = relativeLuminance(hex, "readableOn");
+  const lb = relativeLuminance(bgHex, "readableOn");
+  const ratio = (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+  return ratio >= min ? hex : contrastText(bgHex);
+}
+
+function relativeLuminance(hex, who) {
   if (typeof hex !== "string" || !/^#[0-9a-fA-F]{6}$/.test(hex)) {
-    throw new Error(`contrastText: expected "#RRGGBB", got "${hex}"`);
+    throw new Error(`${who}: expected "#RRGGBB", got "${hex}"`);
   }
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
   const b = parseInt(hex.slice(5, 7), 16) / 255;
   const lin = (c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
-  const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-  return L > 0.179 ? "#000000" : "#ffffff";
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
 }
 
 // ---------------------------------------------------------------------------
@@ -631,4 +657,74 @@ export function titledBox(opts = {}) {
     title: { x: innerX, y: titleY, w: innerW, h: titleH, fontSize: titleFontSize },
     body: { x: innerX, y: bodyY, w: innerW, h: bodyH, fontSize: bodyFontSize },
   };
+}
+
+// ---------------------------------------------------------------------------
+// equalize
+// ---------------------------------------------------------------------------
+
+/**
+ * One height that fits every cell in a group — the "measure, take the max,
+ * apply to all" step that keeps a row of sibling boxes from going ragged.
+ *
+ * Sugar's bound text treats a box's `h` as a *floor*: a label that wraps grows
+ * its own box and nothing else, so three boxes declared at the same size can
+ * render at three different heights. Measure the group first, then build every
+ * box at the returned `h` — the label still wraps and centers, the boxes stay
+ * level, and the overflow lint still applies.
+ *
+ * Measurement reuses `fitBoundText` / `titledBox`, so the numbers agree with
+ * what the renderer will actually do. Widths are per-cell inputs and are
+ * returned untouched — this equalizes height only.
+ *
+ * @param {Array<object>} cells - one descriptor per cell, each of:
+ *   - `{ w, text, fontSize? }`  — a bound-text box (label wrapped to `w`)
+ *   - `{ w, title, body?, titleFontSize?, bodyFontSize?, padding?, gap? }`
+ *                               — a titled box (header + body, `titledBox` math)
+ *   - `{ w, h }`                — a cell whose height is already known
+ * @param {object} [opts]
+ * @param {number} [opts.minH=0] - floor for the resulting height
+ *
+ * @returns {{ h: number, cells: Array<{ w: number, h: number, contentH: number }> }}
+ *   `h` is the group height; every entry in `cells` carries that same `h`
+ *   plus its own `contentH` (what it needed on its own).
+ *
+ * @example
+ *   const row = equalize([
+ *     { w: 400, text: "Speaking: Listen & Repeat, Interview", fontSize: 15 },
+ *     { w: 400, text: "Speaking: Listen & Repeat, Interview\nWriting: Email", fontSize: 15 },
+ *   ]);
+ *   // → { h: 62, cells: [{ w: 400, h: 62, contentH: 41 }, { w: 400, h: 62, contentH: 62 }] }
+ *   // build both rects at row.h — they stay level whichever label wrapped
+ */
+export function equalize(cells, opts = {}) {
+  if (!Array.isArray(cells) || cells.length === 0) {
+    throw new Error("equalize: `cells` must be a non-empty array");
+  }
+  const minH = opts.minH ?? 0;
+
+  const measured = cells.map((cell, i) => {
+    const w = cell?.w;
+    if (typeof w !== "number" || !Number.isFinite(w) || w <= 0) {
+      throw new Error(`equalize: cells[${i}] needs a positive numeric \`w\``);
+    }
+    let contentH;
+    if (typeof cell.h === "number" && Number.isFinite(cell.h)) {
+      contentH = cell.h;
+    } else if (typeof cell.title === "string") {
+      contentH = titledBox({ ...cell, x: 0, y: 0, w }).box.h;
+    } else if (typeof cell.text === "string") {
+      contentH = cell.text === ""
+        ? 0
+        : fitBoundText(cell.text, w, 0, cell.fontSize ?? 16).height;
+    } else {
+      throw new Error(
+        `equalize: cells[${i}] needs one of \`text\`, \`title\`, or a numeric \`h\``
+      );
+    }
+    return { w, contentH };
+  });
+
+  const h = Math.max(minH, ...measured.map((m) => m.contentH));
+  return { h, cells: measured.map((m) => ({ w: m.w, h, contentH: m.contentH })) };
 }

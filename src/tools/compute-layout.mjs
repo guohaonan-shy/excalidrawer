@@ -1,7 +1,7 @@
 import { defineTool } from "./schema.mjs";
 import {
   gridLayout, chain, swimlane, hubSpoke, edgePoint, routeU, labelAnchor,
-  fitContainer, titledBox,
+  fitContainer, titledBox, equalize,
 } from "../layout.mjs";
 
 /**
@@ -19,6 +19,7 @@ const DISPATCH = {
   labelAnchor: (a) => labelAnchor(a.points, a),
   fitContainer:(a) => fitContainer(a.children, a),
   titledBox:   (a) => titledBox(a),
+  equalize:    (a) => equalize(a.cells, a),
 };
 
 export const HELPERS = Object.keys(DISPATCH);
@@ -39,6 +40,8 @@ export const computeLayout = defineTool({
     "  labelAnchor — { points:[[x,y]...], padding?, preferSide? } → {x,y,side,segmentIdx}\n" +
     "  fitContainer— { children:[{x,y,w,h}], padding?, minW?, minH? } → {x,y,w,h} (wraps children, equal pad incl. bottom)\n" +
     "  titledBox   — { x, y, w, title, body?, titleFontSize?, bodyFontSize?, padding?, gap? } → {box,title,body} (header+body, auto-height)\n" +
+    "  equalize    — { cells:[{w,text,fontSize?}|{w,title,body?,...}|{w,h}], minH? } → {h, cells:[{w,h,contentH}]} " +
+    "(one height that fits the whole group — build every sibling box at `h` so a wrapped label can't leave the row ragged)\n" +
     "On bad input it returns { error }.",
   params: {
     helper: {

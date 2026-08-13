@@ -129,6 +129,19 @@ test("compute_layout: dispatches edgePoint", () => {
   assert.deepEqual(result.result, { x: 100, y: 50 });
 });
 
+test("compute_layout: dispatches equalize", () => {
+  const tool = getTool("compute_layout");
+  const res = tool.run({
+    helper: "equalize",
+    args: { cells: [{ w: 180, text: "Auth", fontSize: 15 },
+                    { w: 180, text: "Payment Reconciliation & Settlement", fontSize: 15 }] },
+  });
+  assert.equal(res.helper, "equalize");
+  assert.equal(res.result.cells.length, 2);
+  assert.equal(res.result.cells[0].h, res.result.h);
+  assert.equal(res.result.cells[1].h, res.result.h);
+});
+
 test("compute_layout: unknown helper returns error", () => {
   const tool = getTool("compute_layout");
   const result = tool.run({ helper: "bogus", args: {} });

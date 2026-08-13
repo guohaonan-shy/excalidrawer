@@ -27,6 +27,7 @@
 import { setSeed, box, arrow, textEl, rect, colors, excalidraw } from "../elements.mjs";
 import { toSvg, toPng } from "../export.mjs";
 import { estimateTextWidth, wrapText, lineCount, textHeight } from "../text.mjs";
+import { readableOn } from "../layout.mjs";
 
 // Map color name strings to actual color values
 const COLOR_MAP = {
@@ -132,12 +133,16 @@ export function architecture(data, opts = {}) {
       })
     );
 
-    // Section label — use full available width so long labels are never clipped
+    // Section label — use full available width so long labels are never clipped.
+    // Deliberately centered: the exporter centers every text element, so a
+    // `textAlign: "left"` here would only make the .excalidraw file disagree
+    // with the SVG/PNG we render from it.
     fgElements.push(
       textEl(`sec-${si}-lbl`, PAD + SECTION_PAD, curY + SECTION_PAD - 4,
         sectionW - SECTION_PAD * 2, SECTION_LABEL_H, section.label, 16, {
-          textAlign: "left",
-          strokeColor: palette.stroke,
+          // Light accents (yellow/orange) fall under the 3:1 floor on their own
+          // tint — keep the hue where it reads, drop to ink where it doesn't.
+          strokeColor: readableOn(palette.stroke, palette.bg),
         })
     );
 

@@ -139,6 +139,11 @@ break points.
 
 ## Common pitfalls
 
+- **Milestone cards at different heights** → one long `desc` grows its own
+  card and the row of labels goes ragged above/below the axis. Run
+  `compute_layout` `equalize` over the cards on the same side of the axis and
+  build them all at the returned `h`; the axis offset then stays constant.
+
 - **Axis line piercing dots** (Style A but with a single axis arrow) →
   arrows always render after shapes; the line draws over dots. → Use
   discrete segments.

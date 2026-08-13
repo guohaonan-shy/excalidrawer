@@ -135,6 +135,14 @@ This loops the connection below the entire row.
 
 ## Common pitfalls
 
+- **Sibling nodes at different heights** → a long label wraps and grows only
+  its own box, so a row of branches ends up ragged (`h` is a floor, not a
+  fixed height). Before building any set of nodes meant to read as one row —
+  the branches under a decision, a bank of parallel steps — run
+  `compute_layout` `equalize` over them and build every box at the returned
+  `h`. Arrow anchoring gets steadier too: same-height siblings mean the
+  `left`/`right` edge points line up.
+
 - **Auto-side picks the wrong edge for back-edges.** → Always set explicit
   perpendicular sides on back-edges.
 - **Multiple arrows converging on one decision target.** → Spread `toT`

@@ -102,6 +102,11 @@ step 4").
 
 ## Common pitfalls
 
+- **Actor headers at different heights** → a long actor name wraps and grows
+  only its own header, so the lifelines start at different y. Run
+  `compute_layout` `equalize` over all actor headers and build them at the
+  returned `h`, then drop every lifeline from that single baseline.
+
 - **Solid bar lifelines** (using a thin rect instead of dashed arrow) →
   obscures message labels that cross them. → Always use
   `{ shape:"arrow", head:"none", dashed:true, stroke:"gray" }`.

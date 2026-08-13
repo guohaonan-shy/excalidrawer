@@ -146,6 +146,12 @@ Title at `y = 30`, fontSize `26-28`, size width = the full diagram span:
 
 ## Common pitfalls
 
+- **Items in one tier at different heights** → the item with the long label
+  wraps and grows alone, breaking the band. `swimlane`'s `itemH` is a floor,
+  not a promise. Run `compute_layout` `equalize` over the tier's items first,
+  then pass the returned `h` as `itemH` (and size the lane band from it) so
+  the whole tier sits level.
+
 - **API Gateway buried in Business tier** → arrows from the gateway must
   cross same-row items. → Give it its own tier.
 - **swimlane left-packs items** → connection-heavy diagrams get diagonal

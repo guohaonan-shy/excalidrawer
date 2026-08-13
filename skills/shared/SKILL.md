@@ -1,13 +1,13 @@
 ---
 name: shared
-description: Shared base for the excalidrawer diagram skills (flowchart / timeline / architecture / sequence). Holds the cross-cutting conventions every type skill depends on — MCP precheck + CLI fallback, sugar schema reference, color palette, output file naming, label language, export format selection, and iteration rules. The type skills declare "前置条件：先 Read ../shared/SKILL.md" and rely on this. Not a standalone drawing skill — read it first, then follow the type-specific recipe. 通用约定 / 基座 / sugar / 配色 / 命名 / 导出格式。
+description: Shared base for the excalidrawer diagram skills (flowchart / timeline / architecture / sequence / comparison). Holds the cross-cutting conventions every type skill depends on — MCP precheck + CLI fallback, sugar schema reference, color palette, output file naming, label language, export format selection, and iteration rules. The type skills declare "前置条件：先 Read ../shared/SKILL.md" and rely on this. Not a standalone drawing skill — read it first, then follow the type-specific recipe. 通用约定 / 基座 / sugar / 配色 / 命名 / 导出格式。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
 # excalidrawer shared base
 
 Cross-cutting rules for every diagram type. The type skills
-(`flowchart` / `timeline` / `architecture` / `sequence`)
+(`flowchart` / `timeline` / `architecture` / `sequence` / `comparison`)
 **MUST read this file first** before composing elements. This file is the
 single source of truth for the common machinery; the type skills add only
 their own clarify questions and layout recipe on top.
@@ -38,8 +38,8 @@ If the MCP tools aren't available (server failed to start, older host,
 sandboxed env), fall back to the CLI shipped by the same package:
 
 ```bash
-npx -y -p excalidrawer@^0.5.11 -c 'excalidrawer render -i elements.json -o ./flowchart-foo'
-npx -y -p excalidrawer@^0.5.11 -c "excalidrawer compute-layout --helper gridLayout -a '{...}'"
+npx -y -p excalidrawer@^0.5.13 -c 'excalidrawer render -i elements.json -o ./flowchart-foo'
+npx -y -p excalidrawer@^0.5.13 -c "excalidrawer compute-layout --helper gridLayout -a '{...}'"
 ```
 
 `elements.json` accepts either a bare sugar array or `{ "elements": [...] }`.
@@ -84,6 +84,7 @@ names — never `outputs/<timestamp>/` subfolders.
 | timeline | `./timeline-<name>.{excalidraw,svg,png}` |
 | architecture | `./architecture-<name>.{excalidraw,svg,png}` |
 | sequence | `./sequence-<name>.{excalidraw,svg,png}` |
+| comparison | `./comparison-<name>.{excalidraw,svg,png}` |
 | freeform | `./diagram-<name>.{excalidraw,svg,png}` |
 
 `<name>` is a short kebab-case derived from the request (e.g. `login-flow`,
@@ -148,7 +149,9 @@ accept a defect — they are all fixable.
 `render_diagram` runs a geometry lint on every success and returns a `warnings`
 array **only when something is wrong** (files are still written — warnings are
 non-fatal). **A non-empty `warnings` means NOT done: fix the flagged elements and
-re-render until `warnings` is absent.**
+re-render until `warnings` is absent.** On the CLI fallback path the same lint
+prints to **stderr** (`⚠ N quality warning(s)`, 0.5.13+) — read it there, it is
+the same gate.
 
 Each warning is `{ code, ids, message }`; `ids` names the offending element(s),
 `message` states the fix:
