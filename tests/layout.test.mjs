@@ -10,10 +10,13 @@ import {
   labelAnchor,
   fitContainer,
   titledBox,
+  equalize,
   contrastText,
+  readableOn,
   triplet,
   colors,
   textHeight,
+  fitBoundText,
 } from "../src/index.mjs";
 
 // Float helper — geometry has rounding noise.
@@ -445,4 +448,78 @@ test("titledBox: no body → height is just padding + title + padding, no gap", 
 
 test("titledBox: missing numeric x/y/w throws", () => {
   assert.throws(() => titledBox({ y: 0, w: 100, title: "x" }), /numeric `x`, `y`, `w`/);
+});
+
+// ===========================================================================
+// equalize
+// ===========================================================================
+
+test("equalize: a wrapped label lifts the whole group to one height", () => {
+  const short = "Auth";
+  const long = "Payment Reconciliation & Settlement";
+  const g = equalize([
+    { w: 180, text: short, fontSize: 15 },
+    { w: 180, text: long, fontSize: 15 },
+    { w: 180, text: "Cache", fontSize: 15 },
+  ]);
+  // every cell reports the group height...
+  assert.deepEqual(g.cells.map((c) => c.h), [g.h, g.h, g.h]);
+  // ...which is the tallest cell's own requirement
+  assert.equal(g.h, Math.max(...g.cells.map((c) => c.contentH)));
+  assert.ok(g.cells[1].contentH > g.cells[0].contentH, "the wrapped label is taller");
+  // widths pass through untouched — this equalizes height only
+  assert.deepEqual(g.cells.map((c) => c.w), [180, 180, 180]);
+});
+
+test("equalize: measurement matches what the renderer will do to bound text", () => {
+  const text = "Payment Reconciliation & Settlement";
+  const g = equalize([{ w: 180, text, fontSize: 15 }]);
+  // same math as the sugar/box() path: wrap to inner width, then grow
+  assert.equal(g.h, fitBoundText(text, 180, 0, 15).height);
+});
+
+test("equalize: passing the group height back to a box stops the growth", () => {
+  const text = "Payment Reconciliation & Settlement";
+  const { h } = equalize([{ w: 180, text, fontSize: 15 }]);
+  // h is a floor for fitBoundText — at the group height the box no longer grows
+  assert.equal(fitBoundText(text, 180, h, 15).height, h);
+});
+
+test("equalize: mixes bound-text, titled and pre-measured cells", () => {
+  const g = equalize([
+    { w: 200, text: "one line", fontSize: 15 },
+    { w: 200, title: "Delivery", body: "a\nb\nc" },
+    { w: 200, h: 500 },
+  ]);
+  assert.equal(g.h, 500, "the known-height cell wins");
+  assert.equal(g.cells[1].contentH, titledBox({ x: 0, y: 0, w: 200, title: "Delivery", body: "a\nb\nc" }).box.h);
+});
+
+test("equalize: minH is a floor", () => {
+  const g = equalize([{ w: 100, text: "x", fontSize: 12 }], { minH: 400 });
+  assert.equal(g.h, 400);
+});
+
+test("equalize: empty text contributes no height", () => {
+  const g = equalize([{ w: 100, text: "" }, { w: 100, h: 40 }]);
+  assert.equal(g.h, 40);
+  assert.equal(g.cells[0].contentH, 0);
+});
+
+test("equalize: rejects an empty group, a bad width, and an unmeasurable cell", () => {
+  assert.throws(() => equalize([]), /non-empty array/);
+  assert.throws(() => equalize([{ w: 0, text: "x" }]), /positive numeric `w`/);
+  assert.throws(() => equalize([{ w: 100 }]), /`text`, `title`, or a numeric `h`/);
+});
+
+test("readableOn: keeps an accent that clears the floor, drops one that doesn't", () => {
+  // blue accent on its own tint is legible → kept
+  assert.equal(readableOn(colors.strokeBlue, colors.bgBlue), colors.strokeBlue);
+  // yellow accent on its own tint is ~2:1 → falls back to ink
+  assert.equal(readableOn(colors.strokeYellow, colors.bgYellow), contrastText(colors.bgYellow));
+});
+
+test("readableOn: the floor is configurable and rejects bad input", () => {
+  assert.equal(readableOn(colors.strokeBlue, colors.bgBlue, { min: 99 }), contrastText(colors.bgBlue));
+  assert.throws(() => readableOn("blue", "#ffffff"), /expected "#RRGGBB"/);
 });

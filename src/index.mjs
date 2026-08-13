@@ -29,7 +29,9 @@ export {
   labelAnchor,
   fitContainer,
   titledBox,
+  equalize,
   contrastText,
+  readableOn,
   triplet,
 } from "./layout.mjs";
 

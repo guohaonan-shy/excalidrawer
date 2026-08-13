@@ -17,6 +17,7 @@ import { fileURLToPath } from "url";
 import { timeline, flowchart, architecture, sequence } from "./templates/index.mjs";
 import { excalidraw } from "./elements.mjs";
 import { toSvg, toPng } from "./export.mjs";
+import { validate } from "./validate.mjs";
 import { getTool, parseArgs as parseToolArgs } from "./tools/index.mjs";
 
 const TEMPLATES = { timeline, flowchart, architecture, sequence };
@@ -129,7 +130,22 @@ async function cmdRender(args) {
     process.exit(1);
   }
   for (const path of result.written) console.log(`  ✓ ${path}`);
+  printWarnings(result.warnings);
   console.log("Done!");
+}
+
+/**
+ * Surface the quality lint on stdout's sibling stream. The files are already
+ * written (warnings are non-fatal), but a silent CLI made the linter invisible
+ * on the fallback path the skills document — so print, and print to stderr so
+ * anything parsing stdout keeps working.
+ */
+function printWarnings(warnings) {
+  if (!warnings || warnings.length === 0) return;
+  console.error(`  ⚠ ${warnings.length} quality warning(s):`);
+  for (const w of warnings) {
+    console.error(`    - [${w.code}] ${w.ids.join(", ")}: ${w.message}`);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -227,6 +243,9 @@ async function cmdGenerate(args) {
       console.log(`  ✓ ${args.output}.png`);
     }
   }
+  // The template path bypasses render(), so run the lint here too — otherwise
+  // `generate` is the one command that never reports a quality problem.
+  printWarnings(validate(elements));
   console.log("Done!");
 }
 

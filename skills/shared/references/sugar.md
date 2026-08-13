@@ -105,7 +105,21 @@ hubSpoke    — { center:{x,y}, spokeCount, radius, startAngleDeg?, clockwise? }
 edgePoint   — { target:{x,y,w,h,type?}, side, t? }   → { x, y }
 routeU      — { from:{x,y}, to:{x,y}, side, clearance }  → [[dx,dy]...] relative
 labelAnchor — { points:[[x,y]...], padding?, preferSide? } → { x, y, side, segmentIdx }
+titledBox   — { x, y, w, title, body?, titleFontSize?, bodyFontSize?, padding?, gap? }
+              → { box, title, body }   (header + body, auto-height)
+fitContainer— { children:[{x,y,w,h}], padding?, minW?, minH? } → { x, y, w, h }
+equalize    — { cells:[{w,text,fontSize?} | {w,title,body?,...} | {w,h}], minH? }
+              → { h, cells:[{ w, h, contentH }] }
 ```
+
+**`equalize` — build every sibling box at the returned `h`.** A box's `h` is a
+*floor*: a label that wraps grows its own box and nothing else, so three boxes
+declared `size: [180, 60]` can render 60 / 83 / 60 and leave the row ragged.
+Measure the group first, then pass the group `h` to every box in it — the label
+still wraps and centers, the boxes stay level, and the lint still applies.
+Use it for any set of shapes meant to read as one row / one band: same-row
+flowchart branches, items in one architecture tier, milestone cards, actor
+headers, and every paired cell in a comparison.
 
 Use these for placement math. Element creation always goes through
 `render_diagram` with sugar.

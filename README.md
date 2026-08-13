@@ -28,7 +28,7 @@ you want.
 ## Install
 
 Most users want the **agent plugin** — it bundles the flowchart / timeline /
-architecture / sequence skills and wires them to the MCP server, so you can
+architecture / sequence / comparison skills and wires them to the MCP server, so you can
 just say *"draw the auth flow"* inside Claude Code or Codex. The CLI and
 library entry points are below for scripting and custom use cases.
 
@@ -91,7 +91,7 @@ npm install excalidrawer
 | Tool | What it does |
 |------|--------------|
 | `render_diagram` | Render an array of sugar shorthand or raw Excalidraw elements to `.excalidraw` / `.svg` / `.png` files. |
-| `compute_layout` | Compute coordinates from a layout helper (grid, chain, swimlane, hub-and-spoke, edge anchors, U-routing, label anchors). |
+| `compute_layout` | Compute coordinates from a layout helper (grid, chain, swimlane, hub-and-spoke, edge anchors, U-routing, label anchors, titled boxes, row equalization). |
 
 Each command below registers the server with
 `npx -y -p excalidrawer@latest -c excalidrawer-mcp` — no global install needed,
@@ -145,11 +145,12 @@ Claude Code and Codex both install them.
 | `timeline` | Timelines, roadmaps, project milestones | timeline, 时间线, roadmap, milestone, Q1/Q2 phases |
 | `architecture` | System architecture, layered components, topology | architecture, 架构图, 3-tier, microservices, data platform |
 | `sequence` | Sequence diagrams, multi-actor interactions, call chains | sequence diagram, 时序图, interaction, handshake, OAuth |
+| `comparison` | Left-vs-right comparisons, A vs B, before/after, trade-offs | compare, A vs B, 对比图, side-by-side, before and after |
 | `shared` | Common base — conventions, sugar schema, palette, output rules (read first, not invoked directly) | — |
 
 Each type skill declares a prerequisite — *read `../shared/SKILL.md`
 first* — so the cross-cutting rules live in one place instead of being copied
-four times. Given a request, a type skill clarifies intent with a couple of
+into every type skill. Given a request, a type skill clarifies intent with a couple of
 `AskUserQuestion` prompts, reads its recipe under `references/`, composes sugar
 elements, then calls the MCP server's `render_diagram` tool to emit
 `.excalidraw` / `.svg` / `.png`.
@@ -215,6 +216,9 @@ The full sugar schema (shapes, arrows, layout helpers, `fill` / `stroke` /
 |----------|-------------|
 | `gridLayout`, `chain`, `swimlane`, `hubSpoke` | Position helpers — coordinates for grids, chains, swimlanes, hub-and-spoke. |
 | `edgePoint`, `routeU`, `labelAnchor` | Edge anchors, U-route detours, and label anchors for arrows. |
+| `titledBox`, `fitContainer` | Auto-sized geometry — a header+body card, and a container fitted to its children. |
+| `equalize` | One height that fits a group of cells, so a wrapped label can't leave a row of sibling boxes ragged. |
+| `contrastText`, `readableOn` | Pick a legible label color for a given fill (3:1 WCAG floor). |
 
 These back the `compute_layout` MCP tool — see
 [`skills/shared/references/sugar.md`](skills/shared/references/sugar.md) for usage.

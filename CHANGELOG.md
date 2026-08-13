@@ -4,6 +4,68 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.5.13
+
+_engine 0.5.13 · plugin 0.0.4_
+
+### Added
+
+- **New `comparison` skill** — left-vs-right A/B diagrams: product vs product,
+  before/after, old vs new approach, option trade-offs. Three layouts are
+  covered (symmetric two-column with a `VS` badge, three-column with a center
+  dimension label, and asymmetric where one side splits into sub-cards), plus
+  the card grammar that makes a comparison read as a comparison — a solid
+  header card, a short arrow, and a dashed body panel per side.
+  Say *"compare A and B"* / *"画个对比图"* and the skill takes it from there.
+
+- **`equalize` layout helper** (`compute_layout` + library export). A box's
+  `h` is a floor, so the box whose label wraps grows alone and a row of
+  siblings ends up ragged. `equalize` measures the group and returns one
+  height that fits all of them — build every box at that height and the row
+  stays level while labels still wrap, center, and lint as usual. Works on
+  plain labelled boxes, `titledBox`-style header+body cards, and cells whose
+  height you already know:
+
+  ```js
+  compute_layout({ helper: "equalize", args: { cells: [
+    { w: 180, text: "Auth" },
+    { w: 180, text: "Payment Reconciliation & Settlement" },
+  ]}})
+  // → { h, cells: [{ w, h, contentH }, …] }
+  ```
+
+  All five skill recipes now use it for their sibling rows — flowchart
+  branches, items in an architecture tier, milestone cards, actor headers, and
+  every paired cell in a comparison.
+
+- **`readableOn(color, bg)`** — returns the accent color when it clears the
+  3:1 contrast floor on that background, and a legible ink color when it
+  doesn't. Exported alongside `contrastText`.
+
+- **`examples/comparison-figures.mjs`** — the comparison recipe's three worked
+  examples as runnable code (row cards, single panel, and an asymmetric split),
+  so the layout rules can be read as working code rather than prose.
+
+### Fixed
+
+- **The CLI now reports quality warnings.** `excalidrawer render` computed the
+  geometry lint and then printed only the written paths, so overflowing text
+  and overlapping shapes were silently shipped; `excalidrawer generate` never
+  ran the lint at all. Both now print `⚠ N quality warning(s)` to stderr (stdout
+  is unchanged, so existing pipelines keep working). This is the same gate the
+  MCP `render_diagram` tool has always returned in its result.
+
+- **Architecture template: washed-out section labels.** Yellow and orange tier
+  labels sat at ~2:1 contrast against their own background tint — below the
+  legibility floor the linter enforces. Those two now render in ink; every
+  other tier keeps its accent color.
+
+- **Architecture template: `.excalidraw` and the rendered image disagreed.**
+  Section labels were written with `textAlign: "left"`, which the exporter
+  ignores (it centers all text), so opening the file in Excalidraw showed a
+  left-aligned label where the exported SVG/PNG showed a centered one. The
+  file now matches what we render; exported images are unchanged.
+
 ## 0.5.12
 
 _engine 0.5.12 · plugin 0.0.3_
