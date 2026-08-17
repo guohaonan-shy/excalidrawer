@@ -1,7 +1,17 @@
 # Design note: the missing component layer
 
-**Status:** thinking out loud. Nothing here is scheduled. Written 2026-08-13,
-after the 0.5.13 work (`equalize`) surfaced the same problem three times.
+**Status:** planned — direction agreed 2026-08-17, not yet scheduled to a
+version; tracked from the [README roadmap](../README.md#roadmap). Written
+2026-08-13, after the 0.5.13 work (`equalize`) surfaced the same problem
+three times. Updated 2026-08-17: reading [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design)
+confirmed this is a real differentiator, not wasted effort — they have *zero*
+code-level components (SVG idioms copy-pasted per type in markdown,
+consistency enforced by 9 post-hoc CI linters). `equalize`/`stack` construct
+correctly by design instead of catching drift after the fact. The composite
+types in [`diagram-types.md`](diagram-types.md) — tree (recursive stack),
+pyramid (tapered stack) — will need this layer to avoid the same hardcoded-
+geometry trap the architecture/comparison recipes hit; sequence that work
+together rather than adding types first and components later.
 
 ## The observation
 

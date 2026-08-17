@@ -247,6 +247,24 @@ colors.strokeBlue / colors.strokeGreen / colors.strokeYellow / colors.strokeOran
 In sugar, set `fill` for the background, `stroke` for the border, and
 `textColor` (palette key or `#rrggbb`) for a bound label.
 
+## Roadmap
+
+Directions being explored, each tracked in its own design note under
+[`docs/`](docs/) (see [`docs/roadmap.md`](docs/roadmap.md) for the versioned
+engineering roadmap):
+
+- New diagram types (state machine, tree, pyramid/funnel, bar/line charts,
+  high-level data-stack) + a public example gallery —
+  [`docs/diagram-types.md`](docs/diagram-types.md)
+- WebP output + scenario-aware format selection —
+  [`docs/output-formats.md`](docs/output-formats.md)
+- Mermaid import — [`docs/mermaid-import.md`](docs/mermaid-import.md)
+- draw.io import — [`docs/drawio-import.md`](docs/drawio-import.md)
+- A shared component layer for composite layouts —
+  [`docs/component-layer.md`](docs/component-layer.md)
+- Agent-runtime ecosystem integration (Pi, DeepSeek, Hermes) —
+  [`docs/ecosystem-integration.md`](docs/ecosystem-integration.md)
+
 ## License
 
 MIT
