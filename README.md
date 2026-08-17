@@ -262,6 +262,8 @@ engineering roadmap):
 - draw.io import — [`docs/drawio-import.md`](docs/drawio-import.md)
 - A shared component layer for composite layouts —
   [`docs/component-layer.md`](docs/component-layer.md)
+- Hand-drawn-style icon primitives —
+  [`docs/icon-library.md`](docs/icon-library.md)
 - Agent-runtime ecosystem integration (Pi, DeepSeek, Hermes) —
   [`docs/ecosystem-integration.md`](docs/ecosystem-integration.md)
 

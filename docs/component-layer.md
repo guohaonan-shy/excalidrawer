@@ -13,6 +13,10 @@ pyramid (tapered stack) — will need this layer to avoid the same hardcoded-
 geometry trap the architecture/comparison recipes hit; sequence that work
 together rather than adding types first and components later.
 
+See also [`icon-library.md`](icon-library.md) — a related but distinct
+problem (primitive *content* to place inside a component's slot, not
+layout math), tracked as its own effort.
+
 ## The observation
 
 Across the five skill recipes, the same structure keeps being described in
