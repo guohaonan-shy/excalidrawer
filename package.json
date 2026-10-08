@@ -28,6 +28,14 @@
   ],
   "author": "guohaonan-shy",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guohaonan-shy/excalidrawer.git"
+  },
+  "homepage": "https://github.com/guohaonan-shy/excalidrawer#readme",
+  "bugs": {
+    "url": "https://github.com/guohaonan-shy/excalidrawer/issues"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@resvg/resvg-js": "^2.6.2",

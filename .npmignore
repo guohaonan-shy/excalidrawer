@@ -7,3 +7,6 @@ examples/
 convert-fonts.mjs
 test-font.mjs
 skills-lock.json
+
+# Repo docs, incl. README gallery PNGs — npm renders README images from GitHub
+docs/
