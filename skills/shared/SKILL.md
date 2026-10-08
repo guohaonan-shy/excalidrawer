@@ -1,13 +1,13 @@
 ---
 name: shared
-description: Shared base for the excalidrawer diagram skills (flowchart / timeline / architecture / sequence / comparison). Holds the cross-cutting conventions every type skill depends on — MCP precheck + CLI fallback, sugar schema reference, color palette, output file naming, label language, export format selection, and iteration rules. The type skills declare "前置条件：先 Read ../shared/SKILL.md" and rely on this. Not a standalone drawing skill — read it first, then follow the type-specific recipe. 通用约定 / 基座 / sugar / 配色 / 命名 / 导出格式。
+description: Shared base for the excalidrawer diagram skills (flowchart / timeline / architecture / sequence / comparison / tree). Holds the cross-cutting conventions every type skill depends on — MCP precheck + CLI fallback, sugar schema reference, color palette, output file naming, label language, export format selection, and iteration rules. The type skills declare "前置条件：先 Read ../shared/SKILL.md" and rely on this. Not a standalone drawing skill — read it first, then follow the type-specific recipe. 通用约定 / 基座 / sugar / 配色 / 命名 / 导出格式。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
 # excalidrawer shared base
 
 Cross-cutting rules for every diagram type. The type skills
-(`flowchart` / `timeline` / `architecture` / `sequence` / `comparison`)
+(`flowchart` / `timeline` / `architecture` / `sequence` / `comparison` / `tree`)
 **MUST read this file first** before composing elements. This file is the
 single source of truth for the common machinery; the type skills add only
 their own clarify questions and layout recipe on top.
@@ -85,6 +85,7 @@ names — never `outputs/<timestamp>/` subfolders.
 | architecture | `./architecture-<name>.{excalidraw,svg,png}` |
 | sequence | `./sequence-<name>.{excalidraw,svg,png}` |
 | comparison | `./comparison-<name>.{excalidraw,svg,png}` |
+| tree | `./tree-<name>.{excalidraw,svg,png}` |
 | freeform | `./diagram-<name>.{excalidraw,svg,png}` |
 
 `<name>` is a short kebab-case derived from the request (e.g. `login-flow`,

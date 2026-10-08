@@ -1,7 +1,7 @@
 import { defineTool } from "./schema.mjs";
 import {
   gridLayout, chain, swimlane, hubSpoke, edgePoint, routeU, labelAnchor,
-  fitContainer, titledBox, equalize,
+  fitContainer, titledBox, equalize, tree,
 } from "../layout.mjs";
 
 /**
@@ -20,6 +20,7 @@ const DISPATCH = {
   fitContainer:(a) => fitContainer(a.children, a),
   titledBox:   (a) => titledBox(a),
   equalize:    (a) => equalize(a.cells, a),
+  tree:        (a) => tree(a.root, a),
 };
 
 export const HELPERS = Object.keys(DISPATCH);
@@ -42,6 +43,10 @@ export const computeLayout = defineTool({
     "  titledBox   — { x, y, w, title, body?, titleFontSize?, bodyFontSize?, padding?, gap? } → {box,title,body} (header+body, auto-height)\n" +
     "  equalize    — { cells:[{w,text,fontSize?}|{w,title,body?,...}|{w,h}], minH? } → {h, cells:[{w,h,contentH}]} " +
     "(one height that fits the whole group — build every sibling box at `h` so a wrapped label can't leave the row ragged)\n" +
+    "  tree        — { root:{label,desc?,id?,children?:[node|string]}, direction?:'right'|'down', widths?:[perDepth], fontSize?, minH?, " +
+    "levelGap?, siblingGap?, groupGap?, equalize?:'depth'|'siblings'|'none', originX?, originY? } → " +
+    "{nodes:[{id,parent,depth,leaf,label,fontSize,x,y,w,h,titled?}], segments:[{kind,at,points}], levels, bounds} " +
+    "(tidy tree: parents centered on their children, subtrees never overlap; each segment is a ready L4 arrow — draw with head:'none')\n" +
     "On bad input it returns { error }.",
   params: {
     helper: {

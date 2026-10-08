@@ -13,7 +13,7 @@
 // ============================================================================
 
 import { colors } from "./elements.mjs";
-import { textHeight, fitBoundText } from "./text.mjs";
+import { textHeight, fitBoundText, wrapText, estimateTextWidth, BOUND_TEXT_PAD_X } from "./text.mjs";
 
 // ---------------------------------------------------------------------------
 // gridLayout
@@ -727,4 +727,309 @@ export function equalize(cells, opts = {}) {
 
   const h = Math.max(minH, ...measured.map((m) => m.contentH));
   return { h, cells: measured.map((m) => ({ w: m.w, h, contentH: m.contentH })) };
+}
+
+// ---------------------------------------------------------------------------
+// tree
+// ---------------------------------------------------------------------------
+
+const TREE_DIRECTIONS = {
+  right: "right", horizontal: "right", lr: "right", "left-right": "right",
+  down: "down", vertical: "down", tb: "down", td: "down", "top-down": "down",
+};
+
+// Per-direction defaults. Index = depth; the last entry repeats for deeper levels.
+const TREE_DEFAULTS = {
+  right: { fontSize: [20, 16, 15], minH: [56, 48, 40], levelGap: 72, siblingGap: 16, groupGap: 32, equalize: "siblings" },
+  down:  { fontSize: [20, 16, 15], minH: [60, 56, 52], levelGap: 64, siblingGap: 24, groupGap: 40, equalize: "depth" },
+};
+
+const TITLED_PAD = 12;
+const TITLED_GAP = 4;
+
+const atDepth = (v, d, fallback) =>
+  Array.isArray(v) ? (v.length ? v[Math.min(d, v.length - 1)] : fallback) : (v ?? fallback);
+
+/**
+ * Tidy tree layout — root → children hierarchy, growing right (root on the
+ * left) or down (root on top). Returns coordinates only: node boxes plus the
+ * connector segments, ready for `box`/`rect` + `arrow` (or sugar L4 arrows).
+ *
+ * Correct by construction, not eyeballed:
+ *   - Leaves are stacked in input order along the breadth axis; every subtree
+ *     owns a contiguous band of it, so subtrees never overlap.
+ *   - Each parent sits at the midpoint of its first and last child
+ *     (recursively); a parent larger than its children's band pushes the band
+ *     out instead of overlapping a neighbour.
+ *   - All nodes at one depth share a column (right) / row (down), so
+ *     connectors only ever run through the gap between levels — no edge
+ *     crosses a box or another edge.
+ *   - Node heights come from the same `fitBoundText` / `titledBox` math the
+ *     renderer uses, then are equalized per `equalize` so rows stay level.
+ *
+ * Connectors are one shared trunk per parent: a `stem` from the parent to the
+ * mid-gap trunk line, a `spine` along the trunk spanning the children, and one
+ * `branch` per child from the trunk into the child. A child aligned with its
+ * parent gets a single straight branch from the parent instead.
+ *
+ * @param {object} root - `{ label, desc?, id?, children?: [node | string] }`
+ *   (a bare string is shorthand for a leaf `{ label }`). Extra node fields are
+ *   passed through on the result as `data`.
+ * @param {object} [opts]
+ * @param {"right"|"down"} [opts.direction="right"] - also accepts horizontal/vertical, LR/TB
+ * @param {number|number[]} [opts.widths]     - node width per depth (auto from labels if omitted)
+ * @param {number|number[]} [opts.fontSize]   - label font size per depth
+ * @param {number|number[]} [opts.descFontSize] - `desc` font size per depth (default fontSize − 3)
+ * @param {number|number[]} [opts.minH]       - minimum node height per depth
+ * @param {number} [opts.maxW]                - cap for auto widths (default right: 280, leaves 420; down: 220)
+ * @param {number} [opts.levelGap]            - gap between depths (where connectors run)
+ * @param {number} [opts.siblingGap]          - gap between two adjacent leaves
+ * @param {number} [opts.groupGap]            - gap next to a sibling that has its own children
+ * @param {"depth"|"siblings"|"none"} [opts.equalize] - height equalizing scope
+ * @param {number} [opts.originX=0]
+ * @param {number} [opts.originY=0]
+ *
+ * @returns {{
+ *   direction: "right"|"down",
+ *   nodes: Array<{ id, parent, depth, index, leaf, label, desc?, fontSize, descFontSize?,
+ *                  x, y, w, h, cx, cy, data, titled? }>,
+ *   segments: Array<{ kind: "stem"|"spine"|"branch", parent, child?, at:[x,y], points:[[dx,dy]...] }>,
+ *   levels: Array<{ depth, x, y, w, h }>,
+ *   bounds: { x, y, w, h }
+ * }}
+ *   `titled` (only on nodes with `desc`) is the `titledBox` layout at the
+ *   node's final position, with the wrapped strings on `title.text` /
+ *   `body.text` — draw a rect + two texts instead of a bound label.
+ *   Each segment is in sugar L4 form: `{ shape: "arrow", at, points, head: "none" }`.
+ *
+ * @example
+ *   const t = tree({ label: "Skills", children: [
+ *     { label: "Design", children: ["polish", "critique"] },
+ *     { label: "Research", children: ["investigate"] },
+ *   ]}, { direction: "down", originX: 40, originY: 40 });
+ */
+export function tree(root, opts = {}) {
+  if (root == null || (typeof root !== "object" && typeof root !== "string")) {
+    throw new Error("tree: `root` must be a node object `{ label, children? }`");
+  }
+  const dirKey = String(opts.direction ?? "right").toLowerCase();
+  const direction = TREE_DIRECTIONS[dirKey];
+  if (!direction) {
+    throw new Error(`tree: unknown direction "${opts.direction}" (use "right" or "down")`);
+  }
+  const isRight = direction === "right";
+  const D = TREE_DEFAULTS[direction];
+  const levelGap = opts.levelGap ?? D.levelGap;
+  const siblingGap = opts.siblingGap ?? D.siblingGap;
+  const groupGap = opts.groupGap ?? D.groupGap;
+  const eqMode = opts.equalize ?? D.equalize;
+  if (!["depth", "siblings", "none"].includes(eqMode)) {
+    throw new Error(`tree: equalize must be "depth", "siblings" or "none"`);
+  }
+  const originX = opts.originX ?? 0;
+  const originY = opts.originY ?? 0;
+
+  // 1. Normalize into an internal node list (pre-order).
+  const nodes = [];
+  const walk = (raw, parent, depth, index, path) => {
+    const n = typeof raw === "string" ? { label: raw } : raw;
+    if (n == null || typeof n !== "object") {
+      throw new Error(`tree: node at ${path} must be an object or a string`);
+    }
+    const label = n.label == null ? "" : String(n.label);
+    const { children: rawKids, ...data } = n;
+    const node = {
+      id: n.id != null ? String(n.id) : path,
+      parent: parent ? parent.id : null,
+      depth, index, label,
+      desc: n.desc != null && n.desc !== "" ? String(n.desc) : undefined,
+      data, kids: [],
+    };
+    nodes.push(node);
+    if (parent) parent.kids.push(node);
+    if (rawKids != null && !Array.isArray(rawKids)) {
+      throw new Error(`tree: \`children\` of "${label}" must be an array`);
+    }
+    (rawKids || []).forEach((c, i) => walk(c, node, depth + 1, i, `${path}-${i}`));
+    return node;
+  };
+  const top = walk(root, null, 0, 0, "n");
+  const ids = new Set();
+  for (const n of nodes) {
+    if (ids.has(n.id)) throw new Error(`tree: duplicate node id "${n.id}"`);
+    ids.add(n.id);
+  }
+  const maxDepth = Math.max(...nodes.map((n) => n.depth));
+
+  // 2. Widths per depth (explicit, or auto from the longest label line).
+  const widths = [];
+  for (let d = 0; d <= maxDepth; d++) {
+    const explicit = atDepth(opts.widths, d, null);
+    if (explicit != null) { widths.push(explicit); continue; }
+    const fs = atDepth(opts.fontSize, d, null) ?? atDepth(D.fontSize, d);
+    const atD = nodes.filter((n) => n.depth === d);
+    // Measure a `desc` line at its own (smaller) size, or it inflates the column.
+    const dfs = atDepth(opts.descFontSize, d, null) ?? Math.max(11, fs - 3);
+    const lineW = (s, size) => s.split("\n").map((l) => estimateTextWidth(l, size));
+    const longest = Math.max(0, ...atD.flatMap((n) => [...lineW(n.label, fs), ...lineW(n.desc ?? "", dfs)]));
+    const cap = opts.maxW ?? (isRight ? (d === maxDepth && d > 0 ? 420 : 280) : 220);
+    widths.push(Math.max(120, Math.min(cap, longest + BOUND_TEXT_PAD_X * 2 + 16)));
+  }
+
+  // 3. Measure each node at its depth's width.
+  for (const n of nodes) {
+    const d = n.depth;
+    n.w = widths[d];
+    n.fontSize = atDepth(opts.fontSize, d, null) ?? atDepth(D.fontSize, d);
+    const minH = atDepth(opts.minH, d, null) ?? atDepth(D.minH, d);
+    if (n.desc) {
+      n.descFontSize = atDepth(opts.descFontSize, d, null) ?? Math.max(11, n.fontSize - 3);
+      const inner = n.w - TITLED_PAD * 2;
+      n.wrappedLabel = wrapText(n.label, inner, n.fontSize);
+      n.wrappedDesc = wrapText(n.desc, inner, n.descFontSize);
+      n.h = Math.max(minH, titledBox({
+        x: 0, y: 0, w: n.w, title: n.wrappedLabel, body: n.wrappedDesc,
+        titleFontSize: n.fontSize, bodyFontSize: n.descFontSize, padding: TITLED_PAD, gap: TITLED_GAP,
+      }).box.h);
+    } else {
+      n.h = fitBoundText(n.label, n.w, minH, n.fontSize).height;
+    }
+  }
+
+  // 4. Equalize heights.
+  const levelH = (group) => Math.max(...group.map((n) => n.h));
+  if (eqMode === "depth") {
+    for (let d = 0; d <= maxDepth; d++) {
+      const g = nodes.filter((n) => n.depth === d);
+      const h = levelH(g);
+      for (const n of g) n.h = h;
+    }
+  } else if (eqMode === "siblings") {
+    for (const n of nodes) {
+      if (n.kids.length > 1) {
+        const h = levelH(n.kids);
+        for (const k of n.kids) k.h = h;
+      }
+    }
+  }
+
+  // 5. Depth-axis positions: columns (right) or rows (down).
+  const levelSize = [];
+  for (let d = 0; d <= maxDepth; d++) {
+    levelSize.push(isRight ? widths[d] : levelH(nodes.filter((n) => n.depth === d)));
+  }
+  const levelPos = [];
+  let acc = isRight ? originX : originY;
+  for (let d = 0; d <= maxDepth; d++) {
+    levelPos.push(acc);
+    acc += levelSize[d] + levelGap;
+  }
+
+  // 6. Breadth-axis placement — contiguous band per subtree.
+  const bSize = (n) => (isRight ? n.h : n.w);
+  const shift = (n, delta) => { n.b += delta; n.kids.forEach((k) => shift(k, delta)); };
+  const place = (n, cursor) => {
+    if (n.kids.length === 0) { n.b = cursor; return cursor + bSize(n); }
+    let c = cursor;
+    let end = cursor;
+    n.kids.forEach((k, i) => {
+      if (i > 0) {
+        const prev = n.kids[i - 1];
+        c += prev.kids.length || k.kids.length ? groupGap : siblingGap;
+      }
+      end = place(k, c);
+      c = end;
+    });
+    const first = n.kids[0];
+    const last = n.kids[n.kids.length - 1];
+    const mid = (first.b + bSize(first) / 2 + last.b + bSize(last) / 2) / 2;
+    n.b = mid - bSize(n) / 2;
+    if (n.b < cursor) {
+      // Parent is larger than its children's band: push the band out so the
+      // parent starts at the cursor and stays centered on its children.
+      const delta = cursor - n.b;
+      n.kids.forEach((k) => shift(k, delta));
+      n.b = cursor;
+      end += delta;
+    }
+    return Math.max(end, n.b + bSize(n));
+  };
+  const breadthEnd = place(top, isRight ? originY : originX);
+
+  // 7. Final boxes.
+  for (const n of nodes) {
+    const lp = levelPos[n.depth];
+    if (isRight) {
+      n.x = lp;
+      n.y = n.b;
+    } else {
+      n.x = n.b;
+      // Center a shorter node in its row (only differs when equalize !== "depth").
+      n.y = lp + (levelSize[n.depth] - n.h) / 2;
+    }
+    n.cx = n.x + n.w / 2;
+    n.cy = n.y + n.h / 2;
+    if (n.desc) {
+      n.titled = titledBox({
+        x: n.x, y: n.y, w: n.w, title: n.wrappedLabel, body: n.wrappedDesc,
+        titleFontSize: n.fontSize, bodyFontSize: n.descFontSize, padding: TITLED_PAD, gap: TITLED_GAP,
+      });
+      // Center the header+body block when equalizing made the box taller.
+      const slack = (n.h - n.titled.box.h) / 2;
+      n.titled.box.h = n.h;
+      n.titled.title.y += slack;
+      n.titled.body.y += slack;
+      n.titled.title.text = n.wrappedLabel;
+      n.titled.body.text = n.wrappedDesc;
+    }
+  }
+
+  // 8. Connectors — one shared trunk per parent.
+  const segments = [];
+  const seg = (kind, parent, child, a, b) =>
+    segments.push({ kind, parent, ...(child ? { child } : {}), at: [a[0], a[1]], points: [[0, 0], [b[0] - a[0], b[1] - a[1]]] });
+  for (const p of nodes) {
+    if (p.kids.length === 0) continue;
+    const pc = isRight ? p.cy : p.cx;
+    const pEdge = isRight ? p.x + p.w : p.y + p.h;
+    const trunk = levelPos[p.depth] + levelSize[p.depth] + levelGap / 2;
+    const pt = (along, across) => (isRight ? [along, across] : [across, along]);
+    const kc = p.kids.map((k) => (isRight ? k.cy : k.cx));
+    const aligned = kc.map((c) => Math.abs(c - pc) < 0.5);
+    if (!aligned.some(Boolean)) seg("stem", p.id, null, pt(pEdge, pc), pt(trunk, pc));
+    const lo = Math.min(pc, ...kc);
+    const hi = Math.max(pc, ...kc);
+    if (hi - lo >= 0.5) {
+      seg("spine", p.id, null, pt(trunk, lo), pt(trunk, hi));
+    }
+    p.kids.forEach((k, i) => {
+      const kEdge = isRight ? k.x : k.y;
+      seg("branch", p.id, k.id, aligned[i] ? pt(pEdge, pc) : pt(trunk, kc[i]), pt(kEdge, kc[i]));
+    });
+  }
+
+  const levels = levelPos.map((pos, d) => (isRight
+    ? { depth: d, x: pos, y: originY, w: levelSize[d], h: breadthEnd - originY }
+    : { depth: d, x: originX, y: pos, w: breadthEnd - originX, h: levelSize[d] }));
+
+  const out = nodes.map((n) => {
+    const r = {
+      id: n.id, parent: n.parent, depth: n.depth, index: n.index, leaf: n.kids.length === 0,
+      label: n.label, fontSize: n.fontSize,
+      x: n.x, y: n.y, w: n.w, h: n.h, cx: n.cx, cy: n.cy, data: n.data,
+    };
+    if (n.desc) Object.assign(r, { desc: n.desc, descFontSize: n.descFontSize, titled: n.titled });
+    return r;
+  });
+
+  const depthEnd = levelPos[maxDepth] + levelSize[maxDepth];
+  return {
+    direction,
+    nodes: out,
+    segments,
+    levels,
+    bounds: isRight
+      ? { x: originX, y: originY, w: depthEnd - originX, h: breadthEnd - originY }
+      : { x: originX, y: originY, w: breadthEnd - originX, h: depthEnd - originY },
+  };
 }

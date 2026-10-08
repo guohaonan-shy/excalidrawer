@@ -30,6 +30,7 @@ export {
   fitContainer,
   titledBox,
   equalize,
+  tree as treeLayout,
   contrastText,
   readableOn,
   triplet,
@@ -45,4 +46,4 @@ export { validate } from "./validate.mjs";
 export { desugar, SugarError } from "./sugar.mjs";
 
 // Built-in templates
-export { timeline, flowchart, architecture, sequence } from "./templates/index.mjs";
+export { timeline, flowchart, architecture, sequence, tree } from "./templates/index.mjs";

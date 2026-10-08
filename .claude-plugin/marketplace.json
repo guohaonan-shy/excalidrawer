@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "excalidrawer",
-      "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence, comparison.",
-      "version": "0.0.4",
+      "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence, comparison, tree.",
+      "version": "0.0.5",
       "source": "./",
       "author": {
         "name": "guohaonan-shy",
