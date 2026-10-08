@@ -4,6 +4,69 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.5.14
+
+_engine 0.5.14 · plugin 0.0.5_
+
+### Added
+
+- **New `tree` skill + template** — hierarchies that grow from one root:
+  taxonomies, org charts, user-story maps (root → scenario → story),
+  category → item breakdowns. Grows **left → right** (root on the left; the
+  right choice when leaves are sentences) or **top → down** (root on top; reads
+  like an org chart). Say *"draw this as a tree"* / *"画个树状图"*, or
+  `excalidrawer generate -t tree`. Closes #18.
+
+  Each parent sits at the midpoint of its own children, subtrees never overlap,
+  and connectors run only through the gap between levels, so no edge crosses a
+  box or another edge. The `flowchart` layout can't do this: it centers each
+  layer across the whole canvas, so a parent lands nowhere near its children.
+  Each first-level branch gets its own color and everything under it uses that
+  color's tint, so a group reads as one family without a legend. Optional
+  per-node `desc` subtitle, leaf numbering (`numberLeaves`), depth captions
+  (`levels`), and per-depth widths.
+
+  The skill always asks which way the tree should split — 上下 (root on top)
+  or 左右 (root on the left) — with a sketch of each option. It asks even when
+  the hierarchy is already pasted in, because the content alone can't decide
+  the shape. It recommends left → right when leaves are long sentences or
+  there are more than ~8 of them.
+
+- **`tree` layout helper** (`compute_layout` + library export `treeLayout`).
+  It returns node boxes plus the connector segments already in sugar L4 arrow
+  form, so the skill maps them straight to sugar without doing any geometry.
+
+- **`examples/tree-figures.mjs`** — the issue's eval case (a 23-story Chinese
+  user-story map, left → right) and a small taxonomy drawn both top → down and
+  left → right.
+
+- **README gallery.** A new *What it makes* section shows one rendered figure
+  per diagram type: flowchart, architecture, sequence, timeline, comparison,
+  and the tree in both directions plus a 23-story user-story map. The images live
+  in `docs/gallery/` and come from `examples/gallery.mjs`, so regenerating
+  them is a single command.
+
+### Changed
+
+- **Diagram labels are English unless the user asks otherwise — including
+  when the source is not.** The shared skill already defaulted labels to
+  English, but an agent handed a Chinese spec or outline tended to copy it
+  verbatim. Chatting in Chinese or pasting Chinese material no longer counts as
+  asking for Chinese labels: the content is translated, numbering and product
+  names are kept. Say "用中文" / "keep the original wording" to keep the source
+  language.
+
+### Fixed
+
+- **CJK text wrapping no longer starts a line with punctuation.** A wrapped
+  Chinese label could put a lone `，` or `。` at the start of a line (or a
+  whole line of just `。`). Closing punctuation now pulls the previous
+  character down with it (行首禁则). This applies to every diagram type.
+
+- **`excalidrawer generate` now renders CJK text.** The template path skipped
+  the system CJK font loading that `render` does, so Chinese, Japanese and
+  Korean labels came out as blank space in the SVG/PNG.
+
 ## 0.5.13
 
 _engine 0.5.13 · plugin 0.0.4_

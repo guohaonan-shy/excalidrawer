@@ -14,3 +14,6 @@ examples/*.png
 .kiro/
 .windsurf/
 skills-lock.json
+
+# README gallery images are committed (regenerate: node examples/gallery.mjs)
+!docs/gallery/*.png

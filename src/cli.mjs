@@ -14,13 +14,13 @@ import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
-import { timeline, flowchart, architecture, sequence } from "./templates/index.mjs";
+import { timeline, flowchart, architecture, sequence, tree } from "./templates/index.mjs";
 import { excalidraw } from "./elements.mjs";
-import { toSvg, toPng } from "./export.mjs";
+import { toSvg, toPng, autoRegisterCjkFont } from "./export.mjs";
 import { validate } from "./validate.mjs";
 import { getTool, parseArgs as parseToolArgs } from "./tools/index.mjs";
 
-const TEMPLATES = { timeline, flowchart, architecture, sequence };
+const TEMPLATES = { timeline, flowchart, architecture, sequence, tree };
 
 const PKG_VERSION = JSON.parse(
   readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "package.json"), "utf-8")
@@ -210,6 +210,7 @@ async function cmdGenerate(args) {
     sequence: ["actors", "steps"],
   };
   const missing = (REQUIRED_FIELDS[args.type] || []).filter((f) => !data[f] || !Array.isArray(data[f]));
+  if (args.type === "tree" && (!data.root || typeof data.root !== "object")) missing.push("root");
   if (missing.length > 0) {
     console.error(`Error: input JSON missing required field(s): ${missing.join(", ")}`);
     process.exit(1);
@@ -218,6 +219,9 @@ async function cmdGenerate(args) {
   const opts = {};
   if (args.seed != null) opts.seed = args.seed;
   const elements = templateFn(data, opts);
+  // Templates bypass render(), which is what normally loads a system CJK font —
+  // without this a Chinese/Japanese/Korean label renders as blank space.
+  autoRegisterCjkFont(elements);
 
   const VALID_FORMATS = new Set(["excalidraw", "svg", "png"]);
   const formats = args.format

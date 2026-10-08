@@ -44,6 +44,9 @@ export function wrapText(text, maxWidth, fontSize) {
     .join("\n");
 }
 
+// Punctuation that must not begin a line (CJK line-breaking rules, 行首禁则).
+const NO_LINE_START = new Set([..."，。、；：？！）」』】》〉”’…・ー～,.;:?!)]}%"]);
+
 /**
  * Wrap a single line (no existing \n).
  */
@@ -77,9 +80,19 @@ function wrapLine(line, maxWidth, fontSize) {
     // CJK single character — allow char-level breaking
     if (token.length === 1 && isCJK(token.codePointAt(0))) {
       if (currentW + tokenW > maxWidth && current) {
-        result.push(current);
-        current = "";
-        currentW = 0;
+        // Kinsoku: closing punctuation (，。）…) may not start a line — carry
+        // the previous character down with it instead of stranding a lone "。".
+        const chars = [...current];
+        const prev = chars[chars.length - 1];
+        if (NO_LINE_START.has(token) && chars.length > 1 && isCJK(prev.codePointAt(0)) && !NO_LINE_START.has(prev)) {
+          result.push(chars.slice(0, -1).join(""));
+          current = prev;
+          currentW = estimateTextWidth(prev, fontSize);
+        } else {
+          result.push(current);
+          current = "";
+          currentW = 0;
+        }
       }
       current += token;
       currentW += tokenW;

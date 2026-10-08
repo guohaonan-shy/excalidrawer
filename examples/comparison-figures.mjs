@@ -20,7 +20,7 @@
 
 import { writeFileSync } from "fs";
 import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 
 import { equalize, render } from "../src/index.mjs";
 
@@ -31,7 +31,7 @@ const bg = (c) => "bg" + c[0].toUpperCase() + c.slice(1);
 
 // --- 1. coverage — row cards ------------------------------------------------
 
-function coverage() {
+export function coverage() {
   const W = 1000, LX = 40, CW = 400, RX = 560, IW = CW - PAD * 2, FS = 14, BY = 180;
   const rows = [
     ["Speaking: Listen & Repeat, Interview", "Speaking: Listen & Repeat, Interview"],
@@ -67,7 +67,7 @@ function coverage() {
 
 // --- 2. subscores — single panel --------------------------------------------
 
-function subscores() {
+export function subscores() {
   const LX = 40, CW = 360, RX = 460, BY = 175;
   // Short, near-equal lines, so centered bullet glyphs read fine here.
   const L = "• Fluency\n• Intelligibility\n• Repeat Accuracy";
@@ -86,7 +86,7 @@ function subscores() {
 
 // --- 3. pricing — asymmetric -------------------------------------------------
 
-function pricing() {
+export function pricing() {
   const LX = 30, SUB = 200, MID = 260, RX = 520, CW = 430, RY = 215, FS = 14;
   const c1 = "One-time credit pack\n\n$18.75–$62.50\n10–50 tests\nExpires in 3 months";
   const c2 = "Monthly subscription\n\n$15–$50/mo\n10–50 tests\nResets each cycle";
@@ -118,14 +118,17 @@ function pricing() {
   ];
 }
 
-for (const [name, fn] of [["coverage", coverage], ["subscores", subscores], ["pricing", pricing]]) {
-  const out = await render(fn(), { formats: ["excalidraw", "svg", "png"], scale: 2 });
-  for (const [fmt, data] of Object.entries(out.outputs)) {
-    writeFileSync(join(dir, `comparison-${name}.${fmt}`), data);
+// Run directly → write the figures; imported (e.g. by gallery.mjs) → builders only.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  for (const [name, fn] of [["coverage", coverage], ["subscores", subscores], ["pricing", pricing]]) {
+    const out = await render(fn(), { formats: ["excalidraw", "svg", "png"], scale: 2 });
+    for (const [fmt, data] of Object.entries(out.outputs)) {
+      writeFileSync(join(dir, `comparison-${name}.${fmt}`), data);
+    }
+    const warnings = out.warnings ?? [];
+    console.log(
+      `comparison-${name}.{excalidraw,svg,png} written — ` +
+      (warnings.length ? `${warnings.length} warning(s): ${warnings.map((w) => w.code).join(", ")}` : "lint clean")
+    );
   }
-  const warnings = out.warnings ?? [];
-  console.log(
-    `comparison-${name}.{excalidraw,svg,png} written — ` +
-    (warnings.length ? `${warnings.length} warning(s): ${warnings.map((w) => w.code).join(", ")}` : "lint clean")
-  );
 }
