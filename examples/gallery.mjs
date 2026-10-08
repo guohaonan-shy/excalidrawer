@@ -16,7 +16,7 @@ import {
   render, excalidraw, toPng, validate, autoRegisterCjkFont,
 } from "../src/index.mjs";
 import { coverage } from "./comparison-figures.mjs";
-import { stories, skills, skillsLR } from "./tree-figures.mjs";
+import { storiesEn, skills, skillsLR } from "./tree-figures.mjs";
 
 const outDir = new URL("../docs/gallery/", import.meta.url).pathname;
 mkdirSync(outDir, { recursive: true });
@@ -85,7 +85,7 @@ const figures = {
 
   "tree-right": () => tree(skillsLR),
   "tree-down": () => tree(skills),
-  "tree-cjk": () => tree(stories),
+  "tree-stories": () => tree(storiesEn),
 };
 
 for (const [name, build] of Object.entries(figures)) {

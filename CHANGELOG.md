@@ -42,9 +42,19 @@ _engine 0.5.14 · plugin 0.0.5_
 
 - **README gallery.** A new *What it makes* section shows one rendered figure
   per diagram type: flowchart, architecture, sequence, timeline, comparison,
-  and the tree in both directions plus a CJK user-story map. The images live
+  and the tree in both directions plus a 23-story user-story map. The images live
   in `docs/gallery/` and come from `examples/gallery.mjs`, so regenerating
   them is a single command.
+
+### Changed
+
+- **Diagram labels are English unless the user asks otherwise — including
+  when the source is not.** The shared skill already defaulted labels to
+  English, but an agent handed a Chinese spec or outline tended to copy it
+  verbatim. Chatting in Chinese or pasting Chinese material no longer counts as
+  asking for Chinese labels: the content is translated, numbering and product
+  names are kept. Say "用中文" / "keep the original wording" to keep the source
+  language.
 
 ### Fixed
 

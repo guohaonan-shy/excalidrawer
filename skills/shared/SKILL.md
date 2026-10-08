@@ -97,9 +97,18 @@ hand-drawn body font) is Latin-only, so all-English labels render uniformly.
 CJK / non-Latin text triggers a system font fallback (PingFang on macOS, Noto
 on Linux, Microsoft YaHei on Windows), which renders correctly but visually
 mixes hand-drawn Latin with flat CJK glyphs. Honor an explicit request for
-another language ("用中文" / "in Chinese"). The skill's own clarifying prompts
-and progress messages follow the user's conversation language — separate from
-diagram labels.
+another language ("用中文" / "in Chinese" / "keep the original wording").
+
+What does **not** count as a request: chatting in Chinese, or pasting source
+material (a spec, a numbered list, an outline) written in Chinese. Translate
+that content into English labels. Keep numbering, keep proper nouns and
+product names as written, and keep the meaning of each item intact. Only the
+labels change language; the structure stays the same. If you are unsure whether the user
+wants the original language kept, ask it as one clarify option rather than
+guessing.
+
+The skill's own clarifying prompts and progress messages follow the user's
+conversation language — separate from diagram labels.
 
 ## 6. Export format selection
 

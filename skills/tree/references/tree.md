@@ -16,10 +16,10 @@ canvas, so a parent ends up nowhere near its own children.
 ```js
 compute_layout({ helper: "tree", args: {
   root: {
-    label: "报告页音频预取",
+    label: "Report audio prefetch",
     children: [
-      { label: "刚练完看报告", children: ["1. 原句音频立刻能播…", "2. …"] },
-      { label: "播放器",       children: ["10. …", "11. …"] },
+      { label: "Right after practice", children: ["1. Prompt audio plays instantly…", "2. …"] },
+      { label: "Player",               children: ["10. …", "11. …"] },
     ],
   },
   direction: "right",         // "right" (root left) | "down" (root on top)
@@ -78,7 +78,9 @@ room for it (≈ caption width + 32). For `right`, put the caption above each
 `levels[d]` column and shift `originY` down by ~32.
 
 **Numbered leaves**: if the source list is numbered, keep its numbers in the
-leaf labels (`"7. 作为网络很慢的学生…"`) — readers cross-reference them.
+leaf labels (`"7. As a student on a slow network…"`) — readers cross-reference
+them. Source text in another language still becomes English labels unless the
+user asked otherwise (shared §5); the numbers stay the same.
 
 ## Color: one hue per branch
 
@@ -137,6 +139,8 @@ already carry numbers. `arrowheads: true` puts heads on child branches
   tall column; split it into two groups instead.
 - **`down` with long leaves.** Sentences in a 220px box wrap into tall narrow
   strips. Use `right`.
-- **CJK labels.** Width estimation and font fallback are handled; nothing
-  special to do — but keep group labels short (≤ ~10 chars) so the middle
-  column stays narrow.
+- **Keeping the source language by default.** A Chinese spec pasted in is
+  not a request for Chinese labels; translate unless the user asked to keep
+  the wording (shared §5). When CJK labels *are* requested, width estimation
+  and font fallback are handled — just keep group labels short (≤ ~10 chars)
+  so the middle column stays narrow.

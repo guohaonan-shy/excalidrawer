@@ -6,6 +6,7 @@
  *   2. Top → down: a small skill taxonomy with per-node descriptions and
  *      depth captions.
  *   3. The same taxonomy split left → right.
+ *   4. The story map from (1) with English labels — the gallery version.
  *
  * Writes .excalidraw / .svg / .png into examples/out/ and prints any lint
  * warnings (there should be none).
@@ -61,6 +62,54 @@ export const stories = {
   },
 };
 
+// The same story map with English labels — what the skill produces by default
+// (labels are English unless the user asks for another language).
+export const storiesEn = {
+  title: "Report audio prefetch & shared cache · user stories",
+  direction: "horizontal",
+  numberLeaves: true,
+  root: {
+    label: "Report audio prefetch & shared cache",
+    children: [
+      { label: "Right after practice", children: [
+        "After L&R, the prompt audio on the report plays instantly — no re-download.",
+        "After L&R, my own recordings play instantly, so I can compare them with the prompts.",
+        "After Interview, the questions and my answers play instantly, so I can review weak spots.",
+        "The report shows no long loading state, so I see results right after practice.",
+      ]},
+      { label: "Opening from history", children: [
+        "Opening an old report, I see a skeleton first, so I know it is loading, not frozen.",
+        "When the report appears, its audio is already playable — no wait per clip.",
+        "On a slow network I see report content within 5 s, even if audio is still downloading.",
+        "A question with no recording (e.g. failed analysis) doesn't block the page.",
+        "If one clip fails to download, only that clip shows an error; the rest is unaffected.",
+      ]},
+      { label: "Player", children: [
+        "Every player looks clickable; if audio is still downloading, the button says so.",
+        "Playback starts automatically once the download finishes — no second click.",
+        "A failed download shows a retry prompt, so I know what happened and can try again.",
+        "Re-recording on an L&R report shows “downloading”, not “Playing”, until audio is ready.",
+        "Switching between Original and You plays instantly, without a download pause.",
+        "Model audio in targeted practice plays on click, so I can focus on shadowing.",
+      ]},
+      { label: "Consistency", children: [
+        "After re-recording a question, the report plays the new take, never the replaced one.",
+        "A re-recording made on another device or tab shows up here too.",
+        "If an upload failed, the report never shows a recording the server didn't receive.",
+        "Each targeted-practice attempt keeps its own playable recording, so I can track progress.",
+      ]},
+      { label: "Long-open reports", children: [
+        "Audio I already played keeps working after the report has been open for a day.",
+        "If a recording link has expired, pressing play fetches a fresh link — no page refresh.",
+      ]},
+      { label: "Cache lifetime", children: [
+        "Reopening a report or redoing a set within days doesn't re-download prompt audio.",
+        "Stored recordings don't grow without bound, so they don't fill my disk.",
+      ]},
+    ],
+  },
+};
+
 export const skills = {
   title: "Skills",
   direction: "vertical",
@@ -91,7 +140,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const outDir = new URL("./out/", import.meta.url).pathname;
   mkdirSync(outDir, { recursive: true });
 
-  for (const [name, data] of [["tree-user-stories", stories], ["tree-skills", skills], ["tree-skills-lr", skillsLR]]) {
+  for (const [name, data] of [["tree-user-stories", stories], ["tree-user-stories-en", storiesEn], ["tree-skills", skills], ["tree-skills-lr", skillsLR]]) {
     const els = tree(data);
     autoRegisterCjkFont(els); // calling toSvg/toPng directly skips render()'s font loading
     const base = `${outDir}${name}`;

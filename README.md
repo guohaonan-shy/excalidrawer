@@ -24,7 +24,7 @@ Six diagram types, each with its own agent skill. Click a figure for full size.
 </tr>
 <tr>
   <td align="center" width="33%"><a href="docs/gallery/tree-down.png"><img src="docs/gallery/tree-down.png" alt="Tree · top → down"></a><br><b>Tree · top → down</b><br><sub>Parent → children, split downward</sub></td>
-  <td align="center" width="33%"><a href="docs/gallery/tree-cjk.png"><img src="docs/gallery/tree-cjk.png" alt="Tree · CJK user-story map"></a><br><b>Tree · CJK user-story map</b><br><sub>23 stories in 6 groups, Chinese labels</sub></td>
+  <td align="center" width="33%"><a href="docs/gallery/tree-stories.png"><img src="docs/gallery/tree-stories.png" alt="Tree · user-story map"></a><br><b>Tree · user-story map</b><br><sub>23 numbered stories in 6 groups</sub></td>
   <td width="33%"></td>
 </tr>
 </table>
