@@ -16,9 +16,16 @@
  *                                                                      right = U-route detour)
  *                 L4 { shape:"arrow", at:[x,y], points:[[dx,dy]...] }  (manual escape)
  *
- *   Any arrow also takes: dashed? (dashed stroke), head?:"arrow"|"none"
- *   (end arrowhead, default "arrow"), labelT? (0-1, where the `text` label
- *   sits along the path; default = auto-pick by `labelAnchor`).
+ *   line sugar:   { shape:"line", ... }  — same addressing as arrow (L1-L4),
+ *                 no arrowheads; takes edges?:"sharp"|"round" (default sharp).
+ *
+ *   Any arrow also takes: arrowType?:"sharp"|"round"|"elbow" (default round),
+ *   head? / startHead? (end / start arrowhead: arrow, bar, circle,
+ *   circle_outline, triangle, triangle_outline, diamond, diamond_outline, or
+ *   "none"; default end "arrow", start none), labelT? (0-1, where the `text`
+ *   label sits along the path; default = auto-pick by `labelAnchor`).
+ *   Arrows and lines both take: dashed? / strokeStyle?:"solid"|"dashed"|"dotted",
+ *   strokeWidth? (number or "thin"|"medium"|"bold"), stroke? (color).
  *
  *   id-anchored arrows auto-route orthogonally — straight when the edge points
  *   line up, an L-bend for perpendicular sides, a Z-route for parallel sides
@@ -32,7 +39,10 @@
  * so `from`/`to` can look up the shapes they connect.
  */
 
-import { base, rect, diamond, ellipse, textEl, arrow, colors } from "./elements.mjs";
+import {
+  base, rect, diamond, ellipse, textEl, arrow, line, colors,
+  ARROWHEADS, ARROW_TYPES, STROKE_STYLES, LINE_EDGES, strokeWidths,
+} from "./elements.mjs";
 import { edgePoint, routeU, labelAnchor } from "./layout.mjs";
 import { fitBoundText } from "./text.mjs";
 
@@ -59,7 +69,8 @@ function resolveColor(token, kind) {
 }
 
 const isSugar = (el) => el && typeof el === "object" && typeof el.shape === "string";
-const isArrowSugar = (el) => isSugar(el) && el.shape === "arrow";
+// Linear sugar (arrow / line) resolves in pass 2, after the shapes it may connect.
+const isArrowSugar = (el) => isSugar(el) && (el.shape === "arrow" || el.shape === "line");
 const isXY = (v) => Array.isArray(v) && v.length === 2 && typeof v[0] === "number" && typeof v[1] === "number";
 
 /**
@@ -91,7 +102,7 @@ export function desugar(elements) {
     const kind = el.shape;
     const id = typeof el.id === "string" && el.id ? el.id : `el-${i}`;
     if (!SHAPE_KINDS.includes(kind)) {
-      issues.push(`element[${i}] (${id}): unknown shape "${kind}" — expected ${SHAPE_KINDS.join("/")}/arrow`);
+      issues.push(`element[${i}] (${id}): unknown shape "${kind}" — expected ${SHAPE_KINDS.join("/")}/arrow/line`);
       return;
     }
     if (!isXY(el.at)) {
@@ -192,12 +203,47 @@ export function desugar(elements) {
       extra.strokeColor = s;
     }
     if (el.dashed) extra.strokeStyle = "dashed";
-    if (el.head != null) {
-      if (el.head !== "arrow" && el.head !== "none") {
-        issues.push(`element[${i}] (${id}): head must be "arrow" or "none"`);
+    if (el.strokeStyle != null) {
+      if (!STROKE_STYLES.includes(el.strokeStyle)) {
+        issues.push(`element[${i}] (${id}): strokeStyle must be one of ${STROKE_STYLES.join("/")}`);
         return;
       }
-      if (el.head === "none") extra.endArrowhead = null;
+      extra.strokeStyle = el.strokeStyle;
+    }
+    if (el.strokeWidth != null) {
+      const ok = typeof el.strokeWidth === "number" ? el.strokeWidth > 0 : el.strokeWidth in strokeWidths;
+      if (!ok) {
+        issues.push(`element[${i}] (${id}): strokeWidth must be a positive number or thin/medium/bold`);
+        return;
+      }
+      extra.strokeWidth = el.strokeWidth;
+    }
+
+    const isLine = el.shape === "line";
+    const build = isLine ? line : arrow;
+    if (isLine) {
+      if (el.edges != null && !LINE_EDGES.includes(el.edges)) {
+        issues.push(`element[${i}] (${id}): edges must be one of ${LINE_EDGES.join("/")}`);
+        return;
+      }
+      if (el.edges != null) extra.edges = el.edges;
+    } else {
+      const HEADS = [...ARROWHEADS, "none"];
+      for (const [key, field] of [["head", "endArrowhead"], ["startHead", "startArrowhead"]]) {
+        if (el[key] == null) continue;
+        if (!HEADS.includes(el[key])) {
+          issues.push(`element[${i}] (${id}): ${key} must be one of ${HEADS.join("/")}`);
+          return;
+        }
+        extra[field] = el[key] === "none" ? null : el[key];
+      }
+      if (el.arrowType != null) {
+        if (!ARROW_TYPES.includes(el.arrowType)) {
+          issues.push(`element[${i}] (${id}): arrowType must be one of ${ARROW_TYPES.join("/")}`);
+          return;
+        }
+        extra.arrowType = el.arrowType;
+      }
     }
     const labelT = el.labelT;
     if (labelT != null && (typeof labelT !== "number" || labelT < 0 || labelT > 1)) {
@@ -211,7 +257,7 @@ export function desugar(elements) {
         issues.push(`element[${i}] (${id}): arrow with "points" also needs "at":[x,y]`);
         return;
       }
-      raw.push(arrow(id, el.at[0], el.at[1], el.points, extra));
+      raw.push(build(id, el.at[0], el.at[1], el.points, extra));
       if (el.text) {
         const abs = el.points.map(([dx, dy]) => [el.at[0] + dx, el.at[1] + dy]);
         pushLabel(raw, id, el.text, abs, labelT);
@@ -274,7 +320,7 @@ export function desugar(elements) {
       abs = points.map(([px, py]) => [start.x + px, start.y + py]);
     }
 
-    raw.push(arrow(id, start.x, start.y, points, extra));
+    raw.push(build(id, start.x, start.y, points, extra));
     if (el.text) pushLabel(raw, id, el.text, abs, labelT);
   });
 

@@ -218,9 +218,9 @@ test("arrow: invalid head throws SugarError", () => {
     () =>
       desugar([
         ...twoBoxes,
-        { shape: "arrow", from: "a", to: "b", head: "circle" },
+        { shape: "arrow", from: "a", to: "b", head: "banana" },
       ]),
-    /head must be "arrow" or "none"/
+    /head must be one of/
   );
 });
 

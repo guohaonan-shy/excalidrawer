@@ -9,7 +9,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 ## 前置条件（必做）
 
 先用 Read 工具读取 [`../shared/SKILL.md`](../shared/SKILL.md)
-——它定义了所有图表类型通用的 MCP 前置检查 / CLI fallback、sugar schema、配色、
+——它定义了所有图表类型通用的 MCP 前置检查 / CLI fallback、视觉语义（什么意思用什么组件/线型/配色）、sugar schema、
 文件命名、输出语言、导出格式选择、迭代规则。**缺一不可**，本 skill 只补充架构图专属的
 clarify 问题与 layout recipe。
 

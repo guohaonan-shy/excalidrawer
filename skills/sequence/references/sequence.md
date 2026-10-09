@@ -1,8 +1,11 @@
 # Sequence recipe
 
 How to compose a sequence diagram with sugar. Read AFTER clarifying actors
-+ messages + return-style (SKILL.md §1). Sugar schema in
-[`../../shared/references/sugar.md`](../../shared/references/sugar.md).
++ messages + return-style (SKILL.md §1). Component / style choices follow
+[`../../shared/references/semantics.md`](../../shared/references/semantics.md); sugar schema in
+[`../../shared/references/sugar.md`](../../shared/references/sugar.md). This
+file covers sequence layout and the one place it narrows semantics.md:
+**dashed = response** (§Response style).
 
 ## Layout
 
@@ -31,11 +34,11 @@ for (const [i, actor] of actors.entries()) {
     at: [cx - AW / 2, ATOP], size: [AW, AH],
     fill: actor.color, text: actor.label, fontSize: 15
   });
-  // lifeline = dashed plain line, no arrowhead
+  // lifeline = undirected structure → line; dashed + gray keeps it behind the messages
   els.push({
-    shape: "arrow",
+    shape: "line",
     at: [cx, LIFE_TOP], points: [[0, 0], [0, LIFE_LEN]],
-    head: "none", dashed: true, stroke: "gray"
+    strokeStyle: "dashed", stroke: "gray"
   });
 }
 ```
@@ -65,7 +68,7 @@ steps.forEach((s, i) => {
     at: [fromX, y],
     points: [[0, 0], [toX - fromX, 0]],
     text: s.text,
-    dashed: <see Response style below>,
+    strokeStyle: <see Response style below>,   // "solid" | "dashed"
   };
   if (span > 1) arrow.labelT = 0.25;   // cross-lifeline label dodge
   els.push(arrow);
@@ -73,6 +76,11 @@ steps.forEach((s, i) => {
 ```
 
 ## Response style (from clarify §1)
+
+In a sequence diagram dashed means **response** and nothing else — this
+narrows semantics.md §2, where dashed can also mean async / optional. If the
+user also needs *async* messages, mark them with color (`stroke: "purple"`)
+or an `(async)` label, not a second kind of dash.
 
 Pick one rule and apply uniformly:
 
@@ -82,7 +90,7 @@ Pick one rule and apply uniformly:
 | **By semantics** (UML) | request / call (caller initiates) | response / return |
 | **None** | all messages | — |
 
-Set `dashed: true` on the matching arrows; omit for solid.
+Set `strokeStyle: "dashed"` on the matching arrows; omit for solid.
 
 ## Cross-lifeline label placement
 
@@ -107,9 +115,9 @@ step 4").
   `compute_layout` `equalize` over all actor headers and build them at the
   returned `h`, then drop every lifeline from that single baseline.
 
-- **Solid bar lifelines** (using a thin rect instead of dashed arrow) →
+- **Solid bar lifelines** (using a thin rect instead of a dashed line) →
   obscures message labels that cross them. → Always use
-  `{ shape:"arrow", head:"none", dashed:true, stroke:"gray" }`.
+  `{ shape:"line", strokeStyle:"dashed", stroke:"gray" }`.
 - **All-solid messages** → can't tell requests from responses. → Apply
   one of the §Response style rules.
 - **Long arrow with auto-centered label** → label lands on a crossed

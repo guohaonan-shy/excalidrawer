@@ -6,6 +6,14 @@ elements in the **sugar shorthand** below. Skills compose arrays of sugar
 elements; `render_diagram` translates them into full Excalidraw JSON and writes
 the output files.
 
+This file is the **API reference** — what each component is and how to write
+its fields. *Which* component and *which* style to use for a given meaning
+(arrow vs line, solid vs dashed, bold, colors) is decided in
+[`semantics.md`](semantics.md); read that first.
+
+Components: `rect` / `diamond` / `ellipse` / `text` (shapes), `arrow`
+(directed connector), `line` (undirected connector).
+
 ## Shape sugar
 
 ```js
@@ -55,19 +63,46 @@ auto-router never draws a bare diagonal.
 Common arrow options (apply to L1-L4):
 
 ```js
-{ ..., dashed?: true, head?: "arrow" | "none", labelT?: number /* 0-1 */, text?: string }
+{ ...,
+  arrowType?:   "sharp" | "round" | "elbow",       // default "round"
+  head?:        Arrowhead | "none",                 // end,   default "arrow"
+  startHead?:   Arrowhead | "none",                 // start, default "none"
+  strokeStyle?: "solid" | "dashed" | "dotted",      // dashed?: true is shorthand
+  strokeWidth?: "thin" | "medium" | "bold" | number, // 1 / 2 / 4
+  labelT?: number /* 0-1 */, text?: string }
+
+// Arrowhead = "arrow" | "bar" | "circle" | "circle_outline" | "triangle"
+//           | "triangle_outline" | "diamond" | "diamond_outline"
 ```
 
-- `head: "none"` → no arrowhead (use for plain lines / lifelines)
+- `arrowType` — Excalidraw's three arrow types. `round` smooths through every
+  point (a Catmull-Rom curve, so an L-route becomes an S-ish bend); `sharp`
+  keeps straight segments with hard corners; `elbow` forces every segment
+  axis-aligned (diagonal steps get an L corner) and rounds each corner.
+- `startHead` / `head` — arrowhead at each end; `"none"` removes it.
 - `labelT` → where along the path the auto-`text` label sits (0 = start, 1 = end)
+- `dashed: true` is shorthand for `strokeStyle: "dashed"`.
 
-## Arrow sugar — L4 manual escape
+## Line sugar
+
+`line` is Excalidraw's Line tool: a connector with no arrowheads. Same
+addressing as arrow (L1-L4: `from`/`to` or `at` + `points`), plus:
+
+```js
+{ shape: "line", ..., edges?: "sharp" | "round",    // default "sharp"
+  strokeWidth?: "thin" | "medium" | "bold" | number, strokeStyle?, stroke?, text? }
+```
+
+- `edges: "round"` smooths through the points like a `round` arrow; `"sharp"`
+  keeps hard corners.
+
+## Arrow / line sugar — L4 manual escape
 
 When none of L1-L3 fit (curved freeform, multi-segment with custom routing),
 specify the anchor and relative offset points:
 
 ```js
-{ shape: "arrow", id?, at: [x, y], points: [[dx, dy], [dx, dy], ...] }
+{ shape: "arrow" | "line", id?, at: [x, y], points: [[dx, dy], [dx, dy], ...] }
 ```
 
 ## Auto-routing rules (so you can predict the shape)

@@ -1,7 +1,8 @@
 # Comparison recipe
 
 How to compose a left-vs-right comparison diagram with sugar. Read AFTER
-clarifying intent (SKILL.md §1). Sugar schema in
+clarifying intent (SKILL.md §1). Component / style choices follow
+[`../../shared/references/semantics.md`](../../shared/references/semantics.md); sugar schema in
 [`../../shared/references/sugar.md`](../../shared/references/sugar.md).
 
 ## Modeling — dimensions first, not features first
@@ -86,6 +87,10 @@ Then drop a short arrow from each header into its own body:
 { shape: "arrow", from: "lh", to: "lb" }   // auto-routes bottom → top
 { shape: "arrow", from: "rh", to: "rb" }
 ```
+
+These are auto-routed, so per semantics.md §5 add `arrowType: "elbow"` to
+every header → body arrow (the fan-out arrows in Layout C included) — a
+fanned-out Z-route otherwise renders as an S-bend.
 
 The body comes in **two named forms**. Pick one per diagram and use it on both
 sides — mixing them (row cards left, panel right) reads as a status difference
@@ -278,7 +283,7 @@ Rules that keep it from looking broken:
 - **Default pairing is `gray` (neutral / status quo) vs `blue` (your side).**
   The colored side also gets `textColor` — colored text is what makes one
   column read as "the answer" without shouting. Two families plus ink, nothing
-  more (shared `references/colors.md`: ≤ 4 colors per diagram; a comparison
+  more (shared `references/semantics.md` §6: ≤ 4 colors per diagram; a comparison
   wants 2). `green` works too, but reads as "success/done" rather than "this
   one" — use it when the right side really is the end state (after / fixed).
 - **Never `red` for the other side.** `red` means *error* in this palette —

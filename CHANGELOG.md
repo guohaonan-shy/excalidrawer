@@ -4,6 +4,60 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.5.15
+
+_engine 0.5.15 · plugin 0.0.6_
+
+### Fixed
+
+- **Arrowheads were oversized on bold arrows and skewed on short tails.** The
+  SVG/PNG renderer drew the head as an SVG `<marker>` that scaled with stroke
+  width (24px at the default width, 48px when bold) and aimed it from a point
+  only ~12px back on the curve. On thin curves that was within 1–2° of the
+  line and not visible; on a bold arrow the head was twice Excalidraw's size,
+  and when the last segment was short it could point up to ~40° off the
+  line. Arrowheads are now drawn as real geometry the way Excalidraw draws
+  them: a fixed 25px head with ±20° wings, sized down to half the last
+  segment, aimed along the chord from the tip to the point one head-length
+  back along the drawn curve.
+
+### Added
+
+- **Arrow and line components**, matching Excalidraw's two linear tools.
+  `arrow()` now takes `arrowType` (`sharp` / `round` / `elbow`), `startArrowhead`
+  / `endArrowhead` (all eight Excalidraw arrowheads: `arrow`, `bar`, `circle`,
+  `circle_outline`, `triangle`, `triangle_outline`, `diamond`,
+  `diamond_outline`), `strokeStyle` and `strokeWidth` (`thin` / `medium` /
+  `bold` or a number). The new `line()` builder emits Excalidraw `line`
+  elements with `strokeWidth` and `edges` (`sharp` / `round`). Sugar gets the
+  same: `arrowType`, `head`, `startHead`, `strokeStyle`, `strokeWidth` on
+  arrows, and a new `shape: "line"` with `edges`. Elbow arrows auto-insert
+  corners so every segment is axis-aligned. First step of the component
+  layer (#15); stack/pack primitives are still open there.
+- The SVG/PNG renderer now draws `line` elements (they were silently dropped)
+  and elbow arrows (rounded 16px corners, as in Excalidraw).
+
+### Changed
+
+- An arrow's `width` / `height` is now the bounding box of its points rather
+  than the offset of the last point.
+- **Skills: new visual-semantics layer.** `skills/shared/references/semantics.md`
+  sits between the type recipes and the sugar API and maps a meaning to a
+  component and its style: arrow vs line (directed or not), solid / dashed /
+  dotted (certain, async/return/optional/planned, inferred), stroke weight
+  (main path vs auxiliary), arrowheads, elbow vs round, and colors.
+  `colors.md` is merged into it. Rules: one style carries one meaning per
+  diagram, style is never decoration, add a legend for custom meanings, ask
+  in clarify when the user's description doesn't say. `sugar.md` is now a pure
+  API reference. Recipes keep only their exceptions (sequence: dashed means
+  *response*); read order is semantics → sugar → recipe.
+- Undirected connectors are `line`s everywhere: sequence lifelines, timeline
+  axis segments and connectors, tree connectors (recipes, templates, gallery).
+  `arrow` + `head: "none"` still renders but is no longer taught.
+- Auto-routed connectors between boxes use `arrowType: "elbow"` — flowchart,
+  architecture and comparison recipes, and the flowchart / architecture
+  templates. The default `round` smoothed their L / Z routes into S-bends.
+
 ## 0.5.14
 
 _engine 0.5.14 · plugin 0.0.5_

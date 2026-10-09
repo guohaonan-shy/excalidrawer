@@ -79,7 +79,7 @@ function cacheSequence() {
   const bottom = y + 8;
 
   // Lifelines first, so bands and labels sit on top of them.
-  actors.forEach(([id]) => els.push({ shape: "arrow", at: [cx[id], TOP + headH], points: [[0, 0], [0, bottom - TOP - headH]], dashed: true, head: "none", stroke: "gray" }));
+  actors.forEach(([id]) => els.push({ shape: "line", at: [cx[id], TOP + headH], points: [[0, 0], [0, bottom - TOP - headH]], strokeStyle: "dashed", stroke: "gray" }));
   actors.forEach(([id, label, fill], i) => els.push({ shape: "rect", id, at: [X0 + i * COL, TOP], size: [W, headH], fill, text: label, fontSize: FS }));
   els.push(...body);
   els.push({ shape: "arrow", at: [X0, bottom + 28], points: [[0, 0], [60, 0]], stroke: "red" });

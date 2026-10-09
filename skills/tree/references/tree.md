@@ -1,7 +1,8 @@
 # Tree recipe
 
 How to compose a tree diagram with sugar elements. Read this AFTER clarifying
-intent (SKILL.md §1). Sugar schema basics live in
+intent (SKILL.md §1). Component / style choices follow
+[`../../shared/references/semantics.md`](../../shared/references/semantics.md); sugar schema basics live in
 [`../../shared/references/sugar.md`](../../shared/references/sugar.md) —
 this file only covers tree-specific composition.
 
@@ -55,7 +56,7 @@ Useful args (all optional):
 const sugar = [
   { shape: "text", at: [40, 28], size: [bounds.w, 34], text: TITLE, fontSize: 24 },
   // connectors first so box borders paint over the trunk ends
-  ...segments.map((s) => ({ shape: "arrow", at: s.at, points: s.points, head: "none", stroke: "#495057" })),
+  ...segments.map((s) => ({ shape: "line", at: s.at, points: s.points, stroke: "#495057" })),
   ...nodes.map((n) => ({
     shape: "rect", id: n.id, at: [n.x, n.y], size: [n.w, n.h],
     fill: FILL(n), stroke: STROKE(n), text: n.label, fontSize: n.fontSize,
@@ -130,8 +131,8 @@ already carry numbers. `arrowheads: true` puts heads on child branches
 ## Common pitfalls
 
 - **Arrowheads everywhere.** A tree's direction is implied by the root's
-  position; heads on every branch add noise. Use `head: "none"` on all
-  segments unless the edges mean "flows to".
+  position; heads on every branch add noise. Draw segments as `line`; use
+  `arrow` only when the edges mean "flows to" (semantics.md §1).
 - **Hand-placing nodes after the helper.** Moving one node breaks the
   centering of every ancestor. Change the input (order, widths, gaps) and
   call the helper again.

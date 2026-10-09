@@ -1,7 +1,8 @@
 # Timeline recipe
 
 How to compose a timeline with sugar. Read AFTER clarifying milestones +
-style (SKILL.md §1). Sugar schema in
+style (SKILL.md §1). Component / style choices follow
+[`../../shared/references/semantics.md`](../../shared/references/semantics.md); sugar schema in
 [`../../shared/references/sugar.md`](../../shared/references/sugar.md).
 
 ## Dimensions
@@ -23,8 +24,8 @@ Title at `y = 30`, fontSize `28`, size `[60, AXIS_END_X]`.
 
 ## Style A — perched dots (recommended, clarify default)
 
-The axis is **discrete segments** between dots; only the last segment has
-an arrowhead. Dots sit centered on the axis y. The axis terminates at each
+The axis is **discrete segments** between dots: the inner segments are
+`line`s, and only the last segment is an `arrow` (time flows that way). Dots sit centered on the axis y. The axis terminates at each
 dot edge, dot interior is clean.
 
 Why segments instead of one continuous arrow? In `render`, arrows always
@@ -46,10 +47,9 @@ segments.push({ a: breaks.at(-1).right, b: AXIS_END_X, tail: true });
 // push axis segments
 for (const s of segments) {
   els.push({
-    shape: "arrow",
+    shape: s.tail ? "arrow" : "line",
     at: [s.a, AXIS_Y],
     points: [[0, 0], [s.b - s.a, 0]],
-    head: s.tail ? "arrow" : "none",
   });
 }
 
@@ -115,6 +115,8 @@ milestones.forEach((m, i) => {
 - `desc` is muted (`stroke: "gray"`, fontSize 13).
 
 ## Color rotation
+
+Timeline uses its own cycle (not the default in semantics.md §6):
 
 ```
 blue → green → yellow → purple → red → orange → gray → ... (repeat)
