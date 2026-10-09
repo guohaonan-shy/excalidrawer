@@ -5,8 +5,8 @@
   "type": "module",
   "main": "./src/index.mjs",
   "bin": {
-    "excalidrawer": "./src/cli.mjs",
-    "excalidrawer-mcp": "./src/mcp.mjs"
+    "excalidrawer": "src/cli.mjs",
+    "excalidrawer-mcp": "src/mcp.mjs"
   },
   "exports": {
     ".": "./src/index.mjs",
