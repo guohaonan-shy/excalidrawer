@@ -10,14 +10,16 @@ _engine 0.5.15 · plugin 0.0.6_
 
 ### Fixed
 
-- **Arrowheads on curved arrows sat off-center.** The SVG/PNG renderer drew
-  the head as an SVG `<marker>` that scaled with stroke width (24px at the
-  default width, 48px when bold) but aimed it from a point only ~12px back on
-  the curve, so on a bending tail the head and the line visibly disagreed.
-  Arrowheads are now drawn as real geometry the way Excalidraw draws them:
-  a fixed 25px head with ±20° wings, sized down to half the last segment,
-  aimed along the chord from the tip to the point one head-length back
-  along the drawn curve.
+- **Arrowheads were oversized on bold arrows and skewed on short tails.** The
+  SVG/PNG renderer drew the head as an SVG `<marker>` that scaled with stroke
+  width (24px at the default width, 48px when bold) and aimed it from a point
+  only ~12px back on the curve. On thin curves that was within 1–2° of the
+  line and not visible; on a bold arrow the head was twice Excalidraw's size,
+  and when the last segment was short it could point up to ~40° off the
+  line. Arrowheads are now drawn as real geometry the way Excalidraw draws
+  them: a fixed 25px head with ±20° wings, sized down to half the last
+  segment, aimed along the chord from the tip to the point one head-length
+  back along the drawn curve.
 
 ### Added
 
@@ -30,7 +32,8 @@ _engine 0.5.15 · plugin 0.0.6_
   elements with `strokeWidth` and `edges` (`sharp` / `round`). Sugar gets the
   same: `arrowType`, `head`, `startHead`, `strokeStyle`, `strokeWidth` on
   arrows, and a new `shape: "line"` with `edges`. Elbow arrows auto-insert
-  corners so every segment is axis-aligned.
+  corners so every segment is axis-aligned. First step of the component
+  layer (#15); stack/pack primitives are still open there.
 - The SVG/PNG renderer now draws `line` elements (they were silently dropped)
   and elbow arrows (rounded 16px corners, as in Excalidraw).
 
