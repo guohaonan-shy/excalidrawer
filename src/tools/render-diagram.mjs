@@ -15,10 +15,14 @@ export const renderDiagram = defineTool({
     "— non-empty `text` auto-binds a centered text child. `stroke` colors the " +
     "border, `textColor` (palette key or #rrggbb) colors the label.\n" +
     "  arrow:   { shape:'arrow', from, to, fromSide?, toSide?, fromT?, toT?, " +
-    "via?, head?:'arrow'|'none', dashed?, labelT?, text? } " +
+    "via?, arrowType?:'sharp'|'round'|'elbow', head?, startHead?, strokeStyle?:'solid'|'dashed'|'dotted', " +
+    "strokeWidth?, dashed?, labelT?, text? } — head/startHead: 'arrow'|'bar'|'circle'|'circle_outline'|" +
+    "'triangle'|'triangle_outline'|'diamond'|'diamond_outline'|'none' (default end 'arrow', start none) " +
     "— id-anchored arrows auto-route orthogonally (straight / L-bend / Z-route). " +
     "`via:'above'|'below'|'left'|'right'` gives a U-route detour. " +
     "Escape hatch: { shape:'arrow', at:[x,y], points:[[dx,dy]...] }.\n" +
+    "  line:    { shape:'line', ...same addressing as arrow, edges?:'sharp'|'round', strokeWidth?, strokeStyle? } " +
+    "— a plain connector/divider with no arrowheads.\n" +
     "Raw Excalidraw elements also pass through; missing base fields are filled in. " +
     "Use `compute_layout` for geometry (grids, chains, swimlanes, hub-and-spoke, " +
     "edge anchors, U-routing, label anchors). " +

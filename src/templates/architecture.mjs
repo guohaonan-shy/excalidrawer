@@ -233,7 +233,7 @@ export function architecture(data, opts = {}) {
         strokeColor: "#495057",
         strokeWidth: 1.5,
         strokeStyle: conn.style || "solid",
-        roundness: { type: 2 },  // smooth curved elbows
+        arrowType: "elbow",  // orthogonal route, rounded corners
       })
     );
 

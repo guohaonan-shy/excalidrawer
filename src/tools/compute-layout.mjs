@@ -46,7 +46,7 @@ export const computeLayout = defineTool({
     "  tree        — { root:{label,desc?,id?,children?:[node|string]}, direction?:'right'|'down', widths?:[perDepth], fontSize?, minH?, " +
     "levelGap?, siblingGap?, groupGap?, equalize?:'depth'|'siblings'|'none', originX?, originY? } → " +
     "{nodes:[{id,parent,depth,leaf,label,fontSize,x,y,w,h,titled?}], segments:[{kind,at,points}], levels, bounds} " +
-    "(tidy tree: parents centered on their children, subtrees never overlap; each segment is a ready L4 arrow — draw with head:'none')\n" +
+    "(tidy tree: parents centered on their children, subtrees never overlap; each segment is ready L4 form — draw it as shape:'line')\n" +
     "On bad input it returns { error }.",
   params: {
     helper: {

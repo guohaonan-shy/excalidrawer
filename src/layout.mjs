@@ -753,7 +753,7 @@ const atDepth = (v, d, fallback) =>
 /**
  * Tidy tree layout — root → children hierarchy, growing right (root on the
  * left) or down (root on top). Returns coordinates only: node boxes plus the
- * connector segments, ready for `box`/`rect` + `arrow` (or sugar L4 arrows).
+ * connector segments, ready for `box`/`rect` + `line` (or sugar L4 lines).
  *
  * Correct by construction, not eyeballed:
  *   - Leaves are stacked in input order along the breadth axis; every subtree
@@ -800,7 +800,7 @@ const atDepth = (v, d, fallback) =>
  *   `titled` (only on nodes with `desc`) is the `titledBox` layout at the
  *   node's final position, with the wrapped strings on `title.text` /
  *   `body.text` — draw a rect + two texts instead of a bound label.
- *   Each segment is in sugar L4 form: `{ shape: "arrow", at, points, head: "none" }`.
+ *   Each segment is in sugar L4 form: `{ shape: "line", at, points }`.
  *
  * @example
  *   const t = tree({ label: "Skills", children: [

@@ -375,6 +375,7 @@ export function flowchart(data, opts = {}) {
 
     elements.push(
       arrow(`edge-${ei}`, startX, startY, points, {
+        arrowType: "elbow",
         strokeColor: "#495057",
         strokeWidth: 1.5,
       })

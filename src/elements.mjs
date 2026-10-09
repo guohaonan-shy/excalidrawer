@@ -146,25 +146,136 @@ export function diamondBox(rid, tid, x, y, w, h, bg, text, fontSize = 14, extra 
 }
 
 // ---------------------------------------------------------------------------
-// Arrow helper
+// Linear components: arrow / line
 // ---------------------------------------------------------------------------
+//
+// These mirror Excalidraw's two linear tools and their property panels:
+//
+//   arrow — Stroke style · Arrow type (sharp / round / elbow) · Arrowheads
+//   line  — Stroke width · Edges (sharp / round)
+//
+// Shared option keys (both): strokeColor, strokeWidth, strokeStyle. Anything
+// else in the options object is passed through as a raw element field.
+
+/** Excalidraw's arrowhead set (null = none). */
+export const ARROWHEADS = [
+  "arrow", "bar", "circle", "circle_outline",
+  "triangle", "triangle_outline", "diamond", "diamond_outline",
+];
+export const ARROW_TYPES = ["sharp", "round", "elbow"];
+export const STROKE_STYLES = ["solid", "dashed", "dotted"];
+export const LINE_EDGES = ["sharp", "round"];
+
+/** Excalidraw's three stroke-width presets (thin / medium / bold). */
+export const strokeWidths = { thin: 1, medium: 2, bold: 4 };
+
+function resolveStrokeWidth(v) {
+  if (v == null) return undefined;
+  return typeof v === "string" ? strokeWidths[v] : v;
+}
+
+/** Bounding box of a relative points path → { minX, minY, w, h }. */
+function pointsBox(points) {
+  const xs = points.map((p) => p[0]);
+  const ys = points.map((p) => p[1]);
+  return {
+    w: Math.max(...xs) - Math.min(...xs),
+    h: Math.max(...ys) - Math.min(...ys),
+  };
+}
+
+/**
+ * Make a path axis-aligned for an elbow arrow: every diagonal step becomes an
+ * L (horizontal leg first). Collinear / zero-length points are dropped.
+ */
+export function orthogonalize(points) {
+  const out = [points[0]];
+  for (let i = 1; i < points.length; i++) {
+    const [px, py] = out[out.length - 1];
+    const [x, y] = points[i];
+    if (x !== px && y !== py) out.push([x, py]);
+    out.push([x, y]);
+  }
+  // Drop duplicates and the middle of collinear runs.
+  const clean = [out[0]];
+  for (let i = 1; i < out.length; i++) {
+    const p = out[i];
+    const q = clean[clean.length - 1];
+    if (p[0] === q[0] && p[1] === q[1]) continue;
+    if (clean.length >= 2) {
+      const r = clean[clean.length - 2];
+      if ((r[0] === q[0] && q[0] === p[0]) || (r[1] === q[1] && q[1] === p[1])) {
+        clean[clean.length - 1] = p;
+        continue;
+      }
+    }
+    clean.push(p);
+  }
+  return clean;
+}
 
 /**
  * Arrow from (x, y) following a relative points path.
  *
  * points: array of [dx, dy] offsets, e.g. [[0,0],[100,0]] draws a 100px horizontal arrow.
+ *
+ * opts (all optional — Excalidraw's arrow property panel):
+ *   arrowType      "sharp" | "round" | "elbow"   (default "round"; elbow
+ *                  auto-inserts corners so every segment is axis-aligned)
+ *   startArrowhead / endArrowhead   one of ARROWHEADS, or null for none
+ *                  (default start null, end "arrow")
+ *   strokeStyle    "solid" | "dashed" | "dotted"
+ *   strokeWidth    1 | 2 | 4 or "thin" | "medium" | "bold"
+ *   strokeColor
+ * Raw element fields (e.g. roundness) still pass through and win.
  */
-export function arrow(id, x, y, points, extra = {}) {
-  const last = points[points.length - 1];
-  const w = Math.abs(last[0]);
-  const h = Math.abs(last[1]);
+export function arrow(id, x, y, points, opts = {}) {
+  const { arrowType, strokeWidth, ...extra } = opts;
+  if (arrowType != null && !ARROW_TYPES.includes(arrowType)) {
+    throw new Error(`arrow ${id}: arrowType must be one of ${ARROW_TYPES.join("/")}`);
+  }
+  const elbowed = arrowType === "elbow";
+  const pts = elbowed ? orthogonalize(points) : points;
+  const { w, h } = pointsBox(pts);
+  const sw = resolveStrokeWidth(strokeWidth);
   return base(id, "arrow", x, y, w || 1, h || 1, {
-    points,
-    roundness: { type: 2 },
+    points: pts,
+    roundness: arrowType === "sharp" || elbowed ? null : { type: 2 },
+    elbowed,
     startArrowhead: null,
     endArrowhead: "arrow",
     startBinding: null,
     endBinding: null,
+    ...(sw != null ? { strokeWidth: sw } : {}),
+    ...extra,
+  });
+}
+
+/**
+ * Plain line (no arrowheads) from (x, y) following a relative points path.
+ *
+ * opts (all optional — Excalidraw's line property panel):
+ *   strokeWidth    1 | 2 | 4 or "thin" | "medium" | "bold"
+ *   edges          "sharp" | "round"   (default "sharp"; round = smooth curve
+ *                  through the points, same as a round arrow)
+ *   strokeStyle, strokeColor
+ */
+export function line(id, x, y, points, opts = {}) {
+  const { edges, strokeWidth, ...extra } = opts;
+  if (edges != null && !LINE_EDGES.includes(edges)) {
+    throw new Error(`line ${id}: edges must be one of ${LINE_EDGES.join("/")}`);
+  }
+  const { w, h } = pointsBox(points);
+  const sw = resolveStrokeWidth(strokeWidth);
+  return base(id, "line", x, y, w || 1, h || 1, {
+    points,
+    roundness: edges === "round" ? { type: 2 } : null,
+    polygon: false,
+    startArrowhead: null,
+    endArrowhead: null,
+    startBinding: null,
+    endBinding: null,
+    ...(sw != null ? { strokeWidth: sw } : {}),
     ...extra,
   });
 }

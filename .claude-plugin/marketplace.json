@@ -9,7 +9,7 @@
     {
       "name": "excalidrawer",
       "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence, comparison, tree.",
-      "version": "0.0.5",
+      "version": "0.0.6",
       "source": "./",
       "author": {
         "name": "guohaonan-shy",

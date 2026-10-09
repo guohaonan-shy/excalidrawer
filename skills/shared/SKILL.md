@@ -1,6 +1,6 @@
 ---
 name: shared
-description: Shared base for the excalidrawer diagram skills (flowchart / timeline / architecture / sequence / comparison / tree). Holds the cross-cutting conventions every type skill depends on — MCP precheck + CLI fallback, sugar schema reference, color palette, output file naming, label language, export format selection, and iteration rules. The type skills declare "前置条件：先 Read ../shared/SKILL.md" and rely on this. Not a standalone drawing skill — read it first, then follow the type-specific recipe. 通用约定 / 基座 / sugar / 配色 / 命名 / 导出格式。
+description: Shared base for the excalidrawer diagram skills (flowchart / timeline / architecture / sequence / comparison / tree). Holds the cross-cutting conventions every type skill depends on — MCP precheck + CLI fallback, visual semantics (which component / line style / color for which meaning), sugar schema reference, output file naming, label language, export format selection, and iteration rules. The type skills declare "前置条件：先 Read ../shared/SKILL.md" and rely on this. Not a standalone drawing skill — read it first, then follow the type-specific recipe. 通用约定 / 基座 / sugar / 配色 / 命名 / 导出格式。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
@@ -15,8 +15,9 @@ their own clarify questions and layout recipe on top.
 ## 0. The render loop (shared by all types)
 
 ```text
-detect type → clarify (AskUserQuestion) → read the type recipe → compose sugar
-            → render_diagram → resolve any warnings (§7.5) → give the user the paths → iterate
+detect type → clarify (AskUserQuestion) → read semantics.md + the type recipe
+            → pick components & styles → compose sugar → render_diagram
+            → resolve any warnings (§7.5) → give the user the paths → iterate
 ```
 
 Each type skill owns steps "clarify" and "read recipe + compose"; everything
@@ -44,19 +45,31 @@ npx -y -p excalidrawer@^0.5.13 -c "excalidrawer compute-layout --helper gridLayo
 
 `elements.json` accepts either a bare sugar array or `{ "elements": [...] }`.
 
-## 2. Sugar schema
+## 2. Three layers, read in this order
 
-The element shorthand every recipe composes — shapes, the L1–L4 arrow levels,
-auto-routing rules, and the `compute_layout` helpers — lives in
-[`references/sugar.md`](references/sugar.md). Read it before composing if you
-are unsure of a field. Render order: background rects → arrows → boxes/text
-(arrows always render after shapes, so push lifelines/axes as segments where
-overlap matters — see the timeline/sequence recipes).
+| order | file | answers |
+|---|---|---|
+| 1 | [`references/semantics.md`](references/semantics.md) | **which** component and style a meaning maps to — arrow vs line, solid / dashed / dotted, stroke weight, arrowheads, elbow vs round, colors |
+| 2 | [`references/sugar.md`](references/sugar.md) | **how** to write each component's fields — shapes, arrow / line, L1–L4 addressing, auto-routing, `compute_layout` helpers |
+| 3 | the type skill's `references/<type>.md` | this diagram type's layout numbers and its **exceptions** to semantics.md |
+
+Precedence when they disagree: the user's explicit request → the type recipe
+→ semantics.md → component defaults. A recipe only restates a rule when it
+narrows or overrides it (e.g. sequence narrows "dashed" to mean *response*).
+
+Always read `semantics.md` before composing — it is short, and it is where
+"the user said *async* / *optional* / *planned*" turns into parameters. If the
+user's description leaves a load-bearing style question open (which calls are
+async? which modules are planned?), ask it in clarify (§4) rather than guess.
+
+Render order: background rects → connectors (arrows / lines) → boxes/text.
+Connectors always render after shapes, so push lifelines/axes as segments
+where overlap matters — see the timeline/sequence recipes.
 
 ## 3. Colors
 
-The 7-color hand-drawn palette and the per-type color conventions live in
-[`references/colors.md`](references/colors.md).
+The palette and color conventions are part of
+[`references/semantics.md`](references/semantics.md) §6.
 
 ## 4. Clarify before drawing
 

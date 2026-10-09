@@ -95,6 +95,15 @@ test("tree template: numberLeaves prefixes leaves in reading order", () => {
   assert.ok(texts.includes("5. C"));
 });
 
+test("tree template: connectors are lines; arrowheads turns branches into arrows", () => {
+  const plain = tree({ root: sample }).filter((e) => e.id.startsWith("tree-e"));
+  assert.ok(plain.length > 0 && plain.every((e) => e.type === "line"));
+
+  const headed = tree({ root: sample, arrowheads: true }).filter((e) => e.id.startsWith("tree-e"));
+  assert.ok(headed.some((e) => e.type === "arrow" && e.endArrowhead === "arrow"));
+  assert.ok(headed.some((e) => e.type === "line")); // stems and spines stay plain
+});
+
 test("compute_layout exposes the tree helper", async () => {
   const out = await getTool("compute_layout").run({ helper: "tree", args: { root: sample, direction: "down" } });
   assert.equal(out.helper, "tree");

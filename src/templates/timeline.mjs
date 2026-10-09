@@ -10,7 +10,7 @@
  * }
  */
 
-import { setSeed, box, arrow, textEl, rect, colors, excalidraw } from "../elements.mjs";
+import { setSeed, box, arrow, line, textEl, rect, colors, excalidraw } from "../elements.mjs";
 import { toSvg, toPng } from "../export.mjs";
 import { wrapText } from "../text.mjs";
 
@@ -115,11 +115,10 @@ export function timeline(data, opts = {}) {
     const connStartY = isAbove ? TIMELINE_Y - 8 : TIMELINE_Y + 8;
     const connEndY = isAbove ? boxY + NODE_H : boxY;
     elements.push(
-      arrow(`${prefix}conn`, cx, connStartY, [[0, 0], [0, connEndY - connStartY]], {
+      line(`${prefix}conn`, cx, connStartY, [[0, 0], [0, connEndY - connStartY]], {
         strokeColor: "#adb5bd",
         strokeWidth: 1,
         strokeStyle: "dashed",
-        endArrowhead: null,
       })
     );
 

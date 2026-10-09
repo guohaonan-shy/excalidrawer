@@ -25,7 +25,7 @@
  *   - `color` on any node overrides the hue for it and its subtree
  */
 
-import { setSeed, box, rect, arrow, textEl, colors, excalidraw } from "../elements.mjs";
+import { setSeed, box, rect, arrow, line, textEl, colors, excalidraw } from "../elements.mjs";
 import { toSvg, toPng } from "../export.mjs";
 import { estimateTextWidth } from "../text.mjs";
 import { tree as treeLayout } from "../layout.mjs";
@@ -140,13 +140,11 @@ export function tree(data, opts = {}) {
   }
 
   t.segments.forEach((s, i) => {
-    const head = arrowheads && s.kind === "branch" ? "arrow" : null;
-    lines.push(arrow(`tree-e${i}`, s.at[0], s.at[1], s.points, {
-      strokeColor: EDGE,
-      strokeWidth: 1.5,
-      roundness: null,
-      endArrowhead: head,
-    }));
+    // Plain hierarchy connectors are lines; only "flows to" branches are arrows.
+    const style = { strokeColor: EDGE, strokeWidth: 1.5 };
+    lines.push(arrowheads && s.kind === "branch"
+      ? arrow(`tree-e${i}`, s.at[0], s.at[1], s.points, { ...style, arrowType: "sharp" })
+      : line(`tree-e${i}`, s.at[0], s.at[1], s.points, style));
   });
 
   // Connectors under the boxes, so a trunk end never paints over a border.

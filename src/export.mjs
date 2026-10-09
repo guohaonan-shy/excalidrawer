@@ -258,104 +258,198 @@ function renderEllipse(el) {
   return `<ellipse ${attrs}/>`;
 }
 
-/**
- * Convert an array of points to a smooth cubic bezier SVG path using
- * Catmull-Rom → Cubic Bezier conversion (matches Excalidraw's curve rendering).
- */
-function catmullRomToBezierPath(pts) {
-  if (pts.length < 2) return "";
-  if (pts.length === 2) {
-    return `M${pts[0][0]},${pts[0][1]} L${pts[1][0]},${pts[1][1]}`;
-  }
+// ---------------------------------------------------------------------------
+// Linear elements (arrow / line) — geometry mirrors Excalidraw
+// ---------------------------------------------------------------------------
 
-  let d = `M${pts[0][0]},${pts[0][1]}`;
+// Excalidraw's per-arrowhead size (px) and half-angle (deg) — see
+// getArrowheadSize / getArrowheadAngle in excalidraw/packages/element/src/bounds.ts.
+// Sizes are absolute, NOT scaled by strokeWidth.
+const ARROWHEAD_SIZE = { arrow: 25, diamond: 12, diamond_outline: 12 };
+const ARROWHEAD_ANGLE = { arrow: 20, bar: 90 };
+const ELBOW_RADIUS = 16;
+
+/** Catmull-Rom control points for segment i (the curve Excalidraw / roughjs draws). */
+function catmullRomSegments(pts) {
   const n = pts.length;
-
+  const segs = [];
   for (let i = 0; i < n - 1; i++) {
     const p0 = pts[Math.max(0, i - 1)];
     const p1 = pts[i];
-    const p2 = pts[Math.min(n - 1, i + 1)];
+    const p2 = pts[i + 1];
     const p3 = pts[Math.min(n - 1, i + 2)];
-
-    // Catmull-Rom to cubic bezier control points (alpha = 0.5 / tension = 1/6)
-    const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
-    const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
-    const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
-    const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
-
-    d += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2[0]},${p2[1]}`;
+    segs.push([
+      p1,
+      [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6],
+      [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6],
+      p2,
+    ]);
   }
-
-  return d;
+  return segs;
 }
 
-// Sample the last cubic-bezier segment of a Catmull-Rom path at a point
-// roughly TARGET_DIST pixels before the endpoint, and return the angle (in
-// degrees) from that sample to the endpoint. Used to orient end-arrowheads
-// along the *visually approaching* direction rather than the strict t=1
-// tangent, which can be off when Catmull-Rom recovers from a sharp prior
-// direction change (see export.mjs comment on S-curve tails).
-function computeEndOrientDeg(pts, useCurve, strokeWidth) {
-  const n = pts.length;
-  const [px, py] = pts[n - 2];
-  const [qx, qy] = pts[n - 1];
-  if (!useCurve) {
-    return Math.atan2(qy - py, qx - px) * 180 / Math.PI;
-  }
-  const p0 = pts[Math.max(0, n - 3)];
-  const p1 = pts[n - 2];
-  const p2 = pts[n - 1];
-  const cp1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
-  const cp2 = [p2[0] - (p2[0] - p1[0]) / 6, p2[1] - (p2[1] - p1[1]) / 6];
-  const TARGET_DIST = Math.max(8, strokeWidth * 6);
-  let bestT = 0.9;
-  let bestDelta = Infinity;
-  for (let t = 0.4; t < 1.0; t += 0.02) {
-    const omt = 1 - t;
-    const x = omt**3 * p1[0] + 3*omt**2*t * cp1[0] + 3*omt*t**2 * cp2[0] + t**3 * p2[0];
-    const y = omt**3 * p1[1] + 3*omt**2*t * cp1[1] + 3*omt*t**2 * cp2[1] + t**3 * p2[1];
-    const d = Math.hypot(p2[0] - x, p2[1] - y);
-    const delta = Math.abs(d - TARGET_DIST);
-    if (delta < bestDelta) { bestDelta = delta; bestT = t; }
-  }
-  const omt = 1 - bestT;
-  const sx = omt**3 * p1[0] + 3*omt**2*bestT * cp1[0] + 3*omt*bestT**2 * cp2[0] + bestT**3 * p2[0];
-  const sy = omt**3 * p1[1] + 3*omt**2*bestT * cp1[1] + 3*omt*bestT**2 * cp2[1] + bestT**3 * p2[1];
-  return Math.atan2(p2[1] - sy, p2[0] - sx) * 180 / Math.PI;
+function bezierAt([a, b, c, d], t) {
+  const u = 1 - t;
+  return [
+    u ** 3 * a[0] + 3 * u ** 2 * t * b[0] + 3 * u * t ** 2 * c[0] + t ** 3 * d[0],
+    u ** 3 * a[1] + 3 * u ** 2 * t * b[1] + 3 * u * t ** 2 * c[1] + t ** 3 * d[1],
+  ];
 }
 
-function renderArrow(el) {
+/** Elbow path: orthogonal polyline with each corner rounded (Excalidraw's generateElbowArrowShape). */
+function elbowPath(pts) {
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [px, py] = pts[i - 1];
+    const [x, y] = pts[i];
+    const [nx, ny] = pts[i + 1];
+    const r = Math.min(ELBOW_RADIUS, Math.hypot(x - px, y - py) / 2, Math.hypot(nx - x, ny - y) / 2);
+    const toward = (ax, ay) => {
+      const l = Math.hypot(ax - x, ay - y) || 1;
+      return [x + ((ax - x) / l) * r, y + ((ay - y) / l) * r];
+    };
+    const a = toward(px, py);
+    const b = toward(nx, ny);
+    d += ` L${a[0]},${a[1]} Q${x},${y} ${b[0]},${b[1]}`;
+  }
+  const last = pts[pts.length - 1];
+  return d + ` L${last[0]},${last[1]}`;
+}
+
+const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+
+/**
+ * The drawn path of a linear element plus a dense polyline approximation of
+ * it (`samples`), used to aim arrowheads along what is actually on screen.
+ */
+function linearGeometry(el, pts) {
+  if (el.elbowed && pts.length >= 3) {
+    return { d: elbowPath(pts), samples: pts };
+  }
+  if (el.roundness && pts.length >= 3) {
+    const segs = catmullRomSegments(pts);
+    let d = `M${pts[0][0]},${pts[0][1]}`;
+    const samples = [pts[0]];
+    for (const seg of segs) {
+      d += ` C${seg[1][0]},${seg[1][1]} ${seg[2][0]},${seg[2][1]} ${seg[3][0]},${seg[3][1]}`;
+      for (let k = 1; k <= 24; k++) samples.push(bezierAt(seg, k / 24));
+    }
+    return { d, samples };
+  }
+  return {
+    d: pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x},${y}`).join(" "),
+    samples: pts,
+  };
+}
+
+/** Walk `samples` back from the last point by arc length `dist`; return that point. */
+function pointBackAlong(samples, dist) {
+  let acc = 0;
+  for (let i = samples.length - 1; i > 0; i--) {
+    const [ax, ay] = samples[i];
+    const [bx, by] = samples[i - 1];
+    const seg = Math.hypot(ax - bx, ay - by);
+    if (acc + seg >= dist) {
+      const t = (dist - acc) / (seg || 1);
+      return [ax + (bx - ax) * t, ay + (by - ay) * t];
+    }
+    acc += seg;
+  }
+  return samples[0];
+}
+
+/**
+ * SVG for one arrowhead. Like Excalidraw, the head is sized
+ * min(size, lastSegment / 2) and drawn as real geometry (not an SVG marker).
+ * Its axis runs from the tip to the point one head-length back *along the
+ * drawn curve*, so on a curved tail the head stays centered on the line —
+ * the old marker sampled only ~12px back while drawing a 24px head, which
+ * is what made curved arrows look lopsided.
+ */
+/** Excalidraw's head size: min(per-kind size, last segment × ½ (¼ for diamonds)). */
+function arrowheadSize(kind, pts) {
+  const lastLen = dist(pts[pts.length - 1], pts[pts.length - 2]);
+  const isDiamond = kind === "diamond" || kind === "diamond_outline";
+  return Math.min(ARROWHEAD_SIZE[kind] ?? 15, lastLen * (isDiamond ? 0.25 : 0.5));
+}
+
+function renderArrowhead(el, kind, pts, samples) {
+  const [tx, ty] = pts[pts.length - 1];
+  const size = arrowheadSize(kind, pts);
+  if (!(size > 0)) return "";
+
+  const [bx, by] = pointBackAlong(samples, size);
+  const len = Math.hypot(tx - bx, ty - by) || 1;
+  const nx = (tx - bx) / len;
+  const ny = (ty - by) / len;
+  const xs = tx - nx * size;
+  const ys = ty - ny * size;
+  const rot = (deg) => {
+    const a = (deg * Math.PI) / 180;
+    const dx = xs - tx, dy = ys - ty;
+    return [tx + dx * Math.cos(a) - dy * Math.sin(a), ty + dx * Math.sin(a) + dy * Math.cos(a)];
+  };
+  const angle = ARROWHEAD_ANGLE[kind] ?? 25;
+  const [x3, y3] = rot(-angle);
+  const [x4, y4] = rot(angle);
+  const f = (n) => +n.toFixed(2);
+
+  const outline = kind.endsWith("_outline");
+  const common = {
+    stroke: el.strokeColor,
+    "stroke-width": el.strokeWidth,
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    opacity: el.opacity / 100,
+  };
+  switch (kind) {
+    case "circle":
+    case "circle_outline": {
+      const r = (size + el.strokeWidth - 2) / 2;
+      return `<circle ${svgAttrs({ cx: f(tx), cy: f(ty), r: f(r), fill: outline ? "#ffffff" : el.strokeColor, ...common })}/>`;
+    }
+    case "triangle":
+    case "triangle_outline":
+      return `<path ${svgAttrs({ d: `M${f(tx)},${f(ty)} L${f(x3)},${f(y3)} L${f(x4)},${f(y4)} Z`, fill: outline ? "#ffffff" : el.strokeColor, ...common })}/>`;
+    case "diamond":
+    case "diamond_outline": {
+      const ox = tx - nx * size * 2;
+      const oy = ty - ny * size * 2;
+      return `<path ${svgAttrs({ d: `M${f(tx)},${f(ty)} L${f(x3)},${f(y3)} L${f(ox)},${f(oy)} L${f(x4)},${f(y4)} Z`, fill: outline ? "#ffffff" : el.strokeColor, ...common })}/>`;
+    }
+    default: // "arrow", "bar"
+      return `<path ${svgAttrs({ d: `M${f(x3)},${f(y3)} L${f(tx)},${f(ty)} L${f(x4)},${f(y4)}`, fill: "none", ...common })}/>`;
+  }
+}
+
+function renderLinear(el) {
   if (!el.points || el.points.length < 2) return "";
 
   const pts = el.points.map(([dx, dy]) => [el.x + dx, el.y + dy]);
-  const useCurve = el.roundness && pts.length >= 3;
-  const d = useCurve
-    ? catmullRomToBezierPath(pts)
-    : pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x},${y}`).join(" ");
-  const dash = strokeDashArray(el.strokeStyle);
-  const markerId = `arrow-${el.id}`;
-
-  let markerDef = "";
-  let markerEnd = null;
-  if (el.endArrowhead !== null) {
-    const orient = computeEndOrientDeg(pts, useCurve, el.strokeWidth).toFixed(2);
-    markerDef = `<defs><marker id="${markerId}" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="${orient}">
-  <path d="M0,0 L12,6 L0,12" fill="none" stroke="${el.strokeColor}" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-</marker></defs>`;
-    markerEnd = `url(#${markerId})`;
-  }
+  const { d, samples } = linearGeometry(el, pts);
 
   const attrs = svgAttrs({
     d,
     fill: "none",
     stroke: el.strokeColor,
     "stroke-width": el.strokeWidth,
-    "stroke-dasharray": dash,
-    "marker-end": markerEnd,
+    "stroke-dasharray": strokeDashArray(el.strokeStyle),
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
     opacity: el.opacity / 100,
   });
+  const parts = [`<path ${attrs}/>`];
 
-  return `${markerDef}<path ${attrs}/>`;
+  if (el.type === "arrow") {
+    if (el.endArrowhead != null) {
+      parts.push(renderArrowhead(el, el.endArrowhead, pts, samples));
+    }
+    if (el.startArrowhead != null) {
+      const rev = [...pts].reverse();
+      parts.push(renderArrowhead(el, el.startArrowhead, rev, [...samples].reverse()));
+    }
+  }
+  return parts.join("");
 }
 
 function renderText(el) {
@@ -429,7 +523,7 @@ function computeViewBox(elements, padding = 20) {
 
   for (const el of elements) {
     if (el.type === "text" && el.containerId) continue; // skip bound text
-    if (el.type === "arrow" && el.points) {
+    if ((el.type === "arrow" || el.type === "line") && el.points) {
       for (const [dx, dy] of el.points) {
         minX = Math.min(minX, el.x + dx);
         minY = Math.min(minY, el.y + dy);
@@ -483,7 +577,8 @@ export function toSvg(elements) {
         parts.push(renderBoundText(el, flat));
         break;
       case "arrow":
-        parts.push(renderArrow(el));
+      case "line":
+        parts.push(renderLinear(el));
         break;
       case "text":
         parts.push(renderText(el));

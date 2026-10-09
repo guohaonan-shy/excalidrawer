@@ -172,13 +172,13 @@ function contains(outer, inner, eps = 1) {
 
 function checkDegenerateArrows(flat, warnings) {
   for (const el of flat) {
-    if (el.type !== "arrow") continue;
+    if (el.type !== "arrow" && el.type !== "line") continue;
     const pts = Array.isArray(el.points) ? el.points : null;
     if (!pts || pts.length < 2) {
       warnings.push({
         code: "DEGENERATE_ARROW",
         ids: [el.id],
-        message: `arrow ${el.id} has fewer than 2 points — it renders as nothing.`,
+        message: `${el.type} ${el.id} has fewer than 2 points — it renders as nothing.`,
       });
       continue;
     }
@@ -188,7 +188,7 @@ function checkDegenerateArrows(flat, warnings) {
         code: "DEGENERATE_ARROW",
         ids: [el.id],
         message:
-          `arrow ${el.id} is only ~${Math.round(len)}px long (start ≈ end) ` +
+          `${el.type} ${el.id} is only ~${Math.round(len)}px long (start ≈ end) ` +
           `— give it real endpoints.`,
       });
     }

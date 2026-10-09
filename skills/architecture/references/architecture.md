@@ -1,7 +1,8 @@
 # Architecture recipe
 
 How to compose an architecture diagram with sugar. Read AFTER clarifying
-intent (SKILL.md §1). Sugar schema in
+intent (SKILL.md §1). Component / style choices follow
+[`../../shared/references/semantics.md`](../../shared/references/semantics.md); sugar schema in
 [`../../shared/references/sugar.md`](../../shared/references/sugar.md).
 
 ## Modeling — get the layers right first
@@ -125,6 +126,12 @@ composition tells the story by structure alone.
 
 If connections are in scope, the rules:
 
+- **Style per semantics.md.** Every connection is an auto-routed `arrow`
+  with `arrowType: "elbow"`. Sync calls are solid; async (queue / event /
+  webhook) are `strokeStyle: "dashed"`; a planned service is a `dashed: true`
+  box with dashed connections — pick one meaning for dashed per diagram and
+  add a legend (semantics.md §8). If the user didn't say which calls are
+  async, ask in clarify rather than guess.
 - **Cross-tier arrow** → set `fromSide:"bottom"` + `toSide:"top"`. Don't
   let auto pick — auto can choose horizontal when x-offset is large; you
   want vertical for "drops down a layer."

@@ -1,7 +1,8 @@
 # Flowchart recipe
 
 How to compose a flowchart with sugar elements. Read this AFTER clarifying
-intent (SKILL.md §1). Sugar schema basics live in
+intent (SKILL.md §1). Component / style choices follow
+[`../../shared/references/semantics.md`](../../shared/references/semantics.md); sugar schema basics live in
 [`../../shared/references/sugar.md`](../../shared/references/sugar.md) —
 this file only covers flowchart-specific composition.
 
@@ -70,6 +71,11 @@ floating in a loose gap. Instead:
 - Mainline first node at `y ≈ 150` (leaves ~48 px gap below subtitle).
 
 ## Edges — 4 patterns
+
+Every flowchart edge is an id-anchored, auto-routed `arrow`, so it takes
+`arrowType: "elbow"` (semantics.md §5) — the examples below omit it for
+brevity. Optional steps and skippable branches are `strokeStyle: "dashed"`;
+the main path may be `strokeWidth: "bold"` when the user wants it to stand out.
 
 ### 1. Linear next step — auto everything
 
@@ -151,3 +157,5 @@ This loops the connection below the entire row.
   optional subtitle; first node at `y ≈ 150`.
 - **Red used as a "highlight" color.** → Red reads as "bad case." Use
   blue/green for mainline; red only on error terminals.
+- **Wavy S-bends on L / Z routes.** → The edge was left at the default
+  `round` arrow type. Set `arrowType: "elbow"` on every edge.

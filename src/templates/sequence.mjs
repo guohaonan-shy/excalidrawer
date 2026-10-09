@@ -28,7 +28,7 @@
  *   - Actors beyond 5 fall back to a default color cycle
  */
 
-import { setSeed, box, arrow, textEl, colors, excalidraw } from "../elements.mjs";
+import { setSeed, box, arrow, line, textEl, colors, excalidraw } from "../elements.mjs";
 import { toSvg, toPng } from "../export.mjs";
 import { estimateTextWidth, wrapText, textHeight } from "../text.mjs";
 
@@ -126,9 +126,9 @@ export function sequence(data, opts = {}) {
   const lifelineH = cumY + ROW_GAP;
   actors.forEach((_, i) => {
     elements.push(
-      arrow(`seq-ll${i}`, colCX[i], HEADER_Y + HEADER_H,
+      line(`seq-ll${i}`, colCX[i], HEADER_Y + HEADER_H,
         [[0, 0], [0, lifelineH]],
-        { strokeStyle: "dashed", strokeColor: "#ced4da", strokeWidth: 1, endArrowhead: null }
+        { strokeStyle: "dashed", strokeColor: "#ced4da", strokeWidth: 1 }
       )
     );
   });
