@@ -89,3 +89,28 @@ Colors: `colors.blue/green/yellow/purple/red/orange/gray`, `colors.bg*` (section
 - PNG rendering uses `@resvg/resvg-js` (fast native, no headless browser).
 - This repo is the open-source home for the **npm package (CLI + library + MCP) and the diagram skills** under `skills/`. The skills install two ways from the same source: as a multi-platform **plugin** (`.claude-plugin/` / `.cursor-plugin/` / `.codex-plugin/`) or à la carte via **`npx skills add`** (skills.sh channel). A separate, more elaborate skill set also lives in the personal [harold-skills](https://github.com/guohaonan-shy/harold-skills) marketplace; the two share a common ancestor but iterate independently (see memory).
 - Version lives in `package.json` (currently 0.5.15); changes tracked in `CHANGELOG.md`.
+
+## idea-loop
+
+- 本地开发（分支、worktree、开发服务器）：`DEVELOPMENT.md`
+- 验证命令与 review 要求：`REVIEW.md`
+- 代码规范：`CODING_STANDARDS.md`
+- 需求从哪进来、issue 的状态 label：`ISSUE_TRACKER.md`
+- issue 的分类 label：`CLAUDE.md` 的「issue 分类」一节
+- 产品是给谁的、要做成什么样：`PRODUCT.md`
+- 术语：`GLOSSARY.md`（有就读）
+
+## issue 分类
+
+issue 除了 `status:*` 状态，还带分类 label：父类打成 `type:<父类>`，子类打成 `type:<父类>/<子类>`，打子类时父类一起打。idea-loop 验证 issue 时打，人也可以手动打。
+
+- `diagram`：新图类型、模板、skill recipe
+- `engine`：渲染、布局、组件层、图元
+- `io`：格式转换
+  - `import`：Mermaid、draw.io 等外部格式导入
+  - `export`：输出格式与导出
+- `ecosystem`：插件分发、agent runtime 接入
+- `site`：landing page、文档站
+- `bug`：现有功能坏了
+
+保留的 label：`good first issue`、`help wanted`
