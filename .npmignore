@@ -10,3 +10,11 @@ skills-lock.json
 
 # Repo docs, incl. README gallery PNGs — npm renders README images from GitHub
 docs/
+
+# idea-loop project config — for agents working on the repo, not package users
+DEVELOPMENT.md
+REVIEW.md
+CODING_STANDARDS.md
+ISSUE_TRACKER.md
+PRODUCT.md
+.gitattributes
