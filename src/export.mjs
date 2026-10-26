@@ -606,7 +606,7 @@ export function toSvg(elements) {
  *
  * @returns {Promise<import("@resvg/resvg-js").RenderedImage>}
  */
-async function rasterize(elements, scale) {
+export async function rasterize(elements, scale) {
   const svg = toSvg(elements);
   const fontPath = join(__dirname, "fonts", "Excalifont-Regular.ttf");
 
@@ -633,7 +633,18 @@ async function rasterize(elements, scale) {
  * @returns {Promise<Buffer>} PNG buffer
  */
 export async function toPng(elements, scale = 2) {
-  return Buffer.from((await rasterize(elements, scale)).asPng());
+  return encodePng(await rasterize(elements, scale));
+}
+
+/**
+ * Encode an already-rasterized image (from {@link rasterize}) as PNG. Lets a
+ * caller that wants several bitmap formats rasterize once.
+ *
+ * @param {import("@resvg/resvg-js").RenderedImage} image
+ * @returns {Buffer}
+ */
+export function encodePng(image) {
+  return Buffer.from(image.asPng());
 }
 
 // ---------------------------------------------------------------------------
@@ -679,7 +690,16 @@ function loadWebpEncoder() {
  * @returns {Promise<Buffer>} WebP buffer
  */
 export async function toWebp(elements, scale = 2) {
-  const image = await rasterize(elements, scale);
+  return encodeWebp(await rasterize(elements, scale));
+}
+
+/**
+ * Encode an already-rasterized image (from {@link rasterize}) as lossless WebP.
+ *
+ * @param {import("@resvg/resvg-js").RenderedImage} image
+ * @returns {Promise<Buffer>}
+ */
+export async function encodeWebp(image) {
   const encode = await loadWebpEncoder();
   const pixels = image.pixels;
   const data = new Uint8ClampedArray(pixels.buffer, pixels.byteOffset, pixels.byteLength);

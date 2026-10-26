@@ -10,7 +10,7 @@
  */
 
 import { excalidraw } from "./elements.mjs";
-import { toSvg, toPng, toWebp, autoRegisterCjkFont } from "./export.mjs";
+import { toSvg, rasterize, encodePng, encodeWebp, autoRegisterCjkFont } from "./export.mjs";
 import { desugar } from "./sugar.mjs";
 import { validate } from "./validate.mjs";
 
@@ -95,11 +95,14 @@ export async function render(elements, opts = {}) {
 
   const scale = opts.scale ?? 2;
   const outputs = {};
+  // png and webp are two encodings of one rasterization: do it once, lazily.
+  let image = null;
+  const raster = async () => (image ??= await rasterize(raw, scale));
   for (const fmt of formats) {
     if (fmt === "excalidraw") outputs.excalidraw = excalidraw(raw);
     else if (fmt === "svg") outputs.svg = toSvg(raw);
-    else if (fmt === "png") outputs.png = await toPng(raw, scale);
-    else if (fmt === "webp") outputs.webp = await toWebp(raw, scale);
+    else if (fmt === "png") outputs.png = encodePng(await raster());
+    else if (fmt === "webp") outputs.webp = await encodeWebp(await raster());
   }
 
   return { outputs, formats, elementCount: raw.length, warnings };

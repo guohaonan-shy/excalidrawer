@@ -1,5 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { inflateSync } from "node:zlib";
+import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
 
 import { render, validateElements, ElementValidationError } from "../src/render.mjs";
 
@@ -142,4 +145,75 @@ test("package entry exports toWebp alongside toPng", async () => {
   assert.equal(typeof mod.toWebp, "function");
   const buf = await mod.toWebp([{ id: "r", type: "rectangle", x: 0, y: 0, width: 20, height: 20 }], 1);
   assert.equal(buf.toString("ascii", 8, 12), "WEBP");
+});
+
+// --- png + webp share one rasterization -------------------------------------
+
+/** Decode an 8-bit RGBA PNG (what resvg writes) to raw RGBA bytes. */
+function decodePng(buf) {
+  assert.equal(buf[24], 8, "bit depth 8");
+  assert.equal(buf[25], 6, "color type RGBA");
+  const { w, h } = pngSize(buf);
+  const idat = [];
+  for (let p = 8; p < buf.length; ) {
+    const len = buf.readUInt32BE(p);
+    if (buf.toString("ascii", p + 4, p + 8) === "IDAT") idat.push(buf.subarray(p + 8, p + 8 + len));
+    p += 12 + len;
+  }
+  const raw = inflateSync(Buffer.concat(idat));
+  const stride = w * 4;
+  const out = Buffer.alloc(stride * h);
+  const paeth = (a, b, c) => {
+    const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c);
+    return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+  };
+  for (let y = 0; y < h; y++) {
+    const ft = raw[y * (stride + 1)];
+    for (let x = 0; x < stride; x++) {
+      const v = raw[y * (stride + 1) + 1 + x];
+      const a = x >= 4 ? out[y * stride + x - 4] : 0;
+      const b = y > 0 ? out[(y - 1) * stride + x] : 0;
+      const c = x >= 4 && y > 0 ? out[(y - 1) * stride + x - 4] : 0;
+      const pred = [0, a, b, (a + b) >> 1, paeth(a, b, c)][ft];
+      out[y * stride + x] = (v + pred) & 0xff;
+    }
+  }
+  return out;
+}
+
+/** Decode a WebP buffer to raw RGBA bytes with @jsquash/webp's decoder. */
+async function decodeWebp(buf) {
+  const require = createRequire(import.meta.url);
+  const { default: decode, init } = await import("@jsquash/webp/decode.js");
+  await init(await WebAssembly.compile(readFileSync(require.resolve("@jsquash/webp/codec/dec/webp_dec.wasm"))));
+  const img = await decode(buf);
+  return Buffer.from(img.data.buffer, img.data.byteOffset, img.data.byteLength);
+}
+
+test("render: png and webp requested together decode to byte-identical pixels", async () => {
+  const { outputs } = await render([rectEl], { formats: ["png", "webp"], scale: 2 });
+  const png = decodePng(outputs.png);
+  const webp = await decodeWebp(outputs.webp);
+  assert.equal(webp.length, png.length);
+  assert.ok(webp.equals(png));
+});
+
+test("render: png + webp in one call rasterize the diagram exactly once", async () => {
+  // The native rasterizer is the system boundary: count its render() calls.
+  const { Resvg } = await import("@resvg/resvg-js");
+  const original = Resvg.prototype.render;
+  let calls = 0;
+  Resvg.prototype.render = function (...args) {
+    calls++;
+    return original.apply(this, args);
+  };
+  try {
+    await render([rectEl], { formats: ["png", "webp"] });
+    assert.equal(calls, 1, "png + webp share one rasterization");
+    calls = 0;
+    await render([rectEl], { formats: ["webp"] });
+    assert.equal(calls, 1, "webp alone rasterizes once");
+  } finally {
+    Resvg.prototype.render = original;
+  }
 });

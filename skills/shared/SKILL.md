@@ -162,7 +162,7 @@ mcp__excalidrawer__render_diagram({
 
 A diagram is **not finished** until it clears both gates below. Layer A is a
 deterministic code lint (free, exact, always runs). Layer B is a visual pass you
-perform with your own vision on the PNG (catches what geometry can't). Never
+perform with your own vision on the exported bitmap (catches what geometry can't). Never
 report paths to the user while either gate is failing, and never ask the user to
 accept a defect — they are all fixable.
 
@@ -194,8 +194,10 @@ warnings by construction. Layer A is the safety net for what still slips through
 ### Layer B — visual self-check (required for user-facing diagrams)
 
 The lint proves geometry; only your eyes catch composition. **After Layer A is
-clean, `Read` the exported `.png` and score it against this rubric — one explicit
-PASS/FAIL per line:**
+clean, `Read` the exported bitmap (`.png` or `.webp`) and score it against this
+rubric — one explicit PASS/FAIL per line.** When `formats` produced no bitmap
+(only `svg` / `excalidraw`), also export a `png` just for this check (it can stay out of the
+files you report):
 
 1. **Labels** — every label sits centered and fully inside its shape; none clipped or touching a border.
 2. **Arrows** — each connects the correct two nodes, points the right way, and no line visually plows through an unrelated box or another line.
