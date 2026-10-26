@@ -19,6 +19,45 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   four-option "format" question is gone; `skills/shared/SKILL.md` §6 now maps
   each format to where it fits, and the agent picks from the conversation,
   asking about the destination only when it can't tell.
+- **`stack` layout helper.** `stack({ dir, cells, … })` lays a group of cells
+  along one axis and sizes the container from their content — text cells wrap
+  to their width (or take their natural width, capped at `maxW`), titled cells
+  use the `titledBox` math, and a cell can be another `stack`. It returns every
+  cell's absolute position plus the container's `w` / `h`, so a long label no
+  longer pushes a cell out of a hand-sized lane. `equalize`, `justify` with a
+  fixed `size` (reporting `overflow` when the content doesn't fit) and `cross`
+  (a cell too wide for it grows the container and `crossOverflow` reports the
+  px, the same rule; a `{ panel }` without a `w` fills a column's inner width)
+  are supported. Exported from the package and available through
+  `compute_layout` / `compute-layout --helper stack`. Geometry only, like the
+  other layout helpers; none of them changed.
+- **`panel` layout helper.** `panel({ title, body, titleSide, … })` is a
+  container of a title area plus a `stack`: the title sits on top (full inner
+  width, wrapping makes it taller and pushes the body down) or in a left column
+  as tall as the panel, and the panel's size comes from the title and the body,
+  so an architecture layer band or one side of a comparison no longer needs
+  `cell.y + 80` or a hand-typed shell height. `w` fixes the width (the body's
+  `justify` spreads the rest), and a stack cell can be `{ panel: {…} }` — an
+  outer `equalize` re-flows each panel at the shared width or height. Exported
+  from the package and available through `compute_layout` (`helper: "panel"`).
+  A `w` narrower than the content grows the panel, and its `overflow` field
+  reports the px past `w` (0 otherwise), like `stack`.
+  Existing helpers and templates are unchanged.
+- **`axis` layout helper.** A marked line as coordinates: mark positions
+  (evenly `spacing` apart, or linear over a `domain` when marks carry a
+  `value`), the line as `segments` broken `gap` px around each mark (last one
+  flagged `arrow` with `arrow: "end"`), optional `ticks` on 1/2/5×10ⁿ steps (at most
+  1000 — more throws, raise `step` / lower `count`), label
+  anchors, and a `scale` that converts a value to a coordinate. Exported from
+  the package and available through `compute_layout` (`helper: "axis"`).
+  Existing helpers and templates are unchanged.
+- **`legend` layout helper.** Give it a few labels and it returns each row's
+  sample slot and text slot plus the block size, so the legend no longer needs
+  hand-placed coordinates (`[x, y+10]`, `[x+50, y]`). `dir: "x"` lays the items
+  on one row; with `bounds` and a `corner` it parks the block inside or just
+  outside a corner of the diagram. Coordinates only — the caller draws the
+  swatch or line. Exported from the package and available through the MCP
+  `compute_layout` tool (and the CLI `compute-layout`).
 
 ## 0.5.15
 

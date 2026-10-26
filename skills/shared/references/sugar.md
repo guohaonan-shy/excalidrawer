@@ -145,6 +145,23 @@ titledBox   — { x, y, w, title, body?, titleFontSize?, bodyFontSize?, padding?
 fitContainer— { children:[{x,y,w,h}], padding?, minW?, minH? } → { x, y, w, h }
 equalize    — { cells:[{w,text,fontSize?} | {w,title,body?,...} | {w,h}], minH? }
               → { h, cells:[{ w, h, contentH }] }
+stack       — { dir:"x"|"y", cells:[{text,w?,fontSize?} | {title,body?,w?,...} | {w,h} | {stack:{…}} | {panel:{…}}],
+                gap?=16, pad?=0, align?:"start"|"center"|"end", size?, justify?, cross?,
+                equalize?, maxW?=200, fontSize?=16, x?, y? }
+              → { kind:"stack", x, y, w, h, overflow, crossOverflow, children:[{ kind, id?, x, y, w, h, … }] }
+panel       — { title, body:{ dir?="y", cells, …stack options, no x/y }, titleSide?:"top"|"left"="top",
+                titleFontSize?=18, titleW?, pad?=16, gap?=12, w?, x?, y? }
+              → { kind:"panel", x, y, w, h, overflow, title:{ x, y, w, h, fontSize, text }, body:<stack result> }
+axis        — { from:{x,y}, dir?:'x'|'y', marks?:[{value?,label?,id?}], domain?:[min,max], length?,
+                spacing?, extend?:[before,after], gap?, arrow?:'none'|'end', ticks?:{step?|count?},
+                labelSide?:'before'|'after'|'alternate', labelOffset? }
+              → { kind:'axis', from, to, marks:[{id?,value?,label?,x,y,t,labelAnchor:{x,y,side}}],
+                  ticks:[{value,x,y,labelAnchor}], segments:[{at,points,arrow}],
+                  scale:{domain,origin,pxPerUnit} }
+legend      — { items:[{label,id?}], dir?, sampleW?, sampleH?, gap?, itemGap?, fontSize?, pad?,
+                at?:{x,y}, bounds?:{x,y,w,h}, corner?, place?, offset? }
+              → { kind:"legend", x, y, w, h,
+                  items:[{ id?, text, sample:{x,y,w,h}, label:{x,y,w,h,fontSize} }] }
 ```
 
 **`equalize` — build every sibling box at the returned `h`.** A box's `h` is a
@@ -155,6 +172,84 @@ still wraps and centers, the boxes stay level, and the lint still applies.
 Use it for any set of shapes meant to read as one row / one band: same-row
 flowchart branches, items in one architecture tier, milestone cards, actor
 headers, and every paired cell in a comparison.
+
+**`stack` — lay cells along one axis; the container is sized from the content.**
+Give it each cell's content (`text`, or `title` + `body`, or a known `w` + `h`,
+or a nested `{ stack: {…} }`) and it returns every cell's absolute `x, y, w, h`
+and the container's `w, h`, so no lane height or shell height is typed by hand
+and a long label can't push a cell out of its container. `dir` is the main
+axis (`"x"` a row, `"y"` a column). A cell without `w` gets its natural width
+(capped at `maxW`, default 200, then it wraps). `equalize: true` gives every
+cell the same cross-axis size (row: same height; column: same width).
+`size` fixes the main-axis length and `justify` spreads the spare room
+(`start` / `center` / `end` / `space-between`); if the content doesn't fit, the
+container grows and `overflow` says by how many px. `cross` fixes the
+cross-axis length (a column's width) the same way: in a column, width-less cells
+(and panels without a `w`) fill `cross - pad*2`, and a cell too wide for it
+grows the container, with `crossOverflow` saying by how many px (0 when it
+fits). Check `overflow` / `crossOverflow` when the stack sits in a fixed column
+or canvas.
+
+After the call, draw each child as a `rect` (with `text` for `kind: "text"`)
+at its `x, y, w, h`; for `kind: "titled"` draw the rect and put `title.text` /
+`body.text` (already wrapped) at `title` / `body`'s `x, y` as separate `text`
+elements. Draw the container itself as a `rect` from the top-level `x, y, w, h`
+when it needs a visible shell. Colors and line styles stay your call.
+
+**`panel` — a title area plus a `stack` of cells, sized from both.** Use it
+wherever a container has a heading: an architecture layer band (title column on
+the left, items in a row on the right) or one side of a comparison (title on
+top, row cards below). The `body` is a `stack`'s options (no `x` / `y`; `dir`
+defaults to `"y"`), so no `cell.y + 80` offset or hand-typed container height is
+left to get wrong. `titleSide: "top"` puts the title area across the inner width,
+`gap` above the body; a title that wraps makes the area taller and moves the
+body down. `titleSide: "left"` makes the title a column (`titleW` wide, or its
+natural width capped at 200) as tall as the panel's inner height, so a header
+rect can fill the whole row, with the body `gap` to its right. `w` fixes the
+overall width: the body gets what is left (a row body spreads it by its
+`justify`, a column body's width-less cells fill it); a `w` smaller than the
+content lets the panel grow, and `overflow` is how many px it grew past `w`
+(0 when it fits or `w` is unset) — check it when the panel sits in a fixed column
+or canvas. A panel is also a stack cell, `{ panel: {…} }`,
+and an outer `equalize: true` gives panels one width (column) or one height
+(row), re-flowing each inside: titles re-wrap, the body is stretched, centered
+cells stay centered.
+
+After the call, draw `title` as a header `rect` with `text: title.text` (already
+wrapped; or just a `text` element at `title.x, title.y`), the container as a
+`rect` from the top-level `x, y, w, h`, and each `body.children[i]` as for a
+`stack`. Say "panel", not "card": a card is one small cell inside it.
+
+**`axis` — a marked line, drawn from `segments`.** It returns coordinates
+only; the dots, labels and tick strokes are yours to draw. Marks sit at
+`marks[i].x/y` (centered there), their label belongs at `labelAnchor`. The line
+comes back as `segments`, already broken `gap` px either side of every mark so
+it never runs through a dot: draw each one as the sugar L4 form
+`{ shape: "line", at: seg.at, points: seg.points }`, and as `shape: "arrow"` when
+`seg.arrow` is true (`arrow: "end"` flags the last segment). Mark `value`s are
+placed linearly over `domain`; without values the marks are `spacing` apart.
+For a value that is not a mark, use `scale`: along the axis its coordinate is
+`origin + (v - domain[0]) * pxPerUnit` (x for `dir:"x"`, y for `"y"`).
+`ticks: { step }` or `{ count }` adds ticks at 1 / 2 / 5 × 10ⁿ multiples inside
+the domain, at most 1000 of them (more throws: raise `step` or lower `count`).
+Use it for the spine of a timeline or a chart axis.
+
+**`legend` — coordinates for each row's sample and text; you decide what the
+sample looks like.** Each item comes back with a `sample` slot and a `label`
+slot, vertically centered on each other, plus the size of the whole block.
+Draw the sample to match what it stands for (see `semantics.md` §8): a color
+swatch fills the whole `sample` box (`shape: "rect"` at `[sample.x, sample.y]`,
+`size: [sample.w, sample.h]`); a line sample runs from the box's left-middle
+to its right-middle (`shape: "line"`, `at: [sample.x, sample.y + sample.h/2]`,
+`points: [[0, 0], [sample.w, 0]]`, with the `strokeStyle` / `strokeWidth` it
+documents). The text is a `shape: "text"` at `[label.x, label.y]` with
+`size: [label.w, label.h]` and `fontSize: label.fontSize`. `dir: "x"` puts the
+items on one row (default `itemGap` 24 instead of 8). To park it, pass the
+diagram's extent as `bounds` plus a `corner`: `place: "inside"` (default) tucks
+it `offset` (16) in from that corner; `place: "outside"` puts it just above
+(top corners) or below (bottom corners) the bounds, flush with that side. With
+no `corner`, `at` is the block's top-left (default 0, 0). Bad arguments throw
+an error naming `legend` and the argument.
 
 Use these for placement math. Element creation always goes through
 `render_diagram` with sugar.

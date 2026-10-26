@@ -129,9 +129,16 @@
 
 用了自定义含义（不是请求/响应这类通用约定）时，在图的右下角或标题下方加图例：每行一个短样本线 + 一个 `text`。
 
+不要手算坐标。用 `compute_layout` 的 `legend`：给它每行的文字和图的范围，它返回每行的样本槽、文字槽和整块尺寸。样本画成什么由你按本文件的语义定。
+
 ```js
-{ shape: "line", at: [x, y + 10], points: [[0, 0], [40, 0]], strokeStyle: "dashed" },
-{ shape: "text", at: [x + 50, y], size: [140, 20], text: "planned (Q3)", fontSize: 14 },
+// compute_layout { helper: "legend", args: { items: [{ label: "planned (Q3)" }], bounds: { x: 0, y: 0, w: 800, h: 500 }, corner: "bottom-right" } }
+// → { items: [{ text, sample: { x, y, w, h }, label: { x, y, w, h, fontSize } }], ... }
+// 线型样本：从样本槽的左中画到右中
+{ shape: "line", at: [sample.x, sample.y + sample.h / 2], points: [[0, 0], [sample.w, 0]], strokeStyle: "dashed" },
+{ shape: "text", at: [label.x, label.y], size: [label.w, label.h], text: "planned (Q3)", fontSize: label.fontSize },
 ```
+
+色块样本就用 `shape: "rect"` 填满样本槽。参数见 `sugar.md` 的 Geometry helpers。
 
 图例 ≤ 3 行。需要更多行，说明这张图承载了太多种含义，先考虑拆图。

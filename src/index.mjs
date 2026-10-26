@@ -41,6 +41,10 @@ export {
   contrastText,
   readableOn,
   triplet,
+  stack,
+  panel,
+  axis,
+  legend,
 } from "./layout.mjs";
 
 // Serializer: sugar/raw elements → output formats (0.5.6+).
