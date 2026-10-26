@@ -127,8 +127,8 @@ issues: [26]
 
 ### 共用的约定
 
-- 坐标都是绝对坐标。每个组件都收 `x`、`y`（容器左上角，默认 0），axis 收 `from`。
-- 每个结果都带 `kind`（`"stack"` / `"panel"` / `"text"` / `"titled"` / `"box"` / `"axis"` / `"legend"`）和 `x, y, w, h`。
+- 坐标都是绝对坐标。stack、panel 收 `x`、`y`（容器左上角，默认 0）；axis 用 `from` 定起点；legend 用 `at: {x, y}` 定左上角，或用 `bounds` + `corner` 按角摆，不认单独的 `x`、`y`。（review 第 1 轮 S4 后改：原写「每个组件都收 x、y」，跟 axis、legend 的接口冲突，人批「按推荐」改 spec。）
+- 每个结果都带 `kind`（`"stack"` / `"panel"` / `"text"` / `"titled"` / `"box"` / `"axis"` / `"legend"`）。stack、panel、legend 和各格子的结果带 `x, y, w, h`；axis 的结果带 `from`、`to`，不带 `x, y, w, h`。
 - 输入里带的 `id` 原样写回对应的结果，agent 靠它把结果对回自己的数据。
 - 线段沿用 `tree` 的格式：`{ at: [x, y], points: [[0,0],[dx,dy]] }`，直接画成 sugar 的 `shape: "line"` 或 `arrow`。依据：产品已有做法（`tree` 的 `segments`）。
 - 文字测量一律走 `fitBoundText` / `titledBox`，跟渲染器用同一套数。依据：`equalize` 的现有做法。
@@ -254,6 +254,7 @@ legend({
 工单没写、执行方实现时定的几处，人在 PR #32 的第 1 次停下里批了照现在留下（原话「第二题选 A」，2026-10-26）：
 
 - stack：带标题的格子，结果的标题区、正文区还带上折行后的文字，调用方照量过的样子画。
+- panel：标题区也带上折行后的标题文字，理由同上（review 第 1 轮 S5，人批「按推荐」，2026-10-26）。
 - stack：竖排且给了 `cross` 时，嵌套的子 stack 保持自然宽度；只有不写宽度的文字格、带标题的格子铺满。
 - panel：被定宽或被外层拉宽、比内容需要的宽时，竖排 body 里不写宽度的格子铺满，横排 body 按 `justify` 分布。
 - axis：最后一个标记点正好在轴终点时，箭头画在它前面那一段上、指向它。
