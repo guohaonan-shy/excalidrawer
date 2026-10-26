@@ -38,6 +38,8 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   `justify` spreads the rest), and a stack cell can be `{ panel: {…} }` — an
   outer `equalize` re-flows each panel at the shared width or height. Exported
   from the package and available through `compute_layout` (`helper: "panel"`).
+  A `w` narrower than the content grows the panel, and its `overflow` field
+  reports the px past `w` (0 otherwise), like `stack`.
   Existing helpers and templates are unchanged.
 - **`axis` layout helper.** A marked line as coordinates: mark positions
   (evenly `spacing` apart, or linear over a `domain` when marks carry a

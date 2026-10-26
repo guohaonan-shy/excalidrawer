@@ -58,8 +58,9 @@ export const computeLayout = defineTool({
     "cells without w get their natural width, capped at maxW; draw each child as a rect)\n" +
     "  panel       — { title, body:{dir?='y',cells,…stack options without x/y}, titleSide?:'top'|'left'='top', titleFontSize?=18, titleW?, " +
     "pad?=16, gap?=12, w?, x?, y? } → " +
-    "{kind:'panel',x,y,w,h,title:{x,y,w,h,fontSize,text},body:<stack result>} " +
+    "{kind:'panel',x,y,w,h,overflow,title:{x,y,w,h,fontSize,text},body:<stack result>} " +
     "(title area + a stack of cells, sized from both: top = title above the body, left = a title column as tall as the panel; " +
+    "a w smaller than the content makes the panel grow and overflow reports the px past w, 0 otherwise; " +
     "a cell of a stack can be {panel:{…}}; draw the panel as a rect, title as a header rect or text, body.children as rects)\n" +
     "  axis        — { from:{x,y}, dir?:'x'|'y', marks?:[{value?,label?,id?}], domain?:[min,max], length?, spacing?, extend?:[before,after], gap?, " +
     "arrow?:'none'|'end', ticks?:{step?|count?}, labelSide?:'before'|'after'|'alternate', labelOffset? } → " +

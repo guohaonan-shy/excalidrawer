@@ -197,6 +197,29 @@ test("panel: a w smaller than the content lets the panel grow instead of overflo
   assert.ok(c.x + c.w <= r.x + r.w - 16);
 });
 
+test("panel: overflow reports the px the panel grew past its w (title on top)", () => {
+  const r = panel({ title: "T", w: 100, body: { dir: "x", cells: [{ w: 120, h: 40 }] } });
+  assert.equal(r.w, 120 + 32);
+  assert.equal(r.overflow, r.w - 100);
+});
+
+test("panel: overflow reports the px the panel grew past its w (title on the left)", () => {
+  const r = panel({ title: "T", titleSide: "left", w: 100, body: { dir: "x", cells: [{ w: 120, h: 40 }] } });
+  assert.equal(r.overflow, r.w - 100);
+  assert.ok(r.overflow > 0);
+});
+
+test("panel: overflow is 0 when it fits, when w is spare, and when there is no w", () => {
+  const body = { dir: "x", cells: [{ w: 120, h: 40 }] };
+  for (const side of ["top", "left"]) {
+    assert.equal(panel({ title: "T", titleSide: side, body }).overflow, 0);
+    assert.equal(panel({ title: "T", titleSide: side, w: 400, body }).overflow, 0);
+  }
+  // w exactly the natural width: nothing past it
+  const nat = panel({ title: "T", body });
+  assert.equal(panel({ title: "T", w: nat.w, body }).overflow, 0);
+});
+
 // ============================================================================
 // panel: nested in a stack
 // ============================================================================

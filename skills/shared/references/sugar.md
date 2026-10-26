@@ -151,7 +151,7 @@ stack       — { dir:"x"|"y", cells:[{text,w?,fontSize?} | {title,body?,w?,...}
               → { kind:"stack", x, y, w, h, overflow, children:[{ kind, id?, x, y, w, h, … }] }
 panel       — { title, body:{ dir?="y", cells, …stack options, no x/y }, titleSide?:"top"|"left"="top",
                 titleFontSize?=18, titleW?, pad?=16, gap?=12, w?, x?, y? }
-              → { kind:"panel", x, y, w, h, title:{ x, y, w, h, fontSize, text }, body:<stack result> }
+              → { kind:"panel", x, y, w, h, overflow, title:{ x, y, w, h, fontSize, text }, body:<stack result> }
 axis        — { from:{x,y}, dir?:'x'|'y', marks?:[{value?,label?,id?}], domain?:[min,max], length?,
                 spacing?, extend?:[before,after], gap?, arrow?:'none'|'end', ticks?:{step?|count?},
                 labelSide?:'before'|'after'|'alternate', labelOffset? }
@@ -204,7 +204,9 @@ natural width capped at 200) as tall as the panel's inner height, so a header
 rect can fill the whole row, with the body `gap` to its right. `w` fixes the
 overall width: the body gets what is left (a row body spreads it by its
 `justify`, a column body's width-less cells fill it); a `w` smaller than the
-content lets the panel grow. A panel is also a stack cell, `{ panel: {…} }`,
+content lets the panel grow, and `overflow` is how many px it grew past `w`
+(0 when it fits or `w` is unset) — check it when the panel sits in a fixed column
+or canvas. A panel is also a stack cell, `{ panel: {…} }`,
 and an outer `equalize: true` gives panels one width (column) or one height
 (row), re-flowing each inside: titles re-wrap, the body is stretched, centered
 cells stay centered.

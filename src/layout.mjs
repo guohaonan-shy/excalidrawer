@@ -1332,7 +1332,8 @@ const PANEL_TITLE_MAX_W = 200;
  *
  * With `w`, the content area takes the remaining width: a row body distributes
  * its spare room by its `justify`, a column body's width-less cells fill it.
- * A `w` smaller than the content lets the panel grow. As a cell of a `stack`
+ * A `w` smaller than the content lets the panel grow, and `overflow` reports by how
+ * many px it grew past `w` (0 when it fits or there is no `w`). As a cell of a `stack`
  * (`{ panel: {…} }`), `equalize` can force the panel's width or height; the
  * panel re-flows inside (titles re-wrap, the body is stretched to fit).
  *
@@ -1350,9 +1351,11 @@ const PANEL_TITLE_MAX_W = 200;
  *
  * @returns {{ kind:"panel", x:number, y:number, w:number, h:number,
  *             title:{ x:number, y:number, w:number, h:number, fontSize:number, text:string },
- *             body:object }}
+ *             body:object, overflow:number }}
  *   Absolute coordinates; `body` is the `stack` result (its `children` too),
- *   `title.text` is the title already wrapped to `title.w`.
+ *   `title.text` is the title already wrapped to `title.w`. `overflow` is how many
+ *   px the panel grew past its fixed width (`w`, or the width an outer `equalize`
+ *   forced); 0 otherwise.
  *
  * @example
  *   const lane = panel({
@@ -1440,6 +1443,7 @@ function layoutPanel(spec, where, force) {
   }
 
   translate(bodyRes, bodyPos[0], bodyPos[1]);
+  const overflow = W == null ? 0 : Math.max(0, w - W);
   const result = {
     kind: "panel",
     ...(spec.id !== undefined ? { id: spec.id } : {}),
@@ -1449,6 +1453,7 @@ function layoutPanel(spec, where, force) {
     h,
     title: titleBox,
     body: bodyRes,
+    overflow,
   };
   translate(result, x0, y0);
   return result;
