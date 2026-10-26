@@ -177,6 +177,46 @@ test("legend: bad parameters throw with `legend` and the parameter name", () => 
   assert.throws(() => legend({ items: ITEMS, bounds, corner: "top-left", place: "beside" }), /legend: .*place/);
 });
 
+test("legend: a non-number numeric param throws, naming legend and the param", () => {
+  const bad = ["bad", NaN, Infinity, "40", {}];
+  for (const name of ["sampleW", "sampleH", "gap", "itemGap", "fontSize", "pad", "offset"]) {
+    for (const v of bad) {
+      assert.throws(
+        () => legend({ items: ITEMS, [name]: v }),
+        (e) => /legend/.test(e.message) && e.message.includes(`\`${name}\``),
+        `${name}=${String(v)}`
+      );
+    }
+  }
+});
+
+test("legend: non-number `at` and `bounds` members throw, naming legend and the member", () => {
+  for (const k of ["x", "y"]) {
+    assert.throws(
+      () => legend({ items: ITEMS, at: { x: 0, y: 0, [k]: "50" } }),
+      (e) => /legend/.test(e.message) && e.message.includes(`at.${k}`)
+    );
+  }
+  assert.throws(() => legend({ items: ITEMS, at: 5 }), /legend.*`at`/);
+  for (const k of ["x", "y", "w", "h"]) {
+    // with and without a corner: a bad bounds is never silently accepted
+    for (const extra of [{ corner: "top-left" }, {}]) {
+      assert.throws(
+        () => legend({ items: ITEMS, bounds: { ...bounds, [k]: "bad" }, ...extra }),
+        (e) => /legend/.test(e.message) && e.message.includes(`bounds.${k}`),
+        `${k} ${JSON.stringify(extra)}`
+      );
+    }
+  }
+});
+
+test("legend: valid numbers (0 offset, negative at) still work and stay finite", () => {
+  const lg = legend({ items: ITEMS, offset: 0, pad: 0, gap: 0, itemGap: 0, at: { x: -5, y: -7 } });
+  assert.equal(lg.x, -5);
+  assert.equal(lg.y, -7);
+  assert.ok([lg.x, lg.y, lg.w, lg.h].every(Number.isFinite));
+});
+
 // ===========================================================================
 // entry points
 // ===========================================================================

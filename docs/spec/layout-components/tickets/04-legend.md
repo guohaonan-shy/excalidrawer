@@ -52,4 +52,4 @@ excalidrawer 是代码生成 Excalidraw 图的库 + CLI + MCP server。共享 sk
 
 - `tests/tools.test.mjs` 里 `compute_layout` 的派发测试：白名单再加一项
 - `tests/validate.test.mjs`：验收要靠文字溢出警告不出现来判，要确认 linter 本身没变
-- [ ] review 第 1 轮 S3（2026-10-26）：所有数字参数（sampleW、sampleH、gap、itemGap、fontSize、pad、offset，以及 at、bounds 里的坐标与尺寸）传成非数字时抛错，报错写明 legend 和参数名，写法与 stack、panel 已有的数字检查一致；不再返回 NaN 或拼接出来的字符串坐标
+- [x] review 第 1 轮 S3（2026-10-26）：所有数字参数（sampleW、sampleH、gap、itemGap、fontSize、pad、offset，以及 at、bounds 里的坐标与尺寸）传成非数字时抛错，报错写明 legend 和参数名，写法与 stack、panel 已有的数字检查一致；不再返回 NaN 或拼接出来的字符串坐标

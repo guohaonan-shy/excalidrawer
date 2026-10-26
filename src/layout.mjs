@@ -1504,10 +1504,7 @@ const LEGEND_CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"];
  *   // to (sample.x + sample.w, …), and a text at (label.x, label.y) sized label.w × label.h
  */
 export function legend(opts = {}) {
-  const {
-    items, dir = "y", sampleW = 40, sampleH = 16, gap = 8,
-    fontSize = 14, pad = 12, at, bounds, corner, place = "inside", offset = 16,
-  } = opts ?? {};
+  const { items, dir = "y", place = "inside", at, bounds, corner } = opts ?? {};
 
   if (!Array.isArray(items) || items.length === 0) {
     throw new Error("legend: `items` must be a non-empty array");
@@ -1523,18 +1520,54 @@ export function legend(opts = {}) {
   if (place !== "inside" && place !== "outside") {
     throw new Error(`legend: \`place\` must be "inside" or "outside", got ${JSON.stringify(place)}`);
   }
-  if (corner != null) {
-    if (!LEGEND_CORNERS.includes(corner)) {
+  // Every numeric param must be a finite number (sizes > 0, spacings >= 0),
+  // same bar as stack / panel: a string would otherwise concatenate into the
+  // coordinates and NaN would flow straight into the result.
+  const num = (name, def, kind = "any") => {
+    const v = opts?.[name] ?? def;
+    const bad =
+      !isNum(v) || (kind === "positive" && v <= 0) || (kind === "non-negative" && v < 0);
+    if (bad) {
+      const what = kind === "any" ? "" : `${kind} `;
+      throw new Error(`legend: \`${name}\` must be a ${what}number, got ${JSON.stringify(v)}`);
+    }
+    return v;
+  };
+  const sampleW = num("sampleW", 40, "positive");
+  const sampleH = num("sampleH", 16, "positive");
+  const gap = num("gap", 8, "non-negative");
+  const itemGap = num("itemGap", dir === "x" ? 24 : 8, "non-negative");
+  const fontSize = num("fontSize", 14, "positive");
+  const pad = num("pad", 12, "non-negative");
+  const offset = num("offset", 16);
+  if (at !== undefined && at !== null) {
+    if (typeof at !== "object" || Array.isArray(at)) {
+      throw new Error("legend: `at` must be { x, y }");
+    }
+    for (const k of ["x", "y"]) {
+      if (at[k] !== undefined && !isNum(at[k])) {
+        throw new Error(`legend: \`at.${k}\` must be a number, got ${JSON.stringify(at[k])}`);
+      }
+    }
+  }
+  if (bounds != null || corner != null) {
+    if (corner != null && !LEGEND_CORNERS.includes(corner)) {
       throw new Error(
         `legend: \`corner\` must be one of ${LEGEND_CORNERS.join(" / ")}, got ${JSON.stringify(corner)}`
       );
     }
-    const b = bounds;
-    if (!b || ![b.x, b.y, b.w, b.h].every((n) => typeof n === "number" && Number.isFinite(n))) {
+    if (bounds == null || typeof bounds !== "object" || Array.isArray(bounds)) {
       throw new Error("legend: `bounds` { x, y, w, h } is required when `corner` is given");
     }
+    for (const k of ["x", "y", "w", "h"]) {
+      if (!isNum(bounds[k])) {
+        throw new Error(
+          `legend: \`bounds.${k}\` must be a number, got ${JSON.stringify(bounds[k])}; ` +
+            "`bounds` is { x, y, w, h }"
+        );
+      }
+    }
   }
-  const itemGap = opts?.itemGap ?? (dir === "x" ? 24 : 8);
 
   // Measure each row: the text slot comes from the shared estimator, the row
   // is as tall as the taller of sample and text.
