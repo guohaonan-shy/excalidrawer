@@ -148,7 +148,7 @@ equalize    — { cells:[{w,text,fontSize?} | {w,title,body?,...} | {w,h}], minH
 stack       — { dir:"x"|"y", cells:[{text,w?,fontSize?} | {title,body?,w?,...} | {w,h} | {stack:{…}} | {panel:{…}}],
                 gap?=16, pad?=0, align?:"start"|"center"|"end", size?, justify?, cross?,
                 equalize?, maxW?=200, fontSize?=16, x?, y? }
-              → { kind:"stack", x, y, w, h, overflow, children:[{ kind, id?, x, y, w, h, … }] }
+              → { kind:"stack", x, y, w, h, overflow, crossOverflow, children:[{ kind, id?, x, y, w, h, … }] }
 panel       — { title, body:{ dir?="y", cells, …stack options, no x/y }, titleSide?:"top"|"left"="top",
                 titleFontSize?=18, titleW?, pad?=16, gap?=12, w?, x?, y? }
               → { kind:"panel", x, y, w, h, overflow, title:{ x, y, w, h, fontSize, text }, body:<stack result> }
@@ -183,8 +183,12 @@ axis (`"x"` a row, `"y"` a column). A cell without `w` gets its natural width
 cell the same cross-axis size (row: same height; column: same width).
 `size` fixes the main-axis length and `justify` spreads the spare room
 (`start` / `center` / `end` / `space-between`); if the content doesn't fit, the
-container grows and `overflow` says by how many px. In a column, `cross` fixes
-the width and width-less cells fill `cross - pad*2`.
+container grows and `overflow` says by how many px. `cross` fixes the
+cross-axis length (a column's width) the same way: in a column, width-less cells
+(and panels without a `w`) fill `cross - pad*2`, and a cell too wide for it
+grows the container, with `crossOverflow` saying by how many px (0 when it
+fits). Check `overflow` / `crossOverflow` when the stack sits in a fixed column
+or canvas.
 
 After the call, draw each child as a `rect` (with `text` for `kind: "text"`)
 at its `x, y, w, h`; for `kind: "titled"` draw the rect and put `title.text` /

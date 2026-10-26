@@ -1070,7 +1070,8 @@ export function tree(root, opts = {}) {
  * @param {"start"|"center"|"end"|"space-between"} [opts.justify="start"] - main-axis
  *   distribution when `size` leaves spare room
  * @param {number} [opts.cross]       - fixed cross-axis length (incl. pad). In a column,
- *   cells without a width fill `cross - pad*2`.
+ *   cells without a width (and panels without a `w`) fill `cross - pad*2`; a cell too wide
+ *   for it grows the container, and `crossOverflow` says by how many px.
  * @param {boolean} [opts.equalize=false] - every cell takes the largest cross-axis size
  *   (row: same height; column: same width); text is re-measured, nested stacks re-flow
  * @param {number} [opts.maxW=200]    - width cap for text / titled cells without `w`
@@ -1079,10 +1080,11 @@ export function tree(root, opts = {}) {
  * @param {number} [opts.y=0]
  *
  * @returns {{ kind:"stack", x:number, y:number, w:number, h:number,
- *             overflow:number, children:Array<object> }}
+ *             overflow:number, crossOverflow:number, children:Array<object> }}
  *   `children` mirrors `cells`; each carries `kind` ("text" | "titled" | "box" |
  *   "stack" | "panel") and absolute `x, y, w, h`. `overflow` is how many px the content ran
  *   past `size` (the container grows to fit instead of failing); 0 otherwise.
+ *   `crossOverflow` is the same for `cross`: how many px the widest cell ran past it.
  *
  * @example
  *   const lane = stack({
@@ -1096,18 +1098,19 @@ export function stack(opts = {}) {
 }
 
 // Cell keys that hold a nested container. Each maps to
-// `(spec, where, force) => result at origin (0, 0)`, where `force` is null or
-// `{ axis: "x"|"y", len }` — a length the container must take on that axis.
+// `(spec, where, force, fill) => result at origin (0, 0)`, where `force` is null or
+// `{ axis: "x"|"y", len }` — a length the container must take on that axis — and
+// `fill` is the width a width-less cell takes in a column with a fixed `cross` (or null).
 const NESTED_LAYOUTS = {
-  stack: (spec, where, force) => {
+  stack: (spec, where, force /* , fill: only panels take it */) => {
     let s = spec;
     if (force && s && typeof s === "object") {
       s = force.axis === s.dir ? { ...s, size: force.len } : { ...s, cross: force.len };
     }
     return layoutStack(s && typeof s === "object" ? { ...s, x: 0, y: 0 } : s, where);
   },
-  panel: (spec, where, force) =>
-    layoutPanel(spec && typeof spec === "object" ? { ...spec, x: 0, y: 0 } : spec, where, force),
+  panel: (spec, where, force, fill) =>
+    layoutPanel(spec && typeof spec === "object" ? { ...spec, x: 0, y: 0 } : spec, where, force, fill),
 };
 
 const isNum = (n) => typeof n === "number" && Number.isFinite(n);
@@ -1181,8 +1184,12 @@ function layoutStack(spec, where) {
     );
   }
 
-  const innerCross = inner ?? Math.max(...items.map(crossOf));
-  const C = cross ?? innerCross + pad * 2;
+  // Cross axis: a fixed `cross` that cannot hold the widest cell lets the container
+  // grow and reports the excess in `crossOverflow` — the same rule as `size` / `overflow`.
+  const need = Math.max(...items.map(crossOf)) + pad * 2;
+  const C = cross === undefined ? need : Math.max(cross, need);
+  const crossOverflow = cross === undefined ? 0 : Math.max(0, need - cross);
+  const innerCross = C - pad * 2;
   const content = items.reduce((s, m) => s + mainOf(m), 0) + gap * (items.length - 1);
   const natural = pad * 2 + content;
 
@@ -1215,6 +1222,7 @@ function layoutStack(spec, where) {
     w: crossIsW ? C : S,
     h: crossIsW ? S : C,
     overflow,
+    crossOverflow,
     children,
   };
 }
@@ -1239,6 +1247,7 @@ function measureCell(cell, i, ctx, { fill, force }) {
       cell[nestedKey],
       `${where}cells[${i}].${nestedKey}: `,
       force == null ? null : { axis: crossIsW ? "x" : "y", len: force },
+      fill,
     );
     if (id !== undefined) r.id = id;
     return { w: r.w, h: r.h, result: r };
@@ -1349,7 +1358,9 @@ const PANEL_TITLE_MAX_W = 200;
  * its spare room by its `justify`, a column body's width-less cells fill it.
  * A `w` smaller than the content lets the panel grow, and `overflow` reports by how
  * many px it grew past `w` (0 when it fits or there is no `w`). As a cell of a `stack`
- * (`{ panel: {…} }`), `equalize` can force the panel's width or height; the
+ * (`{ panel: {…} }`) in a column with a fixed `cross`, a panel without a `w` takes the
+ * column's inner width (and reports `overflow` if it cannot fit); `equalize` can force
+ * the panel's width or height; the
  * panel re-flows inside (titles re-wrap, the body is stretched to fit).
  *
  * @param {object} opts
@@ -1383,7 +1394,7 @@ export function panel(opts = {}) {
   return layoutPanel(opts, "", null);
 }
 
-function layoutPanel(spec, where, force) {
+function layoutPanel(spec, where, force, fill = null) {
   const err = (msg) => new Error(`panel: ${where}${msg}`);
   if (!spec || typeof spec !== "object" || Array.isArray(spec)) throw err("expected an options object");
   if (typeof spec.title !== "string") throw err("`title` is required (a string)");
@@ -1414,7 +1425,8 @@ function layoutPanel(spec, where, force) {
   if (!isNum(y0)) throw err(`\`y\` must be a number, got ${JSON.stringify(spec.y)}`);
 
   // `force` comes from an outer stack's equalize: a length this panel must take.
-  const W = force?.axis === "x" ? force.len : wOpt;
+  // A panel without its own `w` in a column with a fixed `cross` takes the column's inner width.
+  const W = force?.axis === "x" ? force.len : wOpt ?? fill;
   const minH = force?.axis === "y" ? force.len : 0;
 
   // The body at the origin. availW / availH are the room it must fill (null: natural).

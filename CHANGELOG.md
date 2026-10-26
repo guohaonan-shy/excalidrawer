@@ -26,6 +26,8 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   cell's absolute position plus the container's `w` / `h`, so a long label no
   longer pushes a cell out of a hand-sized lane. `equalize`, `justify` with a
   fixed `size` (reporting `overflow` when the content doesn't fit) and `cross`
+  (a cell too wide for it grows the container and `crossOverflow` reports the
+  px, the same rule; a `{ panel }` without a `w` fills a column's inner width)
   are supported. Exported from the package and available through
   `compute_layout` / `compute-layout --helper stack`. Geometry only, like the
   other layout helpers; none of them changed.

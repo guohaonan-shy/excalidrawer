@@ -488,3 +488,68 @@ test("stack: equalize accepts only true or false; anything else throws, naming s
   assert.deepEqual(stack({ dir: "x", equalize: false, cells }).children.map((c) => c.h), [10, 50]);
   assert.deepEqual(stack({ dir: "x", cells }).children.map((c) => c.h), [10, 50]);
 });
+
+// ============================================================================
+// stack: cross axis that cannot hold the content (same rule as the main axis)
+// ============================================================================
+
+test("stack: a column whose cross cannot hold a wide panel grows to it and reports crossOverflow", () => {
+  const r = stack({
+    dir: "y",
+    cross: 240,
+    pad: 12,
+    gap: 12,
+    cells: [
+      { text: "订单服务" },
+      { panel: { title: "支付链路", body: { dir: "x", gap: 12, cells: [{ text: "下单" }, { text: "扣减库存" }, { text: "风控审核" }] } } },
+    ],
+  });
+  const p = r.children[1];
+  assert.equal(p.w, 276);
+  assert.equal(r.w, p.w + 12 * 2);
+  assert.equal(r.crossOverflow, r.w - 240);
+  assert.ok(r.crossOverflow > 0);
+  // nothing the caller draws sticks out of the container
+  for (const c of r.children) assert.ok(c.x + c.w <= r.x + r.w - 12, JSON.stringify(c));
+  // the panel was given the column's inner width (216) and says how far past it grew
+  assert.equal(p.overflow, 276 - (240 - 12 * 2));
+  assert.ok(p.overflow > 0);
+});
+
+test("stack: a fixed-width cell wider than cross grows the column and reports crossOverflow", () => {
+  const r = stack({ dir: "y", cross: 100, cells: [{ w: 150, h: 20 }, { w: 40, h: 20 }] });
+  assert.equal(r.w, 150);
+  assert.equal(r.crossOverflow, 50);
+  assert.equal(r.overflow, 0);
+  // same rule on a row: cross is the height
+  const row = stack({ dir: "x", cross: 30, pad: 5, cells: [{ w: 40, h: 60 }] });
+  assert.equal(row.h, 70);
+  assert.equal(row.crossOverflow, 40);
+});
+
+test("stack: crossOverflow is 0 when cross fits or is absent; a grown container aligns cells to its grown edge", () => {
+  assert.equal(stack({ dir: "y", cross: 200, cells: [{ w: 150, h: 20 }] }).crossOverflow, 0);
+  assert.equal(stack({ dir: "y", cells: [{ w: 150, h: 20 }] }).crossOverflow, 0);
+  assert.equal(stack({ dir: "y", cross: 150, cells: [{ w: 150, h: 20 }] }).crossOverflow, 0);
+  const r = stack({ dir: "y", cross: 100, align: "end", cells: [{ w: 150, h: 20 }, { w: 40, h: 20 }] });
+  assert.deepEqual(r.children.map((c) => c.x), [0, 110]);
+});
+
+test("stack: a panel without w in a column with cross fills the inner width when it fits; its own w wins", () => {
+  const body = { dir: "y", cells: [{ text: "A" }] };
+  const filled = stack({ dir: "y", cross: 400, pad: 10, cells: [{ panel: { title: "T", body } }] });
+  assert.equal(filled.children[0].w, 380);
+  assert.equal(filled.children[0].overflow, 0);
+  assert.equal(filled.crossOverflow, 0);
+  const own = stack({ dir: "y", cross: 400, pad: 10, cells: [{ panel: { title: "T", w: 300, body } }] });
+  assert.equal(own.children[0].w, 300);
+});
+
+test("stack: crossOverflow shows up in the compute_layout result and its description", () => {
+  const out = getTool("compute_layout").run({
+    helper: "stack",
+    args: { dir: "y", cross: 100, cells: [{ w: 150, h: 20 }] },
+  });
+  assert.equal(out.result.crossOverflow, 50);
+  assert.match(getTool("compute_layout").description, /crossOverflow/);
+});

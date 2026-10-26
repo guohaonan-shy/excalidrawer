@@ -53,9 +53,10 @@ export const computeLayout = defineTool({
     "(tidy tree: parents centered on their children, subtrees never overlap; each segment is ready L4 form — draw it as shape:'line')\n" +
     "  stack       — { dir:'x'|'y', cells:[{text,w?,fontSize?}|{title,body?,w?,...}|{w,h}|{stack:{…}}], gap?=16, pad?=0, align?:'start'|'center'|'end', " +
     "size?, justify?:'start'|'center'|'end'|'space-between', cross?, equalize?, maxW?=200, fontSize?=16, x?, y? } → " +
-    "{kind:'stack',x,y,w,h,overflow,children:[{kind:'text'|'titled'|'box'|'stack',id?,x,y,w,h,...}]} " +
+    "{kind:'stack',x,y,w,h,overflow,crossOverflow,children:[{kind:'text'|'titled'|'box'|'stack',id?,x,y,w,h,...}]} " +
     "(lays cells along one axis and sizes the container from their content — absolute coordinates, no hand-typed heights; " +
-    "cells without w get their natural width, capped at maxW; draw each child as a rect)\n" +
+    "cells without w get their natural width, capped at maxW; a size / cross that cannot hold the content makes the container grow, " +
+    "and overflow / crossOverflow report the px past size / cross, 0 otherwise; draw each child as a rect)\n" +
     "  panel       — { title, body:{dir?='y',cells,…stack options without x/y}, titleSide?:'top'|'left'='top', titleFontSize?=18, titleW?, " +
     "pad?=16, gap?=12, w?, x?, y? } → " +
     "{kind:'panel',x,y,w,h,overflow,title:{x,y,w,h,fontSize,text},body:<stack result>} " +
