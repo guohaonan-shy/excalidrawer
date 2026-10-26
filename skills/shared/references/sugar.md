@@ -145,10 +145,13 @@ titledBox   — { x, y, w, title, body?, titleFontSize?, bodyFontSize?, padding?
 fitContainer— { children:[{x,y,w,h}], padding?, minW?, minH? } → { x, y, w, h }
 equalize    — { cells:[{w,text,fontSize?} | {w,title,body?,...} | {w,h}], minH? }
               → { h, cells:[{ w, h, contentH }] }
-stack       — { dir:"x"|"y", cells:[{text,w?,fontSize?} | {title,body?,w?,...} | {w,h} | {stack:{…}}],
+stack       — { dir:"x"|"y", cells:[{text,w?,fontSize?} | {title,body?,w?,...} | {w,h} | {stack:{…}} | {panel:{…}}],
                 gap?=16, pad?=0, align?:"start"|"center"|"end", size?, justify?, cross?,
                 equalize?, maxW?=200, fontSize?=16, x?, y? }
               → { kind:"stack", x, y, w, h, overflow, children:[{ kind, id?, x, y, w, h, … }] }
+panel       — { title, body:{ dir?="y", cells, …stack options, no x/y }, titleSide?:"top"|"left"="top",
+                titleFontSize?=18, titleW?, pad?=16, gap?=12, w?, x?, y? }
+              → { kind:"panel", x, y, w, h, title:{ x, y, w, h, fontSize, text }, body:<stack result> }
 axis        — { from:{x,y}, dir?:'x'|'y', marks?:[{value?,label?,id?}], domain?:[min,max], length?,
                 spacing?, extend?:[before,after], gap?, arrow?:'none'|'end', ticks?:{step?|count?},
                 labelSide?:'before'|'after'|'alternate', labelOffset? }
@@ -188,6 +191,28 @@ at its `x, y, w, h`; for `kind: "titled"` draw the rect and put `title.text` /
 `body.text` (already wrapped) at `title` / `body`'s `x, y` as separate `text`
 elements. Draw the container itself as a `rect` from the top-level `x, y, w, h`
 when it needs a visible shell. Colors and line styles stay your call.
+
+**`panel` — a title area plus a `stack` of cells, sized from both.** Use it
+wherever a container has a heading: an architecture layer band (title column on
+the left, items in a row on the right) or one side of a comparison (title on
+top, row cards below). The `body` is a `stack`'s options (no `x` / `y`; `dir`
+defaults to `"y"`), so no `cell.y + 80` offset or hand-typed container height is
+left to get wrong. `titleSide: "top"` puts the title area across the inner width,
+`gap` above the body; a title that wraps makes the area taller and moves the
+body down. `titleSide: "left"` makes the title a column (`titleW` wide, or its
+natural width capped at 200) as tall as the panel's inner height, so a header
+rect can fill the whole row, with the body `gap` to its right. `w` fixes the
+overall width: the body gets what is left (a row body spreads it by its
+`justify`, a column body's width-less cells fill it); a `w` smaller than the
+content lets the panel grow. A panel is also a stack cell, `{ panel: {…} }`,
+and an outer `equalize: true` gives panels one width (column) or one height
+(row), re-flowing each inside: titles re-wrap, the body is stretched, centered
+cells stay centered.
+
+After the call, draw `title` as a header `rect` with `text: title.text` (already
+wrapped; or just a `text` element at `title.x, title.y`), the container as a
+`rect` from the top-level `x, y, w, h`, and each `body.children[i]` as for a
+`stack`. Say "panel", not "card": a card is one small cell inside it.
 
 **`axis` — a marked line, drawn from `segments`.** It returns coordinates
 only; the dots, labels and tick strokes are yours to draw. Marks sit at

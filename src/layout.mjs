@@ -1057,6 +1057,8 @@ export function tree(root, opts = {}) {
  *                                  wrapped to the inner width first).
  *   - `{ w, h }`                 — a cell whose size is already known.
  *   - `{ stack: {…} }`           — a nested stack (same options, no x/y).
+ *   - `{ panel: {…} }`           — a nested `panel` (title area + a stack; no x/y). With
+ *                                  `equalize` it re-flows at the shared width / height.
  *
  * @param {object} opts
  * @param {"x"|"y"} opts.dir          - main axis: "x" lays cells in a row, "y" in a column
@@ -1079,7 +1081,7 @@ export function tree(root, opts = {}) {
  * @returns {{ kind:"stack", x:number, y:number, w:number, h:number,
  *             overflow:number, children:Array<object> }}
  *   `children` mirrors `cells`; each carries `kind` ("text" | "titled" | "box" |
- *   "stack") and absolute `x, y, w, h`. `overflow` is how many px the content ran
+ *   "stack" | "panel") and absolute `x, y, w, h`. `overflow` is how many px the content ran
  *   past `size` (the container grows to fit instead of failing); 0 otherwise.
  *
  * @example
@@ -1104,6 +1106,8 @@ const NESTED_LAYOUTS = {
     }
     return layoutStack(s && typeof s === "object" ? { ...s, x: 0, y: 0 } : s, where);
   },
+  panel: (spec, where, force) =>
+    layoutPanel(spec && typeof spec === "object" ? { ...spec, x: 0, y: 0 } : spec, where, force),
 };
 
 const isNum = (n) => typeof n === "number" && Number.isFinite(n);
@@ -1293,6 +1297,161 @@ function measureCell(cell, i, ctx, { fill, force }) {
   const h = hForced ?? cell.h;
   return { w, h, result: mk("box", { x: 0, y: 0, w, h }) };
 }
+
+// ---------------------------------------------------------------------------
+// panel
+// ---------------------------------------------------------------------------
+
+// A title that sizes itself (no `titleW`, no `w`) takes its natural width,
+// capped here — the same cap `stack` puts on a text cell (`maxW` default).
+const PANEL_TITLE_MAX_W = 200;
+
+/**
+ * A container of "title area + one stack of cells": the content area is a
+ * `stack`, and the panel sizes itself from the title and that stack, so the
+ * `cell.y + 80` / `shellH = …` arithmetic (and the overflow when a label gets
+ * long) goes away. Think architecture's layer band (title column on the left,
+ * items in a row) or one side of a comparison (title on top, row cards below).
+ *
+ * Pure geometry, like `stack`: the title area is a rectangle you may draw as a
+ * header rect with bound text, or just write the text into. The title is
+ * wrapped the way a bound-text box wraps it, so `title.h` is the height of a
+ * header rect that holds it.
+ *
+ *   - `titleSide: "top"`  — the title area spans the panel's inner width and sits
+ *     above the body, `gap` away. A title that wraps makes the area taller and
+ *     moves the body down. With no `w`, the inner width is the wider of the body
+ *     and the title's natural width (capped at 200).
+ *   - `titleSide: "left"` — the title is a column on the left, as tall as the
+ *     inner height, so a header rect can fill the whole row; the body is `gap` to
+ *     its right. The column is `titleW` wide, or the title's natural width
+ *     (+10 per side, capped at 200).
+ *
+ * With `w`, the content area takes the remaining width: a row body distributes
+ * its spare room by its `justify`, a column body's width-less cells fill it.
+ * A `w` smaller than the content lets the panel grow. As a cell of a `stack`
+ * (`{ panel: {…} }`), `equalize` can force the panel's width or height; the
+ * panel re-flows inside (titles re-wrap, the body is stretched to fit).
+ *
+ * @param {object} opts
+ * @param {string} opts.title                  - may contain "\n"
+ * @param {object} opts.body                   - `stack` options without x/y; `dir` defaults to "y"
+ * @param {"top"|"left"} [opts.titleSide="top"]
+ * @param {number} [opts.titleFontSize=18]
+ * @param {number} [opts.titleW]               - `left` only: title column width
+ * @param {number} [opts.pad=16]               - inset between the outer edge and the contents
+ * @param {number} [opts.gap=12]               - space between the title area and the body
+ * @param {number} [opts.w]                    - fixed overall width
+ * @param {number} [opts.x=0]
+ * @param {number} [opts.y=0]
+ *
+ * @returns {{ kind:"panel", x:number, y:number, w:number, h:number,
+ *             title:{ x:number, y:number, w:number, h:number, fontSize:number, text:string },
+ *             body:object }}
+ *   Absolute coordinates; `body` is the `stack` result (its `children` too),
+ *   `title.text` is the title already wrapped to `title.w`.
+ *
+ * @example
+ *   const lane = panel({
+ *     title: "Business Services", titleSide: "left",
+ *     body: { dir: "x", cells: [{ text: "Order Service" }, { text: "Payment reconciliation and settlement worker" }] },
+ *   });
+ *   // draw lane as a rect, lane.title as the header rect, lane.body.children[i] as rects
+ */
+export function panel(opts = {}) {
+  return layoutPanel(opts, "", null);
+}
+
+function layoutPanel(spec, where, force) {
+  const err = (msg) => new Error(`panel: ${where}${msg}`);
+  if (!spec || typeof spec !== "object" || Array.isArray(spec)) throw err("expected an options object");
+  if (typeof spec.title !== "string") throw err("`title` is required (a string)");
+  const body = spec.body;
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    throw err("`body` is required (the options of a stack, without x/y)");
+  }
+  const titleSide = spec.titleSide ?? "top";
+  if (titleSide !== "top" && titleSide !== "left") {
+    throw err(`\`titleSide\` must be one of top | left, got ${JSON.stringify(spec.titleSide)}`);
+  }
+  const num = (name, def, positive = false) => {
+    const v = spec[name] ?? def;
+    if (v === undefined) return undefined;
+    if (!isNum(v) || (positive ? v <= 0 : v < 0)) {
+      throw err(`\`${name}\` must be a ${positive ? "positive" : "non-negative"} number, got ${JSON.stringify(v)}`);
+    }
+    return v;
+  };
+  const pad = num("pad", 16);
+  const gap = num("gap", 12);
+  const fs = num("titleFontSize", 18, true);
+  const titleW = num("titleW", undefined, true);
+  const wOpt = num("w", undefined, true);
+  const x0 = spec.x ?? 0;
+  const y0 = spec.y ?? 0;
+  if (!isNum(x0)) throw err(`\`x\` must be a number, got ${JSON.stringify(spec.x)}`);
+  if (!isNum(y0)) throw err(`\`y\` must be a number, got ${JSON.stringify(spec.y)}`);
+
+  // `force` comes from an outer stack's equalize: a length this panel must take.
+  const W = force?.axis === "x" ? force.len : wOpt;
+  const minH = force?.axis === "y" ? force.len : 0;
+
+  // The body at the origin. availW / availH are the room it must fill (null: natural).
+  const bodyAt = (availW, availH) => {
+    const dir = body.dir ?? "y";
+    const o = { ...body, dir, x: 0, y: 0 };
+    if (availW != null) o[dir === "x" ? "size" : "cross"] = availW;
+    if (availH != null) o[dir === "y" ? "size" : "cross"] = availH;
+    try {
+      return layoutStack(o, "");
+    } catch (e) {
+      throw err(`body: ${e.message}`);
+    }
+  };
+  const natural = bodyAt(null, null);
+  const naturalTitleW = Math.min(PANEL_TITLE_MAX_W, widestLine(spec.title, fs) + BOUND_TEXT_PAD_X * 2);
+  // Constrain the body on an axis only when there is more room than it needs.
+  const grow = (n, avail) => (avail > n ? avail : null);
+
+  let w, h, titleBox, bodyPos, bodyRes;
+  if (titleSide === "top") {
+    const want = W != null ? W - pad * 2 : naturalTitleW;
+    const innerW = Math.max(want, natural.w);
+    const t = fitBoundText(spec.title, innerW, 0, fs);
+    const availH = minH > 0 ? Math.max(minH - pad * 2 - t.height - gap, natural.h) : null;
+    bodyRes = bodyAt(grow(natural.w, innerW), availH == null ? null : grow(natural.h, availH));
+    w = innerW + pad * 2;
+    h = Math.max(minH, pad * 2 + t.height + gap + bodyRes.h);
+    titleBox = { x: pad, y: pad, w: innerW, h: t.height, fontSize: fs, text: t.text };
+    bodyPos = [pad, pad + t.height + gap];
+  } else {
+    const tw = titleW ?? naturalTitleW;
+    const t = fitBoundText(spec.title, tw, 0, fs);
+    const availW = W != null ? Math.max(W - pad * 2 - tw - gap, natural.w) : natural.w;
+    const innerH = Math.max(t.height, natural.h, minH - pad * 2);
+    bodyRes = bodyAt(grow(natural.w, availW), grow(natural.h, innerH));
+    w = pad * 2 + tw + gap + availW;
+    h = pad * 2 + innerH;
+    titleBox = { x: pad, y: pad, w: tw, h: innerH, fontSize: fs, text: t.text };
+    bodyPos = [pad + tw + gap, pad];
+  }
+
+  translate(bodyRes, bodyPos[0], bodyPos[1]);
+  const result = {
+    kind: "panel",
+    ...(spec.id !== undefined ? { id: spec.id } : {}),
+    x: 0,
+    y: 0,
+    w,
+    h,
+    title: titleBox,
+    body: bodyRes,
+  };
+  translate(result, x0, y0);
+  return result;
+}
+
+// ---------------------------------------------------------------------------
 // legend
 // ---------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 import { defineTool } from "./schema.mjs";
 import {
   gridLayout, chain, swimlane, hubSpoke, edgePoint, routeU, labelAnchor,
-  fitContainer, titledBox, equalize, tree, stack, axis, legend,
+  fitContainer, titledBox, equalize, tree, stack, panel, axis, legend,
 } from "../layout.mjs";
 
 /**
@@ -22,6 +22,7 @@ const DISPATCH = {
   equalize:    (a) => equalize(a.cells, a),
   tree:        (a) => tree(a.root, a),
   stack:       (a) => stack(a),
+  panel:       (a) => panel(a),
   axis:        (a) => axis(a),
   legend:      (a) => legend(a),
 };
@@ -55,6 +56,11 @@ export const computeLayout = defineTool({
     "{kind:'stack',x,y,w,h,overflow,children:[{kind:'text'|'titled'|'box'|'stack',id?,x,y,w,h,...}]} " +
     "(lays cells along one axis and sizes the container from their content — absolute coordinates, no hand-typed heights; " +
     "cells without w get their natural width, capped at maxW; draw each child as a rect)\n" +
+    "  panel       — { title, body:{dir?='y',cells,…stack options without x/y}, titleSide?:'top'|'left'='top', titleFontSize?=18, titleW?, " +
+    "pad?=16, gap?=12, w?, x?, y? } → " +
+    "{kind:'panel',x,y,w,h,title:{x,y,w,h,fontSize,text},body:<stack result>} " +
+    "(title area + a stack of cells, sized from both: top = title above the body, left = a title column as tall as the panel; " +
+    "a cell of a stack can be {panel:{…}}; draw the panel as a rect, title as a header rect or text, body.children as rects)\n" +
     "  axis        — { from:{x,y}, dir?:'x'|'y', marks?:[{value?,label?,id?}], domain?:[min,max], length?, spacing?, extend?:[before,after], gap?, " +
     "arrow?:'none'|'end', ticks?:{step?|count?}, labelSide?:'before'|'after'|'alternate', labelOffset? } → " +
     "{kind:'axis',from,to,marks:[{id?,value?,label?,x,y,t,labelAnchor:{x,y,side}}],ticks:[{value,x,y,labelAnchor}],segments:[{at,points,arrow}],scale:{domain,origin,pxPerUnit}} " +

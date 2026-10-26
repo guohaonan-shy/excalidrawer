@@ -29,6 +29,16 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   are supported. Exported from the package and available through
   `compute_layout` / `compute-layout --helper stack`. Geometry only, like the
   other layout helpers; none of them changed.
+- **`panel` layout helper.** `panel({ title, body, titleSide, … })` is a
+  container of a title area plus a `stack`: the title sits on top (full inner
+  width, wrapping makes it taller and pushes the body down) or in a left column
+  as tall as the panel, and the panel's size comes from the title and the body,
+  so an architecture layer band or one side of a comparison no longer needs
+  `cell.y + 80` or a hand-typed shell height. `w` fixes the width (the body's
+  `justify` spreads the rest), and a stack cell can be `{ panel: {…} }` — an
+  outer `equalize` re-flows each panel at the shared width or height. Exported
+  from the package and available through `compute_layout` (`helper: "panel"`).
+  Existing helpers and templates are unchanged.
 - **`axis` layout helper.** A marked line as coordinates: mark positions
   (evenly `spacing` apart, or linear over a `domain` when marks carry a
   `value`), the line as `segments` broken `gap` px around each mark (last one

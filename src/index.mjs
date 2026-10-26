@@ -42,6 +42,7 @@ export {
   readableOn,
   triplet,
   stack,
+  panel,
   axis,
   legend,
 } from "./layout.mjs";

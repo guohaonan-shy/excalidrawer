@@ -349,8 +349,8 @@ test("stack: a cell of an unknown form throws, naming the index and what is acce
     /^Error: stack: cells\[2\] needs text, title, h, stack or panel$/,
   );
   assert.throws(() => stack({ dir: "x", cells: [null] }), /stack: cells\[0\] needs/);
-  // panel is added by a later ticket: until then it is just an unknown cell
-  assert.throws(() => stack({ dir: "x", cells: [{ panel: {} }] }), /stack: cells\[0\] needs .*panel/);
+  // a panel cell is a known form: its errors come from panel, naming the cell
+  assert.throws(() => stack({ dir: "x", cells: [{ panel: {} }] }), /panel: cells\[0\]\.panel: .*`title`/);
 });
 
 test("stack: a { w } or { h } cell missing its other side throws", () => {

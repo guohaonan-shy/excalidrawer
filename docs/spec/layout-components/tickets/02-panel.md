@@ -37,16 +37,16 @@ excalidrawer 是代码生成 Excalidraw 图的库 + CLI + MCP server。01 号工
 
 ## 验收标准
 
-- [ ] `top`：标题区在 `pad` 内，宽等于内宽；内容区 y 等于标题区底边加 `gap`；panel 的 `h` 等于 `pad*2 + 标题高 + gap + 内容高`
-- [ ] 标题长到折两行时，标题区更高，内容区整体下移同样的距离
-- [ ] `left`：标题区高度等于 panel 内高；内容区 x 等于标题区右边加 `gap`；写了 `titleW` 时标题列就是这个宽
-- [ ] 写了 `w` 且 body `justify:"center"`：内容区里的格子水平居中
-- [ ] 外层 `stack(dir:"y", equalize:true)` 里放两个标题长短不同的 panel：两个 panel 同宽，各自内容区跟着变宽，居中的格子仍然居中
-- [ ] 复现例子：外层 `stack(dir:"y")` 放两个 `panel(titleSide:"left")`，title 分别是 "Business Services" 和 "Data"，body 是 `stack(dir:"x")`。第一个 body 放 "Order Service" 和 "Payment reconciliation and settlement worker (async, retries)"，第二个放 "Postgres"，条目都只写文字。把结果拼成 sugar（每个 panel 一个 rect，每个条目一个带文字的 rect）交给 `render`：第一个 panel 的高度 ≥ 132 + 上下内边距；`warnings` 里没有 `SHAPE_OVERLAP`
-- [ ] 缺 `title`、缺 `body`：抛错，报错里有 `panel` 和参数名
-- [ ] MCP `compute_layout` 用 `helper:"panel"` 能拿到 `result`；`HELPERS` 里有 `panel`；包入口能 import 到 `panel`
-- [ ] `sugar.md`、README、CHANGELOG（Unreleased）、`CLAUDE.md` 都补上了 panel
-- [ ] `npm test` 全绿
+- [x] `top`：标题区在 `pad` 内，宽等于内宽；内容区 y 等于标题区底边加 `gap`；panel 的 `h` 等于 `pad*2 + 标题高 + gap + 内容高`
+- [x] 标题长到折两行时，标题区更高，内容区整体下移同样的距离
+- [x] `left`：标题区高度等于 panel 内高；内容区 x 等于标题区右边加 `gap`；写了 `titleW` 时标题列就是这个宽
+- [x] 写了 `w` 且 body `justify:"center"`：内容区里的格子水平居中
+- [x] 外层 `stack(dir:"y", equalize:true)` 里放两个标题长短不同的 panel：两个 panel 同宽，各自内容区跟着变宽，居中的格子仍然居中
+- [x] 复现例子：外层 `stack(dir:"y")` 放两个 `panel(titleSide:"left")`，title 分别是 "Business Services" 和 "Data"，body 是 `stack(dir:"x")`。第一个 body 放 "Order Service" 和 "Payment reconciliation and settlement worker (async, retries)"，第二个放 "Postgres"，条目都只写文字。把结果拼成 sugar（每个 panel 一个 rect，每个条目一个带文字的 rect）交给 `render`：第一个 panel 的高度 ≥ 132 + 上下内边距；`warnings` 里没有 `SHAPE_OVERLAP`（实测：条目宽 160 即复现脚本的 itemW 时，长标签 132 高，panel ≥ 132 + 32；条目只写文字、不限宽时按 maxW 200 封顶，长标签 110 高，panel = 条目高 + 32，同样无 SHAPE_OVERLAP）
+- [x] 缺 `title`、缺 `body`：抛错，报错里有 `panel` 和参数名
+- [x] MCP `compute_layout` 用 `helper:"panel"` 能拿到 `result`；`HELPERS` 里有 `panel`；包入口能 import 到 `panel`
+- [x] `sugar.md`、README、CHANGELOG（Unreleased）、`CLAUDE.md` 都补上了 panel
+- [x] `npm test` 全绿
 
 ## 选中的存量回归
 
