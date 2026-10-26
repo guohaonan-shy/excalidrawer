@@ -1,6 +1,6 @@
 ---
 name: sequence
-description: Generate a hand-drawn-style Excalidraw sequence diagram from code and export to .excalidraw / SVG / PNG — no browser. For sequence diagrams, multi-actor interactions, API call order, handshakes, OAuth / auth flows, request-response chains. Triggers on draw a sequence diagram / interaction flow / call order / handshake. Flow detect → clarify actors & messages & return-style → read references/sequence.md → compose sugar → render_diagram. 中文触发词：时序图 / 序列图 / 多角色交互 / API 调用顺序 / 握手 / OAuth 流程 / 请求响应。
+description: Generate a hand-drawn-style Excalidraw sequence diagram from code and export to .excalidraw / SVG / PNG / WebP — no browser. For sequence diagrams, multi-actor interactions, API call order, handshakes, OAuth / auth flows, request-response chains. Triggers on draw a sequence diagram / interaction flow / call order / handshake. Flow detect → clarify actors & messages & return-style → read references/sequence.md → compose sugar → render_diagram. 中文触发词：时序图 / 序列图 / 多角色交互 / API 调用顺序 / 握手 / OAuth 流程 / 请求响应。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
@@ -10,12 +10,12 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 先用 Read 工具读取 [`../shared/SKILL.md`](../shared/SKILL.md)
 ——它定义了所有图表类型通用的 MCP 前置检查 / CLI fallback、视觉语义（什么意思用什么组件/线型/配色）、sugar schema、
-文件命名、输出语言、导出格式选择、迭代规则。**缺一不可**，本 skill 只补充时序图专属的
+文件命名、输出语言、导出格式参考、迭代规则。**缺一不可**，本 skill 只补充时序图专属的
 clarify 问题与 layout recipe。
 
 ## 1. Clarify（必）
 
-用 **AskUserQuestion** 问 load-bearing 问题，最后一个固定是导出格式（shared §6）。
+用 **AskUserQuestion** 问 load-bearing 问题；导出格式见 shared §6 的格式参考。
 **用户已粘完整 actor + 步骤时跳过结构性提问。**
 
 1. **参与角色 / 服务** — 自由文本（如 `User / Client / Auth Server`），按交互顺序定排列
@@ -30,4 +30,4 @@ clarify 问题与 layout recipe。
 ## 3. 拼 sugar + 渲染
 
 按 recipe 拼 sugar 数组（`chain` 排 actor x 与 step y）。渲染顺序与 render 调用见 shared §2 / §7：
-`output: "./sequence-<name>"`，formats 按 clarify。迭代见 recipe 末尾「Common pitfalls」与 shared §8。
+`output: "./sequence-<name>"`，formats 见 shared §6。迭代见 recipe 末尾「Common pitfalls」与 shared §8。

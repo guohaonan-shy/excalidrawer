@@ -10,13 +10,17 @@
  */
 
 import { excalidraw } from "./elements.mjs";
-import { toSvg, toPng, autoRegisterCjkFont } from "./export.mjs";
+import { toSvg, toPng, toWebp, autoRegisterCjkFont } from "./export.mjs";
 import { desugar } from "./sugar.mjs";
 import { validate } from "./validate.mjs";
 
 export { SugarError } from "./sugar.mjs";
 
-export const VALID_FORMATS = ["excalidraw", "svg", "png"];
+/** Formats a caller may ask for. */
+export const VALID_FORMATS = ["excalidraw", "svg", "png", "webp"];
+
+/** Formats produced when the caller names none (webp is opt-in). */
+export const DEFAULT_FORMATS = ["excalidraw", "svg", "png"];
 
 /** Thrown when elements fail minimum-shape validation. Carries `.issues`. */
 export class ElementValidationError extends Error {
@@ -83,7 +87,7 @@ export async function render(elements, opts = {}) {
   // present. No-op for Latin-only diagrams.
   autoRegisterCjkFont(raw);
 
-  const formats = opts.formats && opts.formats.length ? opts.formats : VALID_FORMATS;
+  const formats = opts.formats && opts.formats.length ? opts.formats : DEFAULT_FORMATS;
   const unknown = formats.filter((f) => !VALID_FORMATS.includes(f));
   if (unknown.length > 0) {
     throw new Error(`unknown format(s): ${unknown.join(", ")}. Valid: ${VALID_FORMATS.join(", ")}`);
@@ -95,6 +99,7 @@ export async function render(elements, opts = {}) {
     if (fmt === "excalidraw") outputs.excalidraw = excalidraw(raw);
     else if (fmt === "svg") outputs.svg = toSvg(raw);
     else if (fmt === "png") outputs.png = await toPng(raw, scale);
+    else if (fmt === "webp") outputs.webp = await toWebp(raw, scale);
   }
 
   return { outputs, formats, elementCount: raw.length, warnings };

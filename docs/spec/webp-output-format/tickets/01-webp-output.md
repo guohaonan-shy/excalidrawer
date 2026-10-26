@@ -32,17 +32,17 @@ skill 侧：
 
 ## 验收标准
 
-- [ ] 用一个最小矩形调 `render(..., { formats: ["webp"] })`：`outputs.webp` 是 Buffer，第 0–4 字节是 `RIFF`、第 8–12 字节是 `WEBP`，返回的格式只有 webp
-- [ ] 同一个矩形分别要 png 和 webp、`scale` 都是 3：两张图解出来的宽高相同
-- [ ] WebP 是无损编码（VP8L 块，不是有损的 VP8 块）
-- [ ] 不写 `formats` 时返回的格式恰好是 excalidraw、svg、png
-- [ ] 未知格式仍报错，报错里列出的可选值包含 webp
-- [ ] `toWebp` 能从包入口 import，跟 `toPng` 并列
-- [ ] MCP `render_diagram` 传 `formats: ["webp"]` 写出 `<output>.webp`
-- [ ] CLI `render -f webp` 写出 `<output>.webp`
-- [ ] 全量测试 `npm test` 通过，`npm run test:example` 跑通
-- [ ] 格式与去处的对应只在共享 skill 出现一次；6 个图类型 skill 里只剩指向它的一句；共享 skill 里写着「推得出就选，推不出才问去处」，没有固定选项的提问表（人工核对）
-- [ ] README、`docs/output-formats.md`、CHANGELOG Unreleased 按「要建什么」更新
+- [x] 用一个最小矩形调 `render(..., { formats: ["webp"] })`：`outputs.webp` 是 Buffer，第 0–4 字节是 `RIFF`、第 8–12 字节是 `WEBP`，返回的格式只有 webp
+- [x] 同一个矩形分别要 png 和 webp、`scale` 都是 3：两张图解出来的宽高相同
+- [x] WebP 是无损编码（VP8L 块，不是有损的 VP8 块）
+- [x] 不写 `formats` 时返回的格式恰好是 excalidraw、svg、png
+- [x] 未知格式仍报错，报错里列出的可选值包含 webp
+- [x] `toWebp` 能从包入口 import，跟 `toPng` 并列
+- [x] MCP `render_diagram` 传 `formats: ["webp"]` 写出 `<output>.webp`
+- [x] CLI `render -f webp` 写出 `<output>.webp`
+- [x] 全量测试 `npm test` 通过，`npm run test:example` 跑通
+- [x] 格式与去处的对应只在共享 skill 出现一次；6 个图类型 skill 里只剩指向它的一句；共享 skill 里写着「推得出就选，推不出才问去处」，没有固定选项的提问表（人工核对）
+- [x] README、`docs/output-formats.md`、CHANGELOG Unreleased 按「要建什么」更新
 
 ## 选中的存量回归
 

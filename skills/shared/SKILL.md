@@ -1,6 +1,6 @@
 ---
 name: shared
-description: Shared base for the excalidrawer diagram skills (flowchart / timeline / architecture / sequence / comparison / tree). Holds the cross-cutting conventions every type skill depends on — MCP precheck + CLI fallback, visual semantics (which component / line style / color for which meaning), sugar schema reference, output file naming, label language, export format selection, and iteration rules. The type skills declare "前置条件：先 Read ../shared/SKILL.md" and rely on this. Not a standalone drawing skill — read it first, then follow the type-specific recipe. 通用约定 / 基座 / sugar / 配色 / 命名 / 导出格式。
+description: Shared base for the excalidrawer diagram skills (flowchart / timeline / architecture / sequence / comparison / tree). Holds the cross-cutting conventions every type skill depends on — MCP precheck + CLI fallback, visual semantics (which component / line style / color for which meaning), sugar schema reference, output file naming, label language, export format reference, and iteration rules. The type skills declare "前置条件：先 Read ../shared/SKILL.md" and rely on this. Not a standalone drawing skill — read it first, then follow the type-specific recipe. 通用约定 / 基座 / sugar / 配色 / 命名 / 导出格式。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
@@ -82,9 +82,8 @@ ready actor list, milestone list, tiers + services).
 - **Natural-language prompt fits**: free-form lists, long descriptions, file
   paths, or > 4 options. Keep an "Other / 自定义" escape so the user can override.
 
-Don't ask anything derivable from the request itself. The **last** clarify
-question is always the export format / use case (see §6). The type skill lists
-the type-specific questions to ask.
+Don't ask anything derivable from the request itself — that includes the
+export format (§6). The type skill lists the type-specific questions to ask.
 
 ## 5. Output naming (gstack style) + language
 
@@ -123,24 +122,25 @@ guessing.
 The skill's own clarifying prompts and progress messages follow the user's
 conversation language — separate from diagram labels.
 
-## 6. Export format selection
+## 6. Export format reference
 
-Ask this as the **final clarify question** — the answer drives the `formats`
-argument to `render_diagram`. The `.excalidraw` file is always included
-(editable source, a few KB); the toggle is mostly whether to render PNG
-(slowest, ~1 s) and / or SVG.
+`formats` follows where the diagram will land. Each format has one home:
 
-AskUserQuestion (single-select, header: `Format` / `用途`):
-
-| Option | `formats` | notes |
+| format | goes where | why |
 |---|---|---|
-| `Markdown / GitHub` | `["excalidraw", "svg"]` | SVG inlines well in `.md` |
-| `Notion / 飞书 / slides / docs` | `["excalidraw", "png"]` | PNG pastes everywhere |
-| `打印 / 高清演示` | `["excalidraw", "png"]` + `scale: 3` | retina-quality export |
-| `都要 / 不确定`(default) | `["excalidraw", "svg", "png"]` | covers all uses |
+| `excalidraw` | anywhere the diagram may be edited again | editable source, a few KB |
+| `svg` | Markdown / GitHub | vector, inlines in `.md` |
+| `png` | Notion / 飞书 / slides | pastes everywhere |
+| `webp` | web pages / blogs / landing pages | lossless, about a quarter of the PNG's size |
 
-If the user already stated the target in the request ("画一个流程图贴 Notion"),
-skip the question and infer.
+`scale` (1–4) enlarges the export for `png` / `webp`; use 3 for print or a
+high-resolution deck.
+
+Choose the formats directly when the destination can be read from the
+conversation ("画一个流程图贴 Notion"), and keep `excalidraw` alongside so the
+diagram stays editable. Ask one short question about where the diagram will go
+only when the conversation doesn't say. Leave `formats` out to get
+excalidraw + svg + png.
 
 ## 7. Render call
 
@@ -154,8 +154,7 @@ mcp__excalidrawer__render_diagram({
 ```
 
 - success: `{ written: [...paths], elementCount: N, warnings? }` — tell the user
-  the paths. `.svg` for Markdown / GitHub, `.png` for Notion / 飞书 / slides,
-  `.excalidraw` for further editing.
+  the paths.
 - failure: `{ error, issues: [...] }` — fix the sugar by issue index and retry;
   no files are written on failure.
 

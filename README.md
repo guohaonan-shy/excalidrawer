@@ -120,7 +120,7 @@ npm install excalidrawer
 
 | Tool | What it does |
 |------|--------------|
-| `render_diagram` | Render an array of sugar shorthand or raw Excalidraw elements to `.excalidraw` / `.svg` / `.png` files. |
+| `render_diagram` | Render an array of sugar shorthand or raw Excalidraw elements to `.excalidraw` / `.svg` / `.png` / `.webp` files. |
 | `compute_layout` | Compute coordinates from a layout helper (grid, chain, swimlane, hub-and-spoke, edge anchors, U-routing, label anchors, titled boxes, row equalization). |
 
 Each command below registers the server with
@@ -184,7 +184,7 @@ first* — so the cross-cutting rules live in one place instead of being copied
 into every type skill. Given a request, a type skill clarifies intent with a couple of
 `AskUserQuestion` prompts, reads its recipe under `references/`, composes sugar
 elements, then calls the MCP server's `render_diagram` tool to emit
-`.excalidraw` / `.svg` / `.png`.
+`.excalidraw` / `.svg` / `.png` / `.webp`.
 
 > All skills call the `excalidrawer-mcp` server. The plugin install above ships
 > a manifest that registers it automatically; without the plugin, wire up the
@@ -196,6 +196,9 @@ elements, then calls the MCP server's `render_diagram` tool to emit
 # Render sugar / raw Excalidraw elements to files
 excalidrawer render -i elements.json -o docs/diagram
 cat elements.json | excalidrawer render -o docs/diagram -f svg,png
+
+# Lossless WebP for web pages / blogs (opt-in; not in the default set)
+excalidrawer render -i elements.json -o docs/diagram -f webp
 
 # Compute layout coordinates (prints JSON)
 excalidrawer compute-layout --helper gridLayout -a '{"count":6,"cols":3,"cellW":140,"cellH":50}'
@@ -238,7 +241,7 @@ The full sugar schema (shapes, arrows, layout helpers, `fill` / `stroke` /
 
 | Function | Returns | Description |
 |----------|---------|-------------|
-| `render(elements, opts?)` | `Promise<{ outputs, elementCount }>` | Desugar + render to `{ excalidraw, svg, png }`. `opts.formats` subsets the output; `opts.scale` (1–4) sets PNG scale. |
+| `render(elements, opts?)` | `Promise<{ outputs, elementCount }>` | Desugar + render to `{ excalidraw, svg, png, webp }`. `opts.formats` picks the outputs (default: excalidraw, svg, png; `webp` is opt-in); `opts.scale` (1–4) sets the PNG / WebP scale. |
 | `desugar(elements)` | `element[]` | Expand sugar shorthand into raw Excalidraw elements without rendering. |
 
 ### Layout helpers
@@ -262,8 +265,9 @@ These back the `compute_layout` MCP tool — see
 | `excalidraw(elements)` | `string` | JSON for a `.excalidraw` file |
 | `toSvg(elements)` | `string` | SVG markup with embedded fonts |
 | `toPng(elements, scale?)` | `Promise<Buffer>` | PNG buffer (resvg-js native rendering) |
+| `toWebp(elements, scale?)` | `Promise<Buffer>` | Lossless WebP buffer — same rasterization as `toPng`, encoded with `@jsquash/webp` |
 
-`excalidraw` / `toSvg` / `toPng` take already-desugared elements; call
+`excalidraw` / `toSvg` / `toPng` / `toWebp` take already-desugared elements; call
 `desugar()` first if you're starting from sugar.
 
 ### Colors
