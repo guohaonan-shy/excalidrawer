@@ -59,3 +59,4 @@ excalidrawer 是代码生成 Excalidraw 图的库 + CLI + MCP server。timeline 
 - `tests/linear.test.mjs`：axis 的线段要画成 line / arrow，要确认线性元素的行为没变
 - `tests/tools.test.mjs` 里 `compute_layout` 的派发测试：白名单再加一项
 - `tests/tree.test.mjs`：axis 沿用 tree 的线段格式，确认格式约定没被改
+- [ ] review 第 1 轮 C1（2026-10-26）：axis 的源码说明里不用术语表列为避免的叫法（GLOSSARY.md 在 axis 下写明 _Avoid_: segmented axis, timeline line），统一叫 axis
