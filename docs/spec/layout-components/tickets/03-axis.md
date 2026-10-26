@@ -62,4 +62,4 @@ excalidrawer 是代码生成 Excalidraw 图的库 + CLI + MCP server。timeline 
 - [x] review 第 1 轮 C1（2026-10-26）：axis 的源码说明里不用术语表列为避免的叫法（GLOSSARY.md 在 axis 下写明 _Avoid_: segmented axis, timeline line），统一叫 axis
 - [x] review 第 1 轮 S1（2026-10-26）：数值范围首尾相等（一个带数值的标记点、所有值相同、或 domain 写成 [3,3]）又要刻度时，调用正常返回：只出一个刻度，落在这个值上，标记点照旧在起点；配一条回归测试，确认这三种输入都在合理时间内返回
 - [x] review 第 1 轮 S3（2026-10-26）：axis 的数字参数（spacing、labelOffset、gap、length、extend、ticks 的 step 和 count、mark 的 value）传成非数字时抛错，报错写明 axis 和参数名，写法与 stack、panel 已有的数字检查一致；不再返回 NaN 坐标
-- [ ] review 第 1 轮补充（2026-10-26）：刻度数上限 1000。step 或 count 算出超过 1000 个刻度时立即抛错（不先生成再数），报错写明 axis，并提示调大 step（或调小 count）；配回归测试：step 1e-9 配 domain [0,1000]、count 1e9 都在 1 秒内抛错，正好 1000 个刻度时正常返回
+- [x] review 第 1 轮补充（2026-10-26）：刻度数上限 1000。step 或 count 算出超过 1000 个刻度时立即抛错（不先生成再数），报错写明 axis，并提示调大 step（或调小 count）；配回归测试：step 1e-9 配 domain [0,1000]、count 1e9 都在 1 秒内抛错，正好 1000 个刻度时正常返回

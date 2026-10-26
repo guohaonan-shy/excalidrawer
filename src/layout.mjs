@@ -1655,6 +1655,9 @@ function niceStep(min, max, count) {
   return best.step;
 }
 
+// Upper bound on ticks per axis; more is never a readable axis.
+const MAX_TICKS = 1000;
+
 // Strip float noise from i*step (0.1*3 → 0.30000000000000004).
 const clean = (v) => Number(v.toPrecision(12));
 
@@ -1687,7 +1690,8 @@ const clean = (v) => Number(v.toPrecision(12));
  * @param {number} [opts.gap=0] - how much of the line to cut away on each side of a mark
  * @param {"none"|"end"} [opts.arrow="none"] - `end` flags the last segment as an arrow
  * @param {{step?:number,count?:number}} [opts.ticks] - ticks on the domain (`count` defaults to 5;
- *   step is the nearest of 1/2/5 × 10^k, ticks on multiples of it, inside the domain)
+ *   step is the nearest of 1/2/5 × 10^k, ticks on multiples of it, inside the domain;
+ *   more than 1000 ticks throws — raise `step` / lower `count`)
  * @param {"before"|"after"|"alternate"} [opts.labelSide="after"] - before = above (x) / left (y)
  * @param {number} [opts.labelOffset=12] - label anchor distance from the line
  *
@@ -1823,6 +1827,14 @@ export function axis(opts = {}) {
       const step = ticks.step ?? niceStep(lo, hi, ticks.count ?? 5);
       const first = Math.ceil(lo / step - 1e-9);
       const last = Math.floor(hi / step + 1e-9);
+      // Count before generating: a tiny step or a huge count would otherwise
+      // allocate until the process dies. `!(<=)` also catches Infinity / NaN.
+      if (!(last - first + 1 <= MAX_TICKS)) {
+        throw new Error(
+          `axis: \`ticks\` would produce more than ${MAX_TICKS} ticks — ` +
+            (ticks.step !== undefined ? "raise `ticks.step`" : "lower `ticks.count`"),
+        );
+      }
       for (let i = first; i <= last; i++) addTick(clean(i * step));
     }
   }

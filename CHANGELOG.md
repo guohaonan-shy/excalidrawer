@@ -44,7 +44,8 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 - **`axis` layout helper.** A marked line as coordinates: mark positions
   (evenly `spacing` apart, or linear over a `domain` when marks carry a
   `value`), the line as `segments` broken `gap` px around each mark (last one
-  flagged `arrow` with `arrow: "end"`), optional `ticks` on 1/2/5×10ⁿ steps, label
+  flagged `arrow` with `arrow: "end"`), optional `ticks` on 1/2/5×10ⁿ steps (at most
+  1000 — more throws, raise `step` / lower `count`), label
   anchors, and a `scale` that converts a value to a coordinate. Exported from
   the package and available through `compute_layout` (`helper: "axis"`).
   Existing helpers and templates are unchanged.

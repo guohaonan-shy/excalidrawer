@@ -227,7 +227,8 @@ placed linearly over `domain`; without values the marks are `spacing` apart.
 For a value that is not a mark, use `scale`: along the axis its coordinate is
 `origin + (v - domain[0]) * pxPerUnit` (x for `dir:"x"`, y for `"y"`).
 `ticks: { step }` or `{ count }` adds ticks at 1 / 2 / 5 × 10ⁿ multiples inside
-the domain. Use it for the spine of a timeline or a chart axis.
+the domain, at most 1000 of them (more throws: raise `step` or lower `count`).
+Use it for the spine of a timeline or a chart axis.
 
 **`legend` — coordinates for each row's sample and text; you decide what the
 sample looks like.** Each item comes back with a `sample` slot and a `label`

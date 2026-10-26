@@ -374,3 +374,35 @@ test("axis: segments drawn as sugar line / arrow render with no linter warnings"
     assert.ok(!out.warnings.some((w) => w.code === "DEGENERATE_ARROW"));
   }
 });
+
+// ---------------------------------------------------------------------------
+// tick cap: at most 1000 ticks, refused before any is generated
+// ---------------------------------------------------------------------------
+
+test("axis: a step so small it implies billions of ticks throws at once, naming axis and `step`", () => {
+  const t0 = Date.now();
+  assert.throws(
+    () => axis({ from, domain: [0, 1000], length: 500, ticks: { step: 1e-9 } }),
+    /axis.*1000.*step/,
+  );
+  assert.ok(Date.now() - t0 < 1000, "took too long");
+});
+
+test("axis: a huge `count` throws at once, naming axis and telling to lower `count`", () => {
+  const t0 = Date.now();
+  assert.throws(
+    () => axis({ from, domain: [0, 1000], length: 500, ticks: { count: 1e9 } }),
+    /axis.*1000.*count/,
+  );
+  assert.ok(Date.now() - t0 < 1000, "took too long");
+});
+
+test("axis: exactly 1000 ticks is fine, 1001 is not", () => {
+  const ok = axis({ from, domain: [0, 999], length: 999, ticks: { step: 1 } });
+  assert.equal(ok.ticks.length, 1000);
+  assert.throws(() => axis({ from, domain: [0, 1000], length: 1000, ticks: { step: 1 } }), /axis.*1000/);
+});
+
+test("axis: a step below float range does not slip past the cap as Infinity", () => {
+  assert.throws(() => axis({ from, domain: [0, 1e300], length: 500, ticks: { step: 1e-300 } }), /axis.*1000/);
+});

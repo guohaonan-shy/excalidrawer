@@ -63,7 +63,7 @@ export const computeLayout = defineTool({
     "a w smaller than the content makes the panel grow and overflow reports the px past w, 0 otherwise; " +
     "a cell of a stack can be {panel:{…}}; draw the panel as a rect, title as a header rect or text, body.children as rects)\n" +
     "  axis        — { from:{x,y}, dir?:'x'|'y', marks?:[{value?,label?,id?}], domain?:[min,max], length?, spacing?, extend?:[before,after], gap?, " +
-    "arrow?:'none'|'end', ticks?:{step?|count?}, labelSide?:'before'|'after'|'alternate', labelOffset? } → " +
+    "arrow?:'none'|'end', ticks?:{step?|count?} (max 1000 ticks), labelSide?:'before'|'after'|'alternate', labelOffset? } → " +
     "{kind:'axis',from,to,marks:[{id?,value?,label?,x,y,t,labelAnchor:{x,y,side}}],ticks:[{value,x,y,labelAnchor}],segments:[{at,points,arrow}],scale:{domain,origin,pxPerUnit}} " +
     "(marked line: each segment is ready L4 form — draw it as shape:'line', or 'arrow' when arrow is true; value v sits at origin+(v-domain[0])*pxPerUnit along the axis)\n" +
     "  legend      — { items:[{label,id?}], dir?:'y'|'x', sampleW?, sampleH?, gap?, itemGap?, fontSize?, pad?, at?:{x,y}, " +
