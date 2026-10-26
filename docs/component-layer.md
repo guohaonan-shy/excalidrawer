@@ -1,7 +1,7 @@
 # Design note: the missing component layer
 
-**Status:** planned — direction agreed 2026-08-17, not yet scheduled to a
-version; tracked from the [README roadmap](../README.md#roadmap). Written
+**Status:** 已立项 (adopted) — see spec `layout-components`; tracked from the
+[README roadmap](../README.md#roadmap). Direction agreed 2026-08-17. Written
 2026-08-13, after the 0.5.13 work (`equalize`) surfaced the same problem
 three times. Updated 2026-08-17: reading [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design)
 confirmed this is a real differentiator, not wasted effort — they have *zero*
@@ -136,8 +136,13 @@ cards are white" is below it.
   recipe fills)? Geometry-returning keeps the line above clean, but the model
   still has to place every rect. A middle form — return slot rects with a
   suggested role (`header` / `body` / `footer`) — may be the sweet spot.
+  *Settled in spec `layout-components`: components return geometry (coordinates
+  only, no elements, no colors), like every existing layout helper.*
 - If components ship, do the four templates get rebuilt on top of them, or stay
   frozen until `generate` is removed in 0.6.0?
+  *Settled in spec `layout-components`: the templates are not rewritten.*
 - Does `stack` subsume `gridLayout` / `chain` / `swimlane`, or sit beside them?
   (`swimlane` is arguably `stack(dir:"y")` of `stack(dir:"x")` with a header
   column.)
+  *Settled in spec `layout-components`: `stack` sits beside the existing
+  helpers; none of them is changed.*

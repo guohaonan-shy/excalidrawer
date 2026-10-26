@@ -252,6 +252,7 @@ The full sugar schema (shapes, arrows, layout helpers, `fill` / `stroke` /
 | `edgePoint`, `routeU`, `labelAnchor` | Edge anchors, U-route detours, and label anchors for arrows. |
 | `titledBox`, `fitContainer` | Auto-sized geometry — a header+body card, and a container fitted to its children. |
 | `equalize` | One height that fits a group of cells, so a wrapped label can't leave a row of sibling boxes ragged. |
+| `stack` | Lay cells along one axis and size the container from their content — absolute coordinates for every cell, natural widths capped at `maxW`, optional `equalize` / `justify` / fixed `size`, nested stacks. |
 | `treeLayout` | Tidy tree (right or down): parents centered on their children, subtrees never overlap, connectors as ready-to-draw segments. `compute_layout` name: `tree`. |
 | `axis` | A marked line: mark positions (even, or linear over a value domain), the line broken around each mark, optional ticks, and the value → coordinate `scale`. Coordinates only — you draw the dots and labels. |
 | `legend` | Legend geometry — a sample slot and a text slot per row plus the block size, placeable in a corner of the diagram's bounds (inside or outside). Coordinates only; you draw the swatch or line. |

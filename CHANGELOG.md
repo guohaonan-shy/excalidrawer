@@ -19,6 +19,16 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   four-option "format" question is gone; `skills/shared/SKILL.md` §6 now maps
   each format to where it fits, and the agent picks from the conversation,
   asking about the destination only when it can't tell.
+- **`stack` layout helper.** `stack({ dir, cells, … })` lays a group of cells
+  along one axis and sizes the container from their content — text cells wrap
+  to their width (or take their natural width, capped at `maxW`), titled cells
+  use the `titledBox` math, and a cell can be another `stack`. It returns every
+  cell's absolute position plus the container's `w` / `h`, so a long label no
+  longer pushes a cell out of a hand-sized lane. `equalize`, `justify` with a
+  fixed `size` (reporting `overflow` when the content doesn't fit) and `cross`
+  are supported. Exported from the package and available through
+  `compute_layout` / `compute-layout --helper stack`. Geometry only, like the
+  other layout helpers; none of them changed.
 - **`axis` layout helper.** A marked line as coordinates: mark positions
   (evenly `spacing` apart, or linear over a `domain` when marks carry a
   `value`), the line as `segments` broken `gap` px around each mark (last one

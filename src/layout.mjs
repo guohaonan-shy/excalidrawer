@@ -1035,6 +1035,264 @@ export function tree(root, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// stack
+// ---------------------------------------------------------------------------
+
+/**
+ * Lay a group of cells out along one direction and size the container from
+ * what is in them — the main-axis half of the job `equalize` does for the
+ * cross axis. Hand it the cells' content; get back every cell's absolute
+ * position and the container's size, so no `laneH` / `shellH` is ever typed by
+ * hand and a long label can't push a cell out of its container.
+ *
+ * Pure geometry: no elements, no colors. Draw each child as a rect (or a rect
+ * with bound text) at the returned coordinates.
+ *
+ * Cells (a plain object each, `id` is copied through to the result):
+ *   - `{ text, w?, fontSize? }`  — bound-text box; height from wrapping `text` to `w`
+ *                                  (`fitBoundText`, same as `equalize`). Without `w`:
+ *                                  natural width + 10 per side, capped at `maxW`.
+ *   - `{ title, body?, w?, titleFontSize?, bodyFontSize?, padding?, gap? }`
+ *                                — titled box (`titledBox` math; title and body are
+ *                                  wrapped to the inner width first).
+ *   - `{ w, h }`                 — a cell whose size is already known.
+ *   - `{ stack: {…} }`           — a nested stack (same options, no x/y).
+ *
+ * @param {object} opts
+ * @param {"x"|"y"} opts.dir          - main axis: "x" lays cells in a row, "y" in a column
+ * @param {Array<object>} opts.cells  - non-empty
+ * @param {number} [opts.gap=16]      - space between neighbours along the main axis
+ * @param {number} [opts.pad=0]       - inset on all four sides of the container
+ * @param {"start"|"center"|"end"} [opts.align="start"] - cross-axis alignment
+ * @param {number} [opts.size]        - fixed main-axis length of the container (incl. pad)
+ * @param {"start"|"center"|"end"|"space-between"} [opts.justify="start"] - main-axis
+ *   distribution when `size` leaves spare room
+ * @param {number} [opts.cross]       - fixed cross-axis length (incl. pad). In a column,
+ *   cells without a width fill `cross - pad*2`.
+ * @param {boolean} [opts.equalize=false] - every cell takes the largest cross-axis size
+ *   (row: same height; column: same width); text is re-measured, nested stacks re-flow
+ * @param {number} [opts.maxW=200]    - width cap for text / titled cells without `w`
+ * @param {number} [opts.fontSize=16] - default font size of text cells
+ * @param {number} [opts.x=0]
+ * @param {number} [opts.y=0]
+ *
+ * @returns {{ kind:"stack", x:number, y:number, w:number, h:number,
+ *             overflow:number, children:Array<object> }}
+ *   `children` mirrors `cells`; each carries `kind` ("text" | "titled" | "box" |
+ *   "stack") and absolute `x, y, w, h`. `overflow` is how many px the content ran
+ *   past `size` (the container grows to fit instead of failing); 0 otherwise.
+ *
+ * @example
+ *   const lane = stack({
+ *     dir: "x", pad: 12, gap: 16, equalize: true,
+ *     cells: [{ text: "Order Service" }, { text: "Payment reconciliation and settlement worker (async, retries)" }],
+ *   });
+ *   // lane.h fits the tallest label; draw lane.children[i] as rects at their x, y, w, h
+ */
+export function stack(opts = {}) {
+  return layoutStack(opts, "");
+}
+
+// Cell keys that hold a nested container. Each maps to
+// `(spec, where, force) => result at origin (0, 0)`, where `force` is null or
+// `{ axis: "x"|"y", len }` — a length the container must take on that axis.
+const NESTED_LAYOUTS = {
+  stack: (spec, where, force) => {
+    let s = spec;
+    if (force && s && typeof s === "object") {
+      s = force.axis === s.dir ? { ...s, size: force.len } : { ...s, cross: force.len };
+    }
+    return layoutStack(s && typeof s === "object" ? { ...s, x: 0, y: 0 } : s, where);
+  },
+};
+
+const isNum = (n) => typeof n === "number" && Number.isFinite(n);
+
+/** Shift a result tree: every object carrying numeric `x` and `y` moves by (dx, dy). */
+function translate(node, dx, dy) {
+  if (Array.isArray(node)) {
+    for (const n of node) translate(n, dx, dy);
+  } else if (node && typeof node === "object") {
+    if (isNum(node.x) && isNum(node.y)) {
+      node.x += dx;
+      node.y += dy;
+    }
+    for (const v of Object.values(node)) if (v && typeof v === "object") translate(v, dx, dy);
+  }
+}
+
+function widestLine(text, fontSize) {
+  return Math.max(...text.split("\n").map((l) => estimateTextWidth(l, fontSize)));
+}
+
+function layoutStack(spec, where) {
+  const err = (msg) => new Error(`stack: ${where}${msg}`);
+  if (!spec || typeof spec !== "object" || Array.isArray(spec)) throw err("expected an options object");
+  const { dir, cells } = spec;
+  if (dir === undefined || dir === null) throw err('`dir` is required ("x" or "y")');
+  if (dir !== "x" && dir !== "y") throw err(`\`dir\` must be "x" or "y", got ${JSON.stringify(dir)}`);
+  if (!Array.isArray(cells) || cells.length === 0) throw err("`cells` must be a non-empty array");
+
+  const num = (name, def, positive = false) => {
+    const v = spec[name] ?? def;
+    if (v === undefined) return undefined;
+    if (!isNum(v) || (positive ? v <= 0 : v < 0)) {
+      throw err(`\`${name}\` must be a ${positive ? "positive" : "non-negative"} number, got ${JSON.stringify(v)}`);
+    }
+    return v;
+  };
+  const oneOf = (name, def, allowed) => {
+    const v = spec[name] ?? def;
+    if (!allowed.includes(v)) throw err(`\`${name}\` must be one of ${allowed.join(" | ")}, got ${JSON.stringify(v)}`);
+    return v;
+  };
+  const gap = num("gap", 16);
+  const pad = num("pad", 0);
+  const size = num("size", undefined, true);
+  const cross = num("cross", undefined, true);
+  const maxW = num("maxW", 200, true);
+  const fontSize = num("fontSize", 16, true);
+  const align = oneOf("align", "start", ["start", "center", "end"]);
+  const justify = oneOf("justify", "start", ["start", "center", "end", "space-between"]);
+  const x0 = spec.x ?? 0;
+  const y0 = spec.y ?? 0;
+  if (!isNum(x0)) throw err(`\`x\` must be a number, got ${JSON.stringify(spec.x)}`);
+  if (!isNum(y0)) throw err(`\`y\` must be a number, got ${JSON.stringify(spec.y)}`);
+
+  const ctx = { dir, where, maxW, fontSize };
+  const crossIsW = dir === "y";
+  const inner = cross === undefined ? null : cross - pad * 2;
+  const fill = crossIsW ? inner : null;
+  const crossOf = (m) => (crossIsW ? m.w : m.h);
+  const mainOf = (m) => (crossIsW ? m.h : m.w);
+
+  let items = cells.map((c, i) => measureCell(c, i, ctx, { fill, force: null }));
+  if (spec.equalize) {
+    const target = Math.max(...items.map(crossOf));
+    items = items.map((m, i) =>
+      crossOf(m) === target ? m : measureCell(cells[i], i, ctx, { fill, force: target }),
+    );
+  }
+
+  const innerCross = inner ?? Math.max(...items.map(crossOf));
+  const C = cross ?? innerCross + pad * 2;
+  const content = items.reduce((s, m) => s + mainOf(m), 0) + gap * (items.length - 1);
+  const natural = pad * 2 + content;
+
+  // Main axis: with a fixed `size` that fits, spare room is distributed by
+  // `justify`; one that doesn't fit lets the container grow and reports the excess.
+  const S = size === undefined ? natural : Math.max(size, natural);
+  const overflow = size === undefined ? 0 : Math.max(0, natural - size);
+  const spare = S - natural;
+  let main = pad;
+  let step = gap;
+  if (spare > 0) {
+    if (justify === "center") main += spare / 2;
+    else if (justify === "end") main += spare;
+    else if (justify === "space-between" && items.length > 1) step += spare / (items.length - 1);
+  }
+
+  const children = items.map((m) => {
+    const c = crossOf(m);
+    const off = pad + (align === "center" ? (innerCross - c) / 2 : align === "end" ? innerCross - c : 0);
+    translate(m.result, x0 + (crossIsW ? off : main), y0 + (crossIsW ? main : off));
+    main += mainOf(m) + step;
+    return m.result;
+  });
+
+  return {
+    kind: "stack",
+    ...(spec.id !== undefined ? { id: spec.id } : {}),
+    x: x0,
+    y: y0,
+    w: crossIsW ? C : S,
+    h: crossIsW ? S : C,
+    overflow,
+    children,
+  };
+}
+
+/**
+ * Measure one cell at the origin. `force` (a length) overrides the cell's
+ * cross-axis size (equalize); `fill` is the default width of a width-less
+ * cell in a column with a fixed `cross`.
+ */
+function measureCell(cell, i, ctx, { fill, force }) {
+  const { dir, where, maxW } = ctx;
+  const crossIsW = dir === "y";
+  const bad = (msg) => new Error(`stack: ${where}cells[${i}] ${msg}`);
+  const UNKNOWN = "needs text, title, h, stack or panel";
+  if (!cell || typeof cell !== "object" || Array.isArray(cell)) throw bad(UNKNOWN);
+  const id = cell.id;
+  const mk = (kind, rest) => ({ kind, ...(id !== undefined ? { id } : {}), ...rest });
+
+  const nestedKey = Object.keys(NESTED_LAYOUTS).find((k) => cell[k] !== undefined);
+  if (nestedKey) {
+    const r = NESTED_LAYOUTS[nestedKey](
+      cell[nestedKey],
+      `${where}cells[${i}].${nestedKey}: `,
+      force == null ? null : { axis: crossIsW ? "x" : "y", len: force },
+    );
+    if (id !== undefined) r.id = id;
+    return { w: r.w, h: r.h, result: r };
+  }
+
+  const isTitled = typeof cell.title === "string";
+  const isText = typeof cell.text === "string";
+  if (isTitled || isText) {
+    if (cell.w !== undefined && !(isNum(cell.w) && cell.w > 0)) {
+      throw bad(`\`w\` must be a positive number, got ${JSON.stringify(cell.w)}`);
+    }
+    if (cell.fontSize !== undefined && !(isNum(cell.fontSize) && cell.fontSize > 0)) {
+      throw bad(`\`fontSize\` must be a positive number, got ${JSON.stringify(cell.fontSize)}`);
+    }
+  } else if (cell.w !== undefined || cell.h !== undefined) {
+    if (!(isNum(cell.w) && cell.w > 0 && isNum(cell.h) && cell.h > 0)) {
+      throw bad("needs a positive numeric `w` and `h`");
+    }
+  } else {
+    throw bad(UNKNOWN);
+  }
+
+  const wForced = crossIsW ? force : null;
+  const hForced = crossIsW ? null : force;
+  const pickW = (natural) => wForced ?? cell.w ?? (crossIsW ? fill : null) ?? natural();
+
+  if (isTitled) {
+    const tfs = cell.titleFontSize ?? 18;
+    const bfs = cell.bodyFontSize ?? 15;
+    const padding = cell.padding ?? 16;
+    const body = cell.body ?? "";
+    const w = pickW(() =>
+      Math.min(maxW, Math.max(widestLine(cell.title, tfs), body ? widestLine(body, bfs) : 0) + padding * 2),
+    );
+    const innerW = Math.max(1, w - padding * 2);
+    const title = wrapText(cell.title, innerW, tfs);
+    const wrappedBody = wrapText(body, innerW, bfs);
+    const t = titledBox({ ...cell, x: 0, y: 0, w, title, body: wrappedBody });
+    const h = Math.max(hForced ?? 0, t.box.h);
+    return {
+      w,
+      h,
+      result: mk("titled", {
+        x: 0, y: 0, w, h,
+        title: { ...t.title, text: title },
+        body: { ...t.body, text: wrappedBody },
+      }),
+    };
+  }
+
+  if (isText) {
+    const fs = cell.fontSize ?? ctx.fontSize;
+    const w = pickW(() => Math.min(maxW, widestLine(cell.text, fs) + BOUND_TEXT_PAD_X * 2));
+    const h = Math.max(hForced ?? 0, fitBoundText(cell.text, w, 0, fs).height);
+    return { w, h, result: mk("text", { x: 0, y: 0, w, h, fontSize: fs }) };
+  }
+
+  const w = wForced ?? cell.w;
+  const h = hForced ?? cell.h;
+  return { w, h, result: mk("box", { x: 0, y: 0, w, h }) };
+}
 // legend
 // ---------------------------------------------------------------------------
 

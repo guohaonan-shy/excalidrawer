@@ -41,6 +41,7 @@ export {
   contrastText,
   readableOn,
   triplet,
+  stack,
   axis,
   legend,
 } from "./layout.mjs";

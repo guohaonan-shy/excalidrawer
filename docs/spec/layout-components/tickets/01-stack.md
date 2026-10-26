@@ -59,20 +59,20 @@ excalidrawer 是代码生成 Excalidraw 图的库 + CLI + MCP server。agent 画
 
 ## 验收标准
 
-- [ ] 横排三个只写文字的格子：返回的 `w`、`h` 等于 `pad*2 + Σ宽 + gap*2` 和最高格子加 `pad*2`；每个格子的 x 依次递增，间距等于 `gap`
-- [ ] 一个格子写 "Payment reconciliation and settlement worker (async, retries)"，`w:160`：它的 `h` 是 132，跟 `equalize` 对同一格子量出的高度一致
-- [ ] 不写 `w` 的 "Order Service" 宽 149；不写 `w` 的长标签宽等于 `maxW`，并且已经折行
-- [ ] `equalize:true` 横排、其中一个格子折成 3 行：三个格子 `h` 相同，等于折行那个格子的高度
-- [ ] 竖排给 `cross:400`、`pad:16`：不写宽度的格子宽 368
-- [ ] 两个 80 宽的格子，`size:400`：`justify` 取 start、center、end、space-between 时，位置分别是贴左、两侧空白相等、贴右、首尾贴边；`size:100` 时容器宽等于内容宽，`overflow` 大于 0
-- [ ] `align` 取 start、center、end 时，矮格子分别贴上、居中、贴下（横排）
-- [ ] 嵌套：外层竖排里放一个 `{stack:{dir:"x",…}}`，内层格子拿到的是绝对坐标（等于外层给它的位置加内层偏移）；外层 `equalize` 拉宽后，内层按新宽度重排
-- [ ] 输入的 `id` 出现在对应结果上
-- [ ] 缺 `dir`、`cells` 为空、格子写法不认识：抛错，报错里有 `stack` 和出错的参数
-- [ ] MCP `compute_layout` 用 `helper:"stack"` 调用能拿到 `result`，参数错时拿到 `{ error }`；`HELPERS` 里有 `stack`
-- [ ] 从包入口能 import 到 `stack`
-- [ ] `sugar.md`、README、CHANGELOG（Unreleased）、`docs/component-layer.md`、`CLAUDE.md` 都按上面改了
-- [ ] `npm test` 全绿
+- [x] 横排三个只写文字的格子：返回的 `w`、`h` 等于 `pad*2 + Σ宽 + gap*2` 和最高格子加 `pad*2`；每个格子的 x 依次递增，间距等于 `gap`
+- [x] 一个格子写 "Payment reconciliation and settlement worker (async, retries)"，`w:160`：它的 `h` 是 132，跟 `equalize` 对同一格子量出的高度一致
+- [x] 不写 `w` 的 "Order Service" 宽 149；不写 `w` 的长标签宽等于 `maxW`，并且已经折行
+- [x] `equalize:true` 横排、其中一个格子折成 3 行：三个格子 `h` 相同，等于折行那个格子的高度
+- [x] 竖排给 `cross:400`、`pad:16`：不写宽度的格子宽 368
+- [x] 两个 80 宽的格子，`size:400`：`justify` 取 start、center、end、space-between 时，位置分别是贴左、两侧空白相等、贴右、首尾贴边；`size:100` 时容器宽等于内容宽，`overflow` 大于 0
+- [x] `align` 取 start、center、end 时，矮格子分别贴上、居中、贴下（横排）
+- [x] 嵌套：外层竖排里放一个 `{stack:{dir:"x",…}}`，内层格子拿到的是绝对坐标（等于外层给它的位置加内层偏移）；外层 `equalize` 拉宽后，内层按新宽度重排
+- [x] 输入的 `id` 出现在对应结果上
+- [x] 缺 `dir`、`cells` 为空、格子写法不认识：抛错，报错里有 `stack` 和出错的参数
+- [x] MCP `compute_layout` 用 `helper:"stack"` 调用能拿到 `result`，参数错时拿到 `{ error }`；`HELPERS` 里有 `stack`
+- [x] 从包入口能 import 到 `stack`
+- [x] `sugar.md`、README、CHANGELOG（Unreleased）、`docs/component-layer.md`、`CLAUDE.md` 都按上面改了
+- [x] `npm test` 全绿
 
 ## 选中的存量回归
 

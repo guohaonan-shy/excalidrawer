@@ -1,7 +1,7 @@
 import { defineTool } from "./schema.mjs";
 import {
   gridLayout, chain, swimlane, hubSpoke, edgePoint, routeU, labelAnchor,
-  fitContainer, titledBox, equalize, tree, axis, legend,
+  fitContainer, titledBox, equalize, tree, stack, axis, legend,
 } from "../layout.mjs";
 
 /**
@@ -21,6 +21,7 @@ const DISPATCH = {
   titledBox:   (a) => titledBox(a),
   equalize:    (a) => equalize(a.cells, a),
   tree:        (a) => tree(a.root, a),
+  stack:       (a) => stack(a),
   axis:        (a) => axis(a),
   legend:      (a) => legend(a),
 };
@@ -49,6 +50,11 @@ export const computeLayout = defineTool({
     "levelGap?, siblingGap?, groupGap?, equalize?:'depth'|'siblings'|'none', originX?, originY? } → " +
     "{nodes:[{id,parent,depth,leaf,label,fontSize,x,y,w,h,titled?}], segments:[{kind,at,points}], levels, bounds} " +
     "(tidy tree: parents centered on their children, subtrees never overlap; each segment is ready L4 form — draw it as shape:'line')\n" +
+    "  stack       — { dir:'x'|'y', cells:[{text,w?,fontSize?}|{title,body?,w?,...}|{w,h}|{stack:{…}}], gap?=16, pad?=0, align?:'start'|'center'|'end', " +
+    "size?, justify?:'start'|'center'|'end'|'space-between', cross?, equalize?, maxW?=200, fontSize?=16, x?, y? } → " +
+    "{kind:'stack',x,y,w,h,overflow,children:[{kind:'text'|'titled'|'box'|'stack',id?,x,y,w,h,...}]} " +
+    "(lays cells along one axis and sizes the container from their content — absolute coordinates, no hand-typed heights; " +
+    "cells without w get their natural width, capped at maxW; draw each child as a rect)\n" +
     "  axis        — { from:{x,y}, dir?:'x'|'y', marks?:[{value?,label?,id?}], domain?:[min,max], length?, spacing?, extend?:[before,after], gap?, " +
     "arrow?:'none'|'end', ticks?:{step?|count?}, labelSide?:'before'|'after'|'alternate', labelOffset? } → " +
     "{kind:'axis',from,to,marks:[{id?,value?,label?,x,y,t,labelAnchor:{x,y,side}}],ticks:[{value,x,y,labelAnchor}],segments:[{at,points,arrow}],scale:{domain,origin,pxPerUnit}} " +

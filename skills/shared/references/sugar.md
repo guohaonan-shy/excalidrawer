@@ -145,6 +145,10 @@ titledBox   — { x, y, w, title, body?, titleFontSize?, bodyFontSize?, padding?
 fitContainer— { children:[{x,y,w,h}], padding?, minW?, minH? } → { x, y, w, h }
 equalize    — { cells:[{w,text,fontSize?} | {w,title,body?,...} | {w,h}], minH? }
               → { h, cells:[{ w, h, contentH }] }
+stack       — { dir:"x"|"y", cells:[{text,w?,fontSize?} | {title,body?,w?,...} | {w,h} | {stack:{…}}],
+                gap?=16, pad?=0, align?:"start"|"center"|"end", size?, justify?, cross?,
+                equalize?, maxW?=200, fontSize?=16, x?, y? }
+              → { kind:"stack", x, y, w, h, overflow, children:[{ kind, id?, x, y, w, h, … }] }
 axis        — { from:{x,y}, dir?:'x'|'y', marks?:[{value?,label?,id?}], domain?:[min,max], length?,
                 spacing?, extend?:[before,after], gap?, arrow?:'none'|'end', ticks?:{step?|count?},
                 labelSide?:'before'|'after'|'alternate', labelOffset? }
@@ -166,6 +170,25 @@ Use it for any set of shapes meant to read as one row / one band: same-row
 flowchart branches, items in one architecture tier, milestone cards, actor
 headers, and every paired cell in a comparison.
 
+**`stack` — lay cells along one axis; the container is sized from the content.**
+Give it each cell's content (`text`, or `title` + `body`, or a known `w` + `h`,
+or a nested `{ stack: {…} }`) and it returns every cell's absolute `x, y, w, h`
+and the container's `w, h`, so no lane height or shell height is typed by hand
+and a long label can't push a cell out of its container. `dir` is the main
+axis (`"x"` a row, `"y"` a column). A cell without `w` gets its natural width
+(capped at `maxW`, default 200, then it wraps). `equalize: true` gives every
+cell the same cross-axis size (row: same height; column: same width).
+`size` fixes the main-axis length and `justify` spreads the spare room
+(`start` / `center` / `end` / `space-between`); if the content doesn't fit, the
+container grows and `overflow` says by how many px. In a column, `cross` fixes
+the width and width-less cells fill `cross - pad*2`.
+
+After the call, draw each child as a `rect` (with `text` for `kind: "text"`)
+at its `x, y, w, h`; for `kind: "titled"` draw the rect and put `title.text` /
+`body.text` (already wrapped) at `title` / `body`'s `x, y` as separate `text`
+elements. Draw the container itself as a `rect` from the top-level `x, y, w, h`
+when it needs a visible shell. Colors and line styles stay your call.
+
 **`axis` — a marked line, drawn from `segments`.** It returns coordinates
 only; the dots, labels and tick strokes are yours to draw. Marks sit at
 `marks[i].x/y` (centered there), their label belongs at `labelAnchor`. The line
@@ -178,6 +201,7 @@ For a value that is not a mark, use `scale`: along the axis its coordinate is
 `origin + (v - domain[0]) * pxPerUnit` (x for `dir:"x"`, y for `"y"`).
 `ticks: { step }` or `{ count }` adds ticks at 1 / 2 / 5 × 10ⁿ multiples inside
 the domain. Use it for the spine of a timeline or a chart axis.
+
 **`legend` — coordinates for each row's sample and text; you decide what the
 sample looks like.** Each item comes back with a `sample` slot and a `label`
 slot, vertically centered on each other, plus the size of the whole block.
