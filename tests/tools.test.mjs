@@ -173,6 +173,15 @@ test("compute_layout: dispatches equalize", () => {
   assert.equal(res.result.cells[1].h, res.result.h);
 });
 
+test("compute_layout: dispatches axis", () => {
+  const res = getTool("compute_layout").run({
+    helper: "axis",
+    args: { from: { x: 0, y: 0 }, marks: [{ value: 0 }, { value: 10 }], length: 200 },
+  });
+  assert.equal(res.helper, "axis");
+  assert.deepEqual(res.result.marks.map((m) => m.x), [0, 200]);
+});
+
 test("compute_layout: unknown helper returns error", () => {
   const tool = getTool("compute_layout");
   const result = tool.run({ helper: "bogus", args: {} });

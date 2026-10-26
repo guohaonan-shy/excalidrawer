@@ -42,17 +42,17 @@ excalidrawer 是代码生成 Excalidraw 图的库 + CLI + MCP server。timeline 
 
 ## 验收标准
 
-- [ ] 4 个 mark，value 为 0、1、2、6，`length:600`：x 依次是 `from.x` 加 0、100、200、600
-- [ ] 3 个不带 value 的 mark，`spacing:160`：间距都是 160，`to` 在最后一个点之后 `extend[1]` 处
-- [ ] `gap:10`：线段在每个 mark 两侧各断开 10；`gap:0`：只有一段
-- [ ] `arrow:"end"`：只有最后一段 `arrow` 为真
-- [ ] `domain:[0, 87]`、`ticks:{count:5}`：刻度是 0、20、40、60、80；`scale` 换算 87 正好落在轴的终点（不算 extend）
-- [ ] `labelSide:"alternate"`：锚点在上下两侧交替；`dir:"y"` 时 before 在左
-- [ ] value 有的有有的没有：抛错，报错里有 `axis`
-- [ ] MCP `compute_layout` 用 `helper:"axis"` 能拿到 `result`；`HELPERS` 里有 `axis`；包入口能 import 到 `axis`
-- [ ] 把 segments 画成 sugar 的 `line` / `arrow` 交给 `render`：不报错，`warnings` 里没有退化箭头（degenerate arrow）
-- [ ] `sugar.md`、README、CHANGELOG（Unreleased）、`CLAUDE.md` 都补上了 axis
-- [ ] `npm test` 全绿
+- [x] 4 个 mark，value 为 0、1、2、6，`length:600`：x 依次是 `from.x` 加 0、100、200、600
+- [x] 3 个不带 value 的 mark，`spacing:160`：间距都是 160，`to` 在最后一个点之后 `extend[1]` 处
+- [x] `gap:10`：线段在每个 mark 两侧各断开 10；`gap:0`：只有一段
+- [x] `arrow:"end"`：只有最后一段 `arrow` 为真
+- [x] `domain:[0, 87]`、`ticks:{count:5}`：刻度是 0、20、40、60、80；`scale` 换算 87 正好落在轴的终点（不算 extend）
+- [x] `labelSide:"alternate"`：锚点在上下两侧交替；`dir:"y"` 时 before 在左
+- [x] value 有的有有的没有：抛错，报错里有 `axis`
+- [x] MCP `compute_layout` 用 `helper:"axis"` 能拿到 `result`；`HELPERS` 里有 `axis`；包入口能 import 到 `axis`
+- [x] 把 segments 画成 sugar 的 `line` / `arrow` 交给 `render`：不报错，`warnings` 里没有退化箭头（degenerate arrow）
+- [x] `sugar.md`、README、CHANGELOG（Unreleased）、`CLAUDE.md` 都补上了 axis
+- [x] `npm test` 全绿
 
 ## 选中的存量回归
 

@@ -1,7 +1,7 @@
 import { defineTool } from "./schema.mjs";
 import {
   gridLayout, chain, swimlane, hubSpoke, edgePoint, routeU, labelAnchor,
-  fitContainer, titledBox, equalize, tree, legend,
+  fitContainer, titledBox, equalize, tree, axis, legend,
 } from "../layout.mjs";
 
 /**
@@ -21,6 +21,7 @@ const DISPATCH = {
   titledBox:   (a) => titledBox(a),
   equalize:    (a) => equalize(a.cells, a),
   tree:        (a) => tree(a.root, a),
+  axis:        (a) => axis(a),
   legend:      (a) => legend(a),
 };
 
@@ -48,6 +49,10 @@ export const computeLayout = defineTool({
     "levelGap?, siblingGap?, groupGap?, equalize?:'depth'|'siblings'|'none', originX?, originY? } → " +
     "{nodes:[{id,parent,depth,leaf,label,fontSize,x,y,w,h,titled?}], segments:[{kind,at,points}], levels, bounds} " +
     "(tidy tree: parents centered on their children, subtrees never overlap; each segment is ready L4 form — draw it as shape:'line')\n" +
+    "  axis        — { from:{x,y}, dir?:'x'|'y', marks?:[{value?,label?,id?}], domain?:[min,max], length?, spacing?, extend?:[before,after], gap?, " +
+    "arrow?:'none'|'end', ticks?:{step?|count?}, labelSide?:'before'|'after'|'alternate', labelOffset? } → " +
+    "{kind:'axis',from,to,marks:[{id?,value?,label?,x,y,t,labelAnchor:{x,y,side}}],ticks:[{value,x,y,labelAnchor}],segments:[{at,points,arrow}],scale:{domain,origin,pxPerUnit}} " +
+    "(marked line: each segment is ready L4 form — draw it as shape:'line', or 'arrow' when arrow is true; value v sits at origin+(v-domain[0])*pxPerUnit along the axis)\n" +
     "  legend      — { items:[{label,id?}], dir?:'y'|'x', sampleW?, sampleH?, gap?, itemGap?, fontSize?, pad?, at?:{x,y}, " +
     "bounds?:{x,y,w,h}, corner?:'top-left'|'top-right'|'bottom-left'|'bottom-right', place?:'inside'|'outside', offset? } → " +
     "{kind:'legend',x,y,w,h,items:[{id?,text,sample:{x,y,w,h},label:{x,y,w,h,fontSize}}]} " +

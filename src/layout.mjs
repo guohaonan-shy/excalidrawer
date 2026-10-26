@@ -1172,3 +1172,215 @@ export function legend(opts = {}) {
 
   return { kind: "legend", x, y, w, h, items: out };
 }
+
+// ---------------------------------------------------------------------------
+// axis
+// ---------------------------------------------------------------------------
+
+// Candidate "nice" tick steps: 1, 2, 5 × 10^k. Picks the one whose tick count
+// over [min, max] lands closest to `count`; a tie goes to the smaller step.
+function niceStep(min, max, count) {
+  const raw = (max - min) / Math.max(count, 1);
+  const k0 = Math.floor(Math.log10(raw));
+  let best = null;
+  for (let k = k0 - 2; k <= k0 + 2; k++) {
+    for (const m of [1, 2, 5]) {
+      const step = m * 10 ** k;
+      const n = Math.floor(max / step + 1e-9) - Math.ceil(min / step - 1e-9) + 1;
+      const diff = Math.abs(n - count);
+      if (best === null || diff < best.diff || (diff === best.diff && step < best.step)) {
+        best = { step, diff };
+      }
+    }
+  }
+  return best.step;
+}
+
+// Strip float noise from i*step (0.1*3 → 0.30000000000000004).
+const clean = (v) => Number(v.toPrecision(12));
+
+/**
+ * A segmented axis: a line with marker points on it, the gaps that keep the
+ * line from running through the markers, optional ticks, and the value → pixel
+ * scale. Returns coordinates only — the dots, labels and tick marks are drawn
+ * by the caller.
+ *
+ * Placement of the marks:
+ * - every mark has a `value` → linear over `domain` (default: min..max of the
+ *   values), spread over the axis minus `extend` at both ends;
+ * - no mark has a `value` → evenly `spacing` apart, or, when `length` is
+ *   given, evenly spread inside `extend`;
+ * - some have, some don't → throws.
+ *
+ * `segments` use the same `{ at, points }` form as `tree`'s connectors, plus an
+ * `arrow` flag: draw each as sugar `{ shape: "line" | "arrow", at, points }`
+ * (`arrow: true` → `"arrow"`). Runs shorter than 4px — the linter's "renders as
+ * nothing" threshold — are dropped rather than returned as degenerate lines.
+ *
+ * @param {object} opts
+ * @param {{x:number,y:number}} opts.from - start of the axis
+ * @param {"x"|"y"} [opts.dir="x"] - `x` runs right, `y` runs down
+ * @param {Array<{id?:string,value?:number,label?:string}>} [opts.marks=[]]
+ * @param {[number,number]} [opts.domain] - value range; defaults to the marks' min..max
+ * @param {number} [opts.length] - total length; default `spacing*(n-1)` + both `extend`s
+ * @param {number} [opts.spacing=160] - gap between valueless marks
+ * @param {[number,number]} [opts.extend=[0,0]] - extra length before the first / after the last mark
+ * @param {number} [opts.gap=0] - how much of the line to cut away on each side of a mark
+ * @param {"none"|"end"} [opts.arrow="none"] - `end` flags the last segment as an arrow
+ * @param {{step?:number,count?:number}} [opts.ticks] - ticks on the domain (`count` defaults to 5;
+ *   step is the nearest of 1/2/5 × 10^k, ticks on multiples of it, inside the domain)
+ * @param {"before"|"after"|"alternate"} [opts.labelSide="after"] - before = above (x) / left (y)
+ * @param {number} [opts.labelOffset=12] - label anchor distance from the line
+ *
+ * @returns {{ kind:"axis", from, to, marks, ticks, segments, scale }}
+ *   - `marks`: `{ id?, value?, label?, x, y, t, labelAnchor:{x,y,side} }`, `t` ∈ [0,1] along the axis
+ *   - `ticks`: `{ value, x, y, labelAnchor }` (empty without `ticks`)
+ *   - `segments`: `{ at:[x,y], points:[[0,0],[dx,dy]], arrow }`
+ *   - `scale`: `{ domain, origin, pxPerUnit }` — value v sits at
+ *     `origin + (v - domain[0]) * pxPerUnit`, measured along the axis (x for
+ *     `dir:"x"`, y for `"y"`); the `extend` stretches are not part of it.
+ *     `domain` and `pxPerUnit` are null when there is no domain.
+ *
+ * @example
+ *   const a = axis({ from: { x: 60, y: 200 },
+ *     marks: [0, 1, 2, 6].map((value) => ({ value, label: `M${value}` })),
+ *     length: 600, gap: 10, arrow: "end" });
+ *   // a.marks.map(m => m.x) → [60, 160, 260, 660]
+ */
+export function axis(opts = {}) {
+  const {
+    from, dir = "x", marks = [], domain, length, spacing = 160,
+    extend = [0, 0], gap = 0, arrow = "none", ticks, labelSide = "after",
+    labelOffset = 12,
+  } = opts ?? {};
+  const isNum = (v) => typeof v === "number" && Number.isFinite(v);
+
+  if (!from || !isNum(from.x) || !isNum(from.y)) {
+    throw new Error("axis: `from` must be { x, y } with numeric coordinates");
+  }
+  if (dir !== "x" && dir !== "y") throw new Error(`axis: unknown \`dir\` "${dir}" (use "x" or "y")`);
+  if (!["before", "after", "alternate"].includes(labelSide)) {
+    throw new Error(`axis: unknown \`labelSide\` "${labelSide}" (use "before", "after" or "alternate")`);
+  }
+  if (arrow !== "none" && arrow !== "end") {
+    throw new Error(`axis: unknown \`arrow\` "${arrow}" (use "none" or "end")`);
+  }
+  if (!Array.isArray(marks)) throw new Error("axis: `marks` must be an array");
+  if (!Array.isArray(extend) || extend.length !== 2 || !extend.every(isNum)) {
+    throw new Error("axis: `extend` must be [before, after] numbers");
+  }
+  if (length !== undefined && !(isNum(length) && length >= 0)) {
+    throw new Error("axis: `length` must be a non-negative number");
+  }
+  if (!(isNum(gap) && gap >= 0)) throw new Error("axis: `gap` must be a non-negative number");
+
+  const withValue = marks.filter((m) => m && m.value !== undefined && m.value !== null).length;
+  if (withValue !== 0 && withValue !== marks.length) {
+    throw new Error("axis: `value` must be set on every mark or on none — got a mix");
+  }
+  const valued = marks.length > 0 && withValue === marks.length;
+  if (valued && !marks.every((m) => isNum(m.value))) {
+    throw new Error("axis: mark `value` must be a finite number");
+  }
+
+  let dom = domain;
+  if (dom !== undefined) {
+    if (!Array.isArray(dom) || dom.length !== 2 || !dom.every(isNum) || dom[0] > dom[1]) {
+      throw new Error("axis: `domain` must be [min, max] with min <= max");
+    }
+  } else if (valued) {
+    const vs = marks.map((m) => m.value);
+    dom = [Math.min(...vs), Math.max(...vs)];
+  }
+  if (ticks !== undefined && ticks !== null && dom === undefined) {
+    throw new Error("axis: `ticks` needs a `domain` (or marks with `value`)");
+  }
+
+  const n = marks.length;
+  const [e0, e1] = extend;
+  const total = length ?? (Math.max(n - 1, 0) * spacing + e0 + e1);
+  const span = total - e0 - e1;
+  if (dom !== undefined && !(span > 0)) {
+    throw new Error("axis: `length` must leave a positive stretch inside `extend` to place the domain on");
+  }
+
+  const pxPerUnit = dom === undefined ? null : (dom[1] === dom[0] ? 0 : span / (dom[1] - dom[0]));
+  const posOfValue = (v) => e0 + (v - dom[0]) * pxPerUnit;
+  const positions = marks.map((m, i) => {
+    if (valued) return posOfValue(m.value);
+    if (length === undefined) return e0 + i * spacing;
+    return n > 1 ? e0 + (i * span) / (n - 1) : e0;
+  });
+
+  const unit = dir === "x" ? [1, 0] : [0, 1];
+  const point = (p) => ({ x: from.x + unit[0] * p, y: from.y + unit[1] * p });
+  const t = (p) => (total > 0 ? p / total : 0);
+  // before = above an x axis / left of a y axis
+  const anchor = (p, i) => {
+    const side = labelSide === "alternate" ? (i % 2 === 0 ? "before" : "after") : labelSide;
+    const off = side === "before" ? -labelOffset : labelOffset;
+    const c = point(p);
+    return dir === "x"
+      ? { x: c.x, y: c.y + off, side }
+      : { x: c.x + off, y: c.y, side };
+  };
+
+  const outMarks = marks.map((m, i) => {
+    const c = point(positions[i]);
+    const out = {};
+    if (m.id !== undefined) out.id = m.id;
+    if (m.value !== undefined) out.value = m.value;
+    if (m.label !== undefined) out.label = m.label;
+    return { ...out, x: c.x, y: c.y, t: t(positions[i]), labelAnchor: anchor(positions[i], i) };
+  });
+
+  const outTicks = [];
+  if (ticks !== undefined && ticks !== null) {
+    const [lo, hi] = dom;
+    const step = ticks.step ?? niceStep(lo, hi, ticks.count ?? 5);
+    if (!(isNum(step) && step > 0)) throw new Error("axis: `ticks.step` must be a positive number");
+    const first = Math.ceil(lo / step - 1e-9);
+    const last = Math.floor(hi / step + 1e-9);
+    for (let i = first; i <= last; i++) {
+      const value = clean(i * step);
+      const p = posOfValue(value);
+      const c = point(p);
+      outTicks.push({ value, x: c.x, y: c.y, labelAnchor: anchor(p, outTicks.length) });
+    }
+  }
+
+  // Line pieces = [0, total] minus a hole of `gap` either side of every mark.
+  const holes = (gap > 0 ? positions : [])
+    .map((p) => [p - gap, p + gap])
+    .sort((a, b) => a[0] - b[0]);
+  const pieces = [];
+  let cursor = 0;
+  for (const [a, b] of holes) {
+    if (a > cursor) pieces.push([cursor, Math.min(a, total)]);
+    cursor = Math.max(cursor, b);
+  }
+  if (cursor < total) pieces.push([cursor, total]);
+  const kept = pieces.filter(([a, b]) => b - a >= 4);
+  const segments = kept.map(([a, b], i) => {
+    const s = point(a);
+    return {
+      at: [s.x, s.y],
+      points: [[0, 0], [unit[0] * (b - a), unit[1] * (b - a)]],
+      arrow: arrow === "end" && i === kept.length - 1,
+    };
+  });
+
+  return {
+    kind: "axis",
+    from: { x: from.x, y: from.y },
+    to: point(total),
+    marks: outMarks,
+    ticks: outTicks,
+    segments,
+    scale: {
+      domain: dom === undefined ? null : [dom[0], dom[1]],
+      origin: (dir === "x" ? from.x : from.y) + e0,
+      pxPerUnit,
+    },
+  };
+}

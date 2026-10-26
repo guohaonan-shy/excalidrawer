@@ -19,6 +19,13 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   four-option "format" question is gone; `skills/shared/SKILL.md` §6 now maps
   each format to where it fits, and the agent picks from the conversation,
   asking about the destination only when it can't tell.
+- **`axis` layout helper.** A marked line as coordinates: mark positions
+  (evenly `spacing` apart, or linear over a `domain` when marks carry a
+  `value`), the line as `segments` broken `gap` px around each mark (last one
+  flagged `arrow` with `arrow: "end"`), optional `ticks` on 1/2/5×10ⁿ steps, label
+  anchors, and a `scale` that converts a value to a coordinate. Exported from
+  the package and available through `compute_layout` (`helper: "axis"`).
+  Existing helpers and templates are unchanged.
 - **`legend` layout helper.** Give it a few labels and it returns each row's
   sample slot and text slot plus the block size, so the legend no longer needs
   hand-placed coordinates (`[x, y+10]`, `[x+50, y]`). `dir: "x"` lays the items

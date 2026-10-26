@@ -145,6 +145,12 @@ titledBox   — { x, y, w, title, body?, titleFontSize?, bodyFontSize?, padding?
 fitContainer— { children:[{x,y,w,h}], padding?, minW?, minH? } → { x, y, w, h }
 equalize    — { cells:[{w,text,fontSize?} | {w,title,body?,...} | {w,h}], minH? }
               → { h, cells:[{ w, h, contentH }] }
+axis        — { from:{x,y}, dir?:'x'|'y', marks?:[{value?,label?,id?}], domain?:[min,max], length?,
+                spacing?, extend?:[before,after], gap?, arrow?:'none'|'end', ticks?:{step?|count?},
+                labelSide?:'before'|'after'|'alternate', labelOffset? }
+              → { kind:'axis', from, to, marks:[{id?,value?,label?,x,y,t,labelAnchor:{x,y,side}}],
+                  ticks:[{value,x,y,labelAnchor}], segments:[{at,points,arrow}],
+                  scale:{domain,origin,pxPerUnit} }
 legend      — { items:[{label,id?}], dir?, sampleW?, sampleH?, gap?, itemGap?, fontSize?, pad?,
                 at?:{x,y}, bounds?:{x,y,w,h}, corner?, place?, offset? }
               → { kind:"legend", x, y, w, h,
@@ -160,6 +166,18 @@ Use it for any set of shapes meant to read as one row / one band: same-row
 flowchart branches, items in one architecture tier, milestone cards, actor
 headers, and every paired cell in a comparison.
 
+**`axis` — a marked line, drawn from `segments`.** It returns coordinates
+only; the dots, labels and tick strokes are yours to draw. Marks sit at
+`marks[i].x/y` (centered there), their label belongs at `labelAnchor`. The line
+comes back as `segments`, already broken `gap` px either side of every mark so
+it never runs through a dot: draw each one as the sugar L4 form
+`{ shape: "line", at: seg.at, points: seg.points }`, and as `shape: "arrow"` when
+`seg.arrow` is true (`arrow: "end"` flags the last segment). Mark `value`s are
+placed linearly over `domain`; without values the marks are `spacing` apart.
+For a value that is not a mark, use `scale`: along the axis its coordinate is
+`origin + (v - domain[0]) * pxPerUnit` (x for `dir:"x"`, y for `"y"`).
+`ticks: { step }` or `{ count }` adds ticks at 1 / 2 / 5 × 10ⁿ multiples inside
+the domain. Use it for the spine of a timeline or a chart axis.
 **`legend` — coordinates for each row's sample and text; you decide what the
 sample looks like.** Each item comes back with a `sample` slot and a `label`
 slot, vertically centered on each other, plus the size of the whole block.
