@@ -1,6 +1,6 @@
 ---
 type: spec
-status: 实现中
+status: 完成
 tags: [io, export, webp-output-format]
 summary: 加 WebP 输出格式，并让 agent 按图的去处选格式
 related: ["[[2026-10-23-webp-format-decisions]]"]
