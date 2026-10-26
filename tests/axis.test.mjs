@@ -241,6 +241,95 @@ test("axis: a domain with no length to spread it over throws", () => {
 });
 
 // ---------------------------------------------------------------------------
+// a range that collapses to one value
+// ---------------------------------------------------------------------------
+// `ticks` on a [v, v] range used to spin forever (the nice-step search had no
+// finite scale to work from), so each of these runs under a clock.
+
+const within = (ms, fn) => {
+  const t0 = Date.now();
+  const r = fn();
+  assert.ok(Date.now() - t0 < ms, "took too long");
+  return r;
+};
+
+test("axis: one valued mark with ticks returns a single tick on that value", () => {
+  const a = within(1000, () =>
+    axis({ from, marks: [{ value: 5, label: "now" }], length: 600, ticks: { count: 5 } }));
+  assert.deepEqual(a.ticks.map((t) => t.value), [5]);
+  assert.equal(a.ticks[0].x, 100);
+  assert.equal(a.ticks[0].y, 50);
+  assert.equal(a.marks[0].x, 100);
+  assert.deepEqual(a.scale.domain, [5, 5]);
+  assert.equal(a.scale.pxPerUnit, 0);
+});
+
+test("axis: marks that all share one value with ticks return a single tick on it", () => {
+  const a = within(1000, () =>
+    axis({ from, marks: [{ value: 7 }, { value: 7 }, { value: 7 }], length: 600, ticks: { count: 5 } }));
+  assert.deepEqual(a.ticks.map((t) => t.value), [7]);
+  assert.deepEqual(a.marks.map((m) => m.x), [100, 100, 100]);
+});
+
+test("axis: domain [3,3] with ticks returns a single tick on 3, with or without a step", () => {
+  const a = within(1000, () => axis({ from, domain: [3, 3], length: 600, ticks: { count: 5 } }));
+  assert.deepEqual(a.ticks.map((t) => t.value), [3]);
+  assert.equal(a.ticks[0].x, 100);
+  const b = within(1000, () => axis({ from, domain: [3, 3], length: 600, ticks: { step: 2 } }));
+  assert.deepEqual(b.ticks.map((t) => t.value), [3]);
+  assert.equal(b.ticks[0].x, 100);
+});
+
+test("axis: a collapsed range on a y axis puts the single tick at the origin, label by the usual rule", () => {
+  const a = within(1000, () =>
+    axis({ from, dir: "y", domain: [3, 3], length: 600, ticks: { count: 5 } }));
+  assert.equal(a.ticks[0].x, 100);
+  assert.equal(a.ticks[0].y, 50);
+  assert.deepEqual(a.ticks[0].labelAnchor, { x: 112, y: 50, side: "after" });
+});
+
+test("axis: non-numeric numeric parameters throw, naming axis and the parameter", () => {
+  const ok = { from, marks: [{}, {}] };
+  for (const name of ["spacing", "labelOffset", "gap", "length"]) {
+    for (const bad of ["bad", NaN, Infinity, {}, -1]) {
+      assert.throws(
+        () => axis({ ...ok, [name]: bad }),
+        new RegExp(`axis: \\\`${name}\\\``),
+        `${name}=${String(bad)}`,
+      );
+    }
+  }
+  assert.throws(() => axis({ ...ok, extend: ["a", 0] }), /axis: `extend`/);
+  assert.throws(() => axis({ ...ok, extend: [NaN, 0] }), /axis: `extend`/);
+  const dom = { from, domain: [0, 10], length: 100 };
+  assert.throws(() => axis({ ...dom, ticks: { step: "bad" } }), /axis: `ticks.step`/);
+  assert.throws(() => axis({ ...dom, ticks: { step: NaN } }), /axis: `ticks.step`/);
+  assert.throws(() => axis({ ...dom, ticks: { step: 0 } }), /axis: `ticks.step`/);
+  assert.throws(() => axis({ ...dom, ticks: { count: "bad" } }), /axis: `ticks.count`/);
+  assert.throws(() => axis({ ...dom, ticks: { count: NaN } }), /axis: `ticks.count`/);
+  assert.throws(() => axis({ ...dom, ticks: { count: 0 } }), /axis: `ticks.count`/);
+  assert.throws(() => axis({ ...dom, ticks: "bad" }), /axis: `ticks`/);
+  assert.throws(
+    () => axis({ from, marks: [{ value: "5" }, { value: "7" }], length: 100 }),
+    /axis: .*`value`/,
+  );
+  assert.throws(
+    () => axis({ from, marks: [{ value: NaN }, { value: 1 }], length: 100 }),
+    /axis: .*`value`/,
+  );
+});
+
+test("axis: no numeric input ever yields NaN coordinates", () => {
+  // anything that returns must be finite all the way down
+  const walk = (v) => {
+    if (typeof v === "number") assert.ok(Number.isFinite(v), `non-finite ${v}`);
+    else if (v && typeof v === "object") Object.values(v).forEach(walk);
+  };
+  walk(axis({ from, marks: [{}, {}], spacing: 0 }));
+  walk(axis({ from, marks: [{ value: 3 }], length: 100, ticks: { count: 5 } }));
+});
+
+// ---------------------------------------------------------------------------
 // entry points
 // ---------------------------------------------------------------------------
 

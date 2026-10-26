@@ -1639,6 +1639,7 @@ export function legend(opts = {}) {
 // over [min, max] lands closest to `count`; a tie goes to the smaller step.
 function niceStep(min, max, count) {
   const raw = (max - min) / Math.max(count, 1);
+  if (!(raw > 0 && Number.isFinite(raw))) return 1; // collapsed range: any step lands on it
   const k0 = Math.floor(Math.log10(raw));
   let best = null;
   for (let k = k0 - 2; k <= k0 + 2; k++) {
@@ -1658,7 +1659,7 @@ function niceStep(min, max, count) {
 const clean = (v) => Number(v.toPrecision(12));
 
 /**
- * A segmented axis: a line with marker points on it, the gaps that keep the
+ * An axis: a line with marker points on it, the gaps that keep the
  * line from running through the markers, optional ticks, and the value → pixel
  * scale. Returns coordinates only — the dots, labels and tick marks are drawn
  * by the caller.
@@ -1712,6 +1713,13 @@ export function axis(opts = {}) {
     labelOffset = 12,
   } = opts ?? {};
   const isNum = (v) => typeof v === "number" && Number.isFinite(v);
+  const bad = (name, want, v) =>
+    new Error(`axis: \`${name}\` must be ${want}, got ${JSON.stringify(v) ?? String(v)}`);
+  const checkNum = (name, v, positive = false) => {
+    if (!isNum(v) || (positive ? v <= 0 : v < 0)) {
+      throw bad(name, positive ? "a positive number" : "a non-negative number", v);
+    }
+  };
 
   if (!from || !isNum(from.x) || !isNum(from.y)) {
     throw new Error("axis: `from` must be { x, y } with numeric coordinates");
@@ -1725,12 +1733,19 @@ export function axis(opts = {}) {
   }
   if (!Array.isArray(marks)) throw new Error("axis: `marks` must be an array");
   if (!Array.isArray(extend) || extend.length !== 2 || !extend.every(isNum)) {
-    throw new Error("axis: `extend` must be [before, after] numbers");
+    throw bad("extend", "[before, after] numbers", extend);
   }
-  if (length !== undefined && !(isNum(length) && length >= 0)) {
-    throw new Error("axis: `length` must be a non-negative number");
+  if (length !== undefined) checkNum("length", length);
+  checkNum("spacing", spacing);
+  checkNum("gap", gap);
+  checkNum("labelOffset", labelOffset);
+  if (ticks !== undefined && ticks !== null) {
+    if (typeof ticks !== "object" || Array.isArray(ticks)) {
+      throw bad("ticks", "{ step? , count? }", ticks);
+    }
+    if (ticks.step !== undefined) checkNum("ticks.step", ticks.step, true);
+    if (ticks.count !== undefined) checkNum("ticks.count", ticks.count, true);
   }
-  if (!(isNum(gap) && gap >= 0)) throw new Error("axis: `gap` must be a non-negative number");
 
   const withValue = marks.filter((m) => m && m.value !== undefined && m.value !== null).length;
   if (withValue !== 0 && withValue !== marks.length) {
@@ -1738,7 +1753,8 @@ export function axis(opts = {}) {
   }
   const valued = marks.length > 0 && withValue === marks.length;
   if (valued && !marks.every((m) => isNum(m.value))) {
-    throw new Error("axis: mark `value` must be a finite number");
+    const badMark = marks.find((m) => !isNum(m.value));
+    throw bad("value", "a finite number on every mark", badMark.value);
   }
 
   let dom = domain;
@@ -1795,15 +1811,19 @@ export function axis(opts = {}) {
   const outTicks = [];
   if (ticks !== undefined && ticks !== null) {
     const [lo, hi] = dom;
-    const step = ticks.step ?? niceStep(lo, hi, ticks.count ?? 5);
-    if (!(isNum(step) && step > 0)) throw new Error("axis: `ticks.step` must be a positive number");
-    const first = Math.ceil(lo / step - 1e-9);
-    const last = Math.floor(hi / step + 1e-9);
-    for (let i = first; i <= last; i++) {
-      const value = clean(i * step);
+    const addTick = (value) => {
       const p = posOfValue(value);
       const c = point(p);
       outTicks.push({ value, x: c.x, y: c.y, labelAnchor: anchor(p, outTicks.length) });
+    };
+    if (lo === hi) {
+      // A range that collapsed to one value has no steps to walk: one tick on it.
+      addTick(lo);
+    } else {
+      const step = ticks.step ?? niceStep(lo, hi, ticks.count ?? 5);
+      const first = Math.ceil(lo / step - 1e-9);
+      const last = Math.floor(hi / step + 1e-9);
+      for (let i = first; i <= last; i++) addTick(clean(i * step));
     }
   }
 
