@@ -80,5 +80,5 @@ excalidrawer 是代码生成 Excalidraw 图的库 + CLI + MCP server。agent 画
 - `tests/tools.test.mjs` 里 `compute_layout` 的派发测试（「dispatches equalize」「unknown helper returns error」「helper throwing is caught as error」）：白名单和说明文字要改
 - `tests/tree.test.mjs`：`tree` 也用同一套测量，验证没被连带改坏
 - [x] review 第 1 轮 S3（2026-10-26）：equalize 只认真假值，传成别的（比如文字 "false"）时抛错，报错写明 stack 和 equalize；同样的开关检查也用在 panel 的 body 上
-- [ ] review 第 2 轮 S2（2026-10-26）：带标题格子的 titleFontSize、bodyFontSize、padding、gap 传成非数字，或 body 不是文字时抛错，报错写明 stack、第几个格子、哪个参数（规则原文：「参数错：抛错，报错写明组件名、哪个参数、哪一项」）；不再返回非数字坐标或底层函数的报错
+- [x] review 第 2 轮 S2（2026-10-26）：带标题格子的 titleFontSize、bodyFontSize、padding、gap 传成非数字，或 body 不是文字时抛错，报错写明 stack、第几个格子、哪个参数（规则原文：「参数错：抛错，报错写明组件名、哪个参数、哪一项」）；不再返回非数字坐标或底层函数的报错
 - [ ] review 第 2 轮 S3（2026-10-26）：给了 cross 但有格子比内宽还宽时，容器撑到最宽的格子，结果多一个 crossOverflow 等于撑出的像素数（没撑大为 0），跟主轴的 overflow 同一个规矩；例：竖排 cross 240 里一个一排三格的 panel（宽 276）→ 容器宽 276 + pad*2、crossOverflow > 0；竖排 cross 100 里一个 150 宽的格子 → 同理。不写宽度的 panel 被放进定宽列、内容放不下时，panel 的 overflow 也照实报出。compute_layout 说明、sugar.md 同步

@@ -372,6 +372,32 @@ test("stack: bad numeric parameters throw, naming the parameter", () => {
   assert.throws(() => stack({ dir: "x", cells: [{ w: 1, h: 0 }] }), /stack: cells\[0\] .*`w` and `h`/);
 });
 
+test("stack: a titled cell's bad titleFontSize, bodyFontSize, padding, gap or body throws, naming stack, the cell and the parameter", () => {
+  const titled = (extra) => [{ w: 1, h: 1 }, { title: "T", body: "B", w: 150, ...extra }];
+  const cases = [
+    ["titleFontSize", "big"], ["titleFontSize", 0], ["titleFontSize", NaN],
+    ["bodyFontSize", "12"], ["bodyFontSize", -1], ["bodyFontSize", Infinity],
+    ["padding", "16"], ["padding", -4], ["padding", NaN],
+    ["gap", "10"], ["gap", -1], ["gap", NaN],
+    ["body", 5], ["body", {}], ["body", ["x"]],
+  ];
+  for (const [param, bad] of cases) {
+    assert.throws(
+      () => stack({ dir: "x", cells: titled({ [param]: bad }) }),
+      new RegExp(`^Error: stack: cells\\[1\\] \`${param}\``),
+      `${param}: ${JSON.stringify(bad)}`,
+    );
+  }
+  // inside a nested stack the message still says which cell
+  assert.throws(
+    () => stack({ dir: "x", cells: [{ stack: { dir: "y", cells: [{ title: "T", padding: "x" }] } }] }),
+    /^Error: stack: cells\[0\]\.stack: cells\[0\] `padding`/,
+  );
+  // valid values (including 0 padding / gap and an absent or empty body) still lay out with finite numbers
+  const r = stack({ dir: "x", cells: [{ title: "T", w: 100, padding: 0, gap: 0 }, { title: "T", body: "", w: 100 }, { title: "T", body: null, w: 100 }] });
+  for (const c of r.children) assert.ok([c.x, c.y, c.w, c.h].every(Number.isFinite), JSON.stringify(c));
+});
+
 test("stack: an error inside a nested stack says which cell it was in", () => {
   assert.throws(
     () => stack({ dir: "x", cells: [{ text: "a" }, { stack: { dir: "y", cells: [{ foo: 1 }] } }] }),

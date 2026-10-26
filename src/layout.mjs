@@ -1253,6 +1253,21 @@ function measureCell(cell, i, ctx, { fill, force }) {
     if (cell.fontSize !== undefined && !(isNum(cell.fontSize) && cell.fontSize > 0)) {
       throw bad(`\`fontSize\` must be a positive number, got ${JSON.stringify(cell.fontSize)}`);
     }
+    if (isTitled) {
+      for (const k of ["titleFontSize", "bodyFontSize"]) {
+        if (cell[k] !== undefined && !(isNum(cell[k]) && cell[k] > 0)) {
+          throw bad(`\`${k}\` must be a positive number, got ${JSON.stringify(cell[k])}`);
+        }
+      }
+      for (const k of ["padding", "gap"]) {
+        if (cell[k] !== undefined && !(isNum(cell[k]) && cell[k] >= 0)) {
+          throw bad(`\`${k}\` must be a non-negative number, got ${JSON.stringify(cell[k])}`);
+        }
+      }
+      if (cell.body !== undefined && cell.body !== null && typeof cell.body !== "string") {
+        throw bad(`\`body\` must be text, got ${JSON.stringify(cell.body)}`);
+      }
+    }
   } else if (cell.w !== undefined || cell.h !== undefined) {
     if (!(isNum(cell.w) && cell.w > 0 && isNum(cell.h) && cell.h > 0)) {
       throw bad("needs a positive numeric `w` and `h`");
