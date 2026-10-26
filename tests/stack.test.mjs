@@ -452,3 +452,13 @@ test("stack: a swim-lane built from stacks, with a long label, renders with no o
   assert.ok(!warnings.some((w) => w.code === "SHAPE_OVERLAP" && w.ids.some((id) => id.startsWith("c"))), JSON.stringify(warnings));
   assert.ok(!warnings.some((w) => w.code.startsWith("TEXT_OVERFLOW")), JSON.stringify(warnings));
 });
+
+test("stack: equalize accepts only true or false; anything else throws, naming stack and equalize", () => {
+  const cells = [{ w: 10, h: 10 }, { w: 10, h: 50 }];
+  for (const bad of ["false", "true", 1, 0, {}, []]) {
+    assert.throws(() => stack({ dir: "x", equalize: bad, cells }), /stack: .*`equalize`/, JSON.stringify(bad));
+  }
+  assert.deepEqual(stack({ dir: "x", equalize: true, cells }).children.map((c) => c.h), [50, 50]);
+  assert.deepEqual(stack({ dir: "x", equalize: false, cells }).children.map((c) => c.h), [10, 50]);
+  assert.deepEqual(stack({ dir: "x", cells }).children.map((c) => c.h), [10, 50]);
+});

@@ -1162,6 +1162,9 @@ function layoutStack(spec, where) {
   const y0 = spec.y ?? 0;
   if (!isNum(x0)) throw err(`\`x\` must be a number, got ${JSON.stringify(spec.x)}`);
   if (!isNum(y0)) throw err(`\`y\` must be a number, got ${JSON.stringify(spec.y)}`);
+  // A switch takes true or false only: the string "false" is truthy, and would silently turn it on.
+  const eq = spec.equalize ?? false;
+  if (typeof eq !== "boolean") throw err(`\`equalize\` must be true or false, got ${JSON.stringify(eq)}`);
 
   const ctx = { dir, where, maxW, fontSize };
   const crossIsW = dir === "y";
@@ -1171,7 +1174,7 @@ function layoutStack(spec, where) {
   const mainOf = (m) => (crossIsW ? m.h : m.w);
 
   let items = cells.map((c, i) => measureCell(c, i, ctx, { fill, force: null }));
-  if (spec.equalize) {
+  if (eq) {
     const target = Math.max(...items.map(crossOf));
     items = items.map((m, i) =>
       crossOf(m) === target ? m : measureCell(cells[i], i, ctx, { fill, force: target }),

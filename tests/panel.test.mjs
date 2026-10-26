@@ -423,3 +423,10 @@ test("compute_layout: the description documents panel's parameters and return", 
   assert.match(description, /panel\s+—\s+\{ title/);
   assert.match(description, /titleSide/);
 });
+
+test("panel: a non-boolean equalize on the body throws, naming panel, body and equalize", () => {
+  assert.throws(
+    () => panel({ title: "T", body: { dir: "x", equalize: "false", cells: [{ w: 10, h: 10 }] } }),
+    /panel: body: stack: .*`equalize`/,
+  );
+});
