@@ -1033,3 +1033,142 @@ export function tree(root, opts = {}) {
       : { x: originX, y: originY, w: breadthEnd - originX, h: depthEnd - originY },
   };
 }
+
+// ---------------------------------------------------------------------------
+// legend
+// ---------------------------------------------------------------------------
+
+const LEGEND_CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"];
+
+/**
+ * A legend: rows of "sample + text", positioned and sized from the text.
+ *
+ * Returns coordinates only. Each row gets a *sample slot* (a box the caller
+ * fills with a color swatch, or draws a line across from its left-middle to
+ * its right-middle) and a *label slot* for the text, vertically centered on
+ * each other. What the sample looks like — fill, stroke, dashes — is the
+ * caller's call, decided by the diagram's semantics.
+ *
+ * The whole block can be dropped in a corner of the diagram's `bounds`, inside
+ * it or just outside it, so the bottom-right coordinates need no hand math.
+ * Label slots are measured with the same estimator the overflow lint uses, so
+ * drawing them as `text` elements never trips `TEXT_OVERFLOW_X`.
+ *
+ * @param {object} opts
+ * @param {Array<{ label: string, id?: any }>} opts.items - non-empty; a label may contain "\n"
+ * @param {"y"|"x"} [opts.dir="y"] - "y" stacks rows, "x" puts all items on one row
+ * @param {number} [opts.sampleW=40]
+ * @param {number} [opts.sampleH=16]
+ * @param {number} [opts.gap=8] - sample slot → label slot
+ * @param {number} [opts.itemGap] - between rows (default 8), or between items when `dir:"x"` (default 24)
+ * @param {number} [opts.fontSize=14]
+ * @param {number} [opts.pad=12] - padding on all four sides of the block
+ * @param {{x:number,y:number}} [opts.at] - top-left of the block (default 0,0); ignored when `corner` is set
+ * @param {{x:number,y:number,w:number,h:number}} [opts.bounds] - the diagram's extent; required with `corner`
+ * @param {"top-left"|"top-right"|"bottom-left"|"bottom-right"} [opts.corner]
+ * @param {"inside"|"outside"} [opts.place="inside"] - inside: tucked into the corner `offset` from both
+ *   edges; outside: above (top corners) / below (bottom corners) the bounds, flush with the corner's side
+ * @param {number} [opts.offset=16] - distance from the bounds' edge(s)
+ *
+ * @returns {{ kind: "legend", x: number, y: number, w: number, h: number,
+ *   items: Array<{ id?: any, text: string,
+ *     sample: {x:number,y:number,w:number,h:number},
+ *     label: {x:number,y:number,w:number,h:number,fontSize:number} }> }}
+ *
+ * @example
+ *   const lg = legend({
+ *     items: [{ label: "request" }, { label: "planned (Q3)" }],
+ *     bounds: { x: 0, y: 0, w: 800, h: 500 }, corner: "bottom-right",
+ *   });
+ *   // for each it of lg.items: draw a line from (sample.x, sample.y + sample.h/2)
+ *   // to (sample.x + sample.w, …), and a text at (label.x, label.y) sized label.w × label.h
+ */
+export function legend(opts = {}) {
+  const {
+    items, dir = "y", sampleW = 40, sampleH = 16, gap = 8,
+    fontSize = 14, pad = 12, at, bounds, corner, place = "inside", offset = 16,
+  } = opts ?? {};
+
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error("legend: `items` must be a non-empty array");
+  }
+  items.forEach((it, i) => {
+    if (typeof it?.label !== "string" || it.label === "") {
+      throw new Error(`legend: items[${i}] needs a non-empty string \`label\``);
+    }
+  });
+  if (dir !== "x" && dir !== "y") {
+    throw new Error(`legend: \`dir\` must be "x" or "y", got ${JSON.stringify(dir)}`);
+  }
+  if (place !== "inside" && place !== "outside") {
+    throw new Error(`legend: \`place\` must be "inside" or "outside", got ${JSON.stringify(place)}`);
+  }
+  if (corner != null) {
+    if (!LEGEND_CORNERS.includes(corner)) {
+      throw new Error(
+        `legend: \`corner\` must be one of ${LEGEND_CORNERS.join(" / ")}, got ${JSON.stringify(corner)}`
+      );
+    }
+    const b = bounds;
+    if (!b || ![b.x, b.y, b.w, b.h].every((n) => typeof n === "number" && Number.isFinite(n))) {
+      throw new Error("legend: `bounds` { x, y, w, h } is required when `corner` is given");
+    }
+  }
+  const itemGap = opts?.itemGap ?? (dir === "x" ? 24 : 8);
+
+  // Measure each row: the text slot comes from the shared estimator, the row
+  // is as tall as the taller of sample and text.
+  const rows = items.map((it) => {
+    const lines = it.label.split("\n");
+    const textW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize)));
+    const textH = textHeight(it.label, fontSize, 0);
+    return { it, textW, textH, rowH: Math.max(sampleH, textH), rowW: sampleW + gap + textW };
+  });
+
+  const innerW = dir === "x"
+    ? rows.reduce((s, r) => s + r.rowW, 0) + itemGap * (rows.length - 1)
+    : Math.max(...rows.map((r) => r.rowW));
+  const innerH = dir === "x"
+    ? Math.max(...rows.map((r) => r.rowH))
+    : rows.reduce((s, r) => s + r.rowH, 0) + itemGap * (rows.length - 1);
+  const w = pad * 2 + innerW;
+  const h = pad * 2 + innerH;
+
+  // Block origin.
+  let x = at?.x ?? 0;
+  let y = at?.y ?? 0;
+  if (corner) {
+    const right = corner.endsWith("right");
+    const bottom = corner.startsWith("bottom");
+    if (place === "inside") {
+      x = right ? bounds.x + bounds.w - offset - w : bounds.x + offset;
+      y = bottom ? bounds.y + bounds.h - offset - h : bounds.y + offset;
+    } else {
+      x = right ? bounds.x + bounds.w - w : bounds.x;
+      y = bottom ? bounds.y + bounds.h + offset : bounds.y - offset - h;
+    }
+  }
+
+  // Slots, centered within each row.
+  let cursor = (dir === "x" ? x : y) + pad;
+  const out = rows.map((r) => {
+    const rowX = dir === "x" ? cursor : x + pad;
+    const rowY = dir === "x" ? y + pad : cursor;
+    const rowH = dir === "x" ? innerH : r.rowH;
+    cursor += (dir === "x" ? r.rowW : r.rowH) + itemGap;
+    const item = {};
+    if (r.it.id !== undefined) item.id = r.it.id;
+    item.text = r.it.label;
+    item.sample = { x: rowX, y: rowY + (rowH - sampleH) / 2, w: sampleW, h: sampleH };
+    item.label = {
+      x: rowX + sampleW + gap,
+      y: rowY + (rowH - r.textH) / 2,
+      w: r.textW,
+      h: r.textH,
+      fontSize,
+    };
+    return item;
+  });
+
+  return { kind: "legend", x, y, w, h, items: out };
+}

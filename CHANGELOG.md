@@ -19,6 +19,13 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   four-option "format" question is gone; `skills/shared/SKILL.md` §6 now maps
   each format to where it fits, and the agent picks from the conversation,
   asking about the destination only when it can't tell.
+- **`legend` layout helper.** Give it a few labels and it returns each row's
+  sample slot and text slot plus the block size, so the legend no longer needs
+  hand-placed coordinates (`[x, y+10]`, `[x+50, y]`). `dir: "x"` lays the items
+  on one row; with `bounds` and a `corner` it parks the block inside or just
+  outside a corner of the diagram. Coordinates only — the caller draws the
+  swatch or line. Exported from the package and available through the MCP
+  `compute_layout` tool (and the CLI `compute-layout`).
 
 ## 0.5.15
 

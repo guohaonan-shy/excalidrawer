@@ -1,7 +1,7 @@
 import { defineTool } from "./schema.mjs";
 import {
   gridLayout, chain, swimlane, hubSpoke, edgePoint, routeU, labelAnchor,
-  fitContainer, titledBox, equalize, tree,
+  fitContainer, titledBox, equalize, tree, legend,
 } from "../layout.mjs";
 
 /**
@@ -21,6 +21,7 @@ const DISPATCH = {
   titledBox:   (a) => titledBox(a),
   equalize:    (a) => equalize(a.cells, a),
   tree:        (a) => tree(a.root, a),
+  legend:      (a) => legend(a),
 };
 
 export const HELPERS = Object.keys(DISPATCH);
@@ -47,6 +48,10 @@ export const computeLayout = defineTool({
     "levelGap?, siblingGap?, groupGap?, equalize?:'depth'|'siblings'|'none', originX?, originY? } → " +
     "{nodes:[{id,parent,depth,leaf,label,fontSize,x,y,w,h,titled?}], segments:[{kind,at,points}], levels, bounds} " +
     "(tidy tree: parents centered on their children, subtrees never overlap; each segment is ready L4 form — draw it as shape:'line')\n" +
+    "  legend      — { items:[{label,id?}], dir?:'y'|'x', sampleW?, sampleH?, gap?, itemGap?, fontSize?, pad?, at?:{x,y}, " +
+    "bounds?:{x,y,w,h}, corner?:'top-left'|'top-right'|'bottom-left'|'bottom-right', place?:'inside'|'outside', offset? } → " +
+    "{kind:'legend',x,y,w,h,items:[{id?,text,sample:{x,y,w,h},label:{x,y,w,h,fontSize}}]} " +
+    "(rows of a sample slot + a text slot; draw the sample as a filled rect, or a line from the slot's left-middle to right-middle; with `corner` + `bounds` the block places itself)\n" +
     "On bad input it returns { error }.",
   params: {
     helper: {

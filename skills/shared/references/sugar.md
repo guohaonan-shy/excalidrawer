@@ -145,6 +145,10 @@ titledBox   — { x, y, w, title, body?, titleFontSize?, bodyFontSize?, padding?
 fitContainer— { children:[{x,y,w,h}], padding?, minW?, minH? } → { x, y, w, h }
 equalize    — { cells:[{w,text,fontSize?} | {w,title,body?,...} | {w,h}], minH? }
               → { h, cells:[{ w, h, contentH }] }
+legend      — { items:[{label,id?}], dir?, sampleW?, sampleH?, gap?, itemGap?, fontSize?, pad?,
+                at?:{x,y}, bounds?:{x,y,w,h}, corner?, place?, offset? }
+              → { kind:"legend", x, y, w, h,
+                  items:[{ id?, text, sample:{x,y,w,h}, label:{x,y,w,h,fontSize} }] }
 ```
 
 **`equalize` — build every sibling box at the returned `h`.** A box's `h` is a
@@ -155,6 +159,23 @@ still wraps and centers, the boxes stay level, and the lint still applies.
 Use it for any set of shapes meant to read as one row / one band: same-row
 flowchart branches, items in one architecture tier, milestone cards, actor
 headers, and every paired cell in a comparison.
+
+**`legend` — coordinates for each row's sample and text; you decide what the
+sample looks like.** Each item comes back with a `sample` slot and a `label`
+slot, vertically centered on each other, plus the size of the whole block.
+Draw the sample to match what it stands for (see `semantics.md` §8): a color
+swatch fills the whole `sample` box (`shape: "rect"` at `[sample.x, sample.y]`,
+`size: [sample.w, sample.h]`); a line sample runs from the box's left-middle
+to its right-middle (`shape: "line"`, `at: [sample.x, sample.y + sample.h/2]`,
+`points: [[0, 0], [sample.w, 0]]`, with the `strokeStyle` / `strokeWidth` it
+documents). The text is a `shape: "text"` at `[label.x, label.y]` with
+`size: [label.w, label.h]` and `fontSize: label.fontSize`. `dir: "x"` puts the
+items on one row (default `itemGap` 24 instead of 8). To park it, pass the
+diagram's extent as `bounds` plus a `corner`: `place: "inside"` (default) tucks
+it `offset` (16) in from that corner; `place: "outside"` puts it just above
+(top corners) or below (bottom corners) the bounds, flush with that side. With
+no `corner`, `at` is the block's top-left (default 0, 0). Bad arguments throw
+an error naming `legend` and the argument.
 
 Use these for placement math. Element creation always goes through
 `render_diagram` with sugar.

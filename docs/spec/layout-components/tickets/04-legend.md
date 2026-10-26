@@ -37,16 +37,16 @@ excalidrawer 是代码生成 Excalidraw 图的库 + CLI + MCP server。共享 sk
 
 ## 验收标准
 
-- [ ] 3 条竖排：三行 y 依次递增，间距等于行高加 `itemGap`；整块 `w` 等于 `pad*2 + sampleW + gap + 最宽文字`
-- [ ] `dir:"x"`：三项在同一行，相邻两项之间隔 `itemGap`
-- [ ] `bounds` 为 800×500、`corner:"bottom-right"`、`place:"inside"`：整块右边缘和下边缘离 bounds 右下角各 `offset`
-- [ ] 同上改 `place:"outside"`：整块在 bounds 下方 `offset` 处，右边缘跟 bounds 右边缘对齐
-- [ ] 只给 `at`：整块左上角就是 `at`
-- [ ] 有 `corner` 没 `bounds`、`items` 为空：抛错，报错里有 `legend`
-- [ ] MCP `compute_layout` 用 `helper:"legend"` 能拿到 `result`；`HELPERS` 里有 `legend`；包入口能 import 到 `legend`
-- [ ] 把结果画成 sugar（样本 rect 加 text）交给 `render`：`warnings` 里没有文字溢出
-- [ ] `sugar.md`、`semantics.md`、README、CHANGELOG（Unreleased）、`CLAUDE.md` 都按上面改了
-- [ ] `npm test` 全绿
+- [x] 3 条竖排：三行 y 依次递增，间距等于行高加 `itemGap`；整块 `w` 等于 `pad*2 + sampleW + gap + 最宽文字`
+- [x] `dir:"x"`：三项在同一行，相邻两项之间隔 `itemGap`
+- [x] `bounds` 为 800×500、`corner:"bottom-right"`、`place:"inside"`：整块右边缘和下边缘离 bounds 右下角各 `offset`
+- [x] 同上改 `place:"outside"`：整块在 bounds 下方 `offset` 处，右边缘跟 bounds 右边缘对齐
+- [x] 只给 `at`：整块左上角就是 `at`
+- [x] 有 `corner` 没 `bounds`、`items` 为空：抛错，报错里有 `legend`
+- [x] MCP `compute_layout` 用 `helper:"legend"` 能拿到 `result`；`HELPERS` 里有 `legend`；包入口能 import 到 `legend`
+- [x] 把结果画成 sugar（样本 rect 加 text）交给 `render`：`warnings` 里没有文字溢出
+- [x] `sugar.md`、`semantics.md`、README、CHANGELOG（Unreleased）、`CLAUDE.md` 都按上面改了
+- [x] `npm test` 全绿
 
 ## 选中的存量回归
 
