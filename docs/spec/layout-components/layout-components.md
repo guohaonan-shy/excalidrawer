@@ -1,6 +1,6 @@
 ---
 type: spec
-status: 实现中
+status: 完成
 tags: [engine, component-layer, layout-components]
 summary: 加 stack / panel / axis / legend 四个组件，几何由内容推出，不再手算
 related: ["[[2026-10-26-component-layer-grill]]", "[[webp-output-format]]"]
