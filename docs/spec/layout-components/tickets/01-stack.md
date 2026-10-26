@@ -79,3 +79,4 @@ excalidrawer 是代码生成 Excalidraw 图的库 + CLI + MCP server。agent 画
 - `tests/layout.test.mjs` 里 `equalize` 的测试：stack 复用同一套测量，改动测量函数的调用方式可能让它们变红
 - `tests/tools.test.mjs` 里 `compute_layout` 的派发测试（「dispatches equalize」「unknown helper returns error」「helper throwing is caught as error」）：白名单和说明文字要改
 - `tests/tree.test.mjs`：`tree` 也用同一套测量，验证没被连带改坏
+- [ ] review 第 1 轮 S3（2026-10-26）：equalize 只认真假值，传成别的（比如文字 "false"）时抛错，报错写明 stack 和 equalize；同样的开关检查也用在 panel 的 body 上
