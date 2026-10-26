@@ -288,6 +288,48 @@ test("axis: a collapsed range on a y axis puts the single tick at the origin, la
   assert.deepEqual(a.ticks[0].labelAnchor, { x: 112, y: 50, side: "after" });
 });
 
+// Without a `length`, a range that collapsed to one value has nothing to
+// spread: the axis is as long as its `extend`s, and everything sits at the start.
+const collapsedInputs = {
+  "one valued mark": { marks: [{ value: 5, label: "now" }] },
+  "marks sharing one value": { marks: [{ value: 7 }, { value: 7 }, { value: 7 }] },
+  "domain [3,3] with no marks": { domain: [3, 3] },
+};
+
+for (const [name, input] of Object.entries(collapsedInputs)) {
+  for (const withTicks of [false, true]) {
+    test(`axis: ${name}, no length${withTicks ? ", with ticks" : ""}: returns a zero-length axis at the start`, () => {
+      const opts = { from, ...input, ...(withTicks ? { ticks: { count: 5 } } : {}) };
+      const a = within(1000, () => axis(opts));
+      assert.deepEqual(a.to, from);
+      assert.ok(a.marks.every((m) => m.x === 100 && m.y === 50 && m.t === 0));
+      assert.equal(a.marks.length, (input.marks ?? []).length);
+      assert.equal(a.ticks.length, withTicks ? 1 : 0);
+      if (withTicks) assert.deepEqual([a.ticks[0].x, a.ticks[0].y], [100, 50]);
+      assert.deepEqual(a.segments, []);
+    });
+  }
+}
+
+test("axis: a collapsed range with no length keeps the extends as the axis length", () => {
+  const a = axis({ from, marks: [{ value: 5 }], extend: [20, 30], ticks: { count: 5 } });
+  assert.deepEqual(a.to, { x: 150, y: 50 });
+  assert.equal(a.marks[0].x, 120);
+  assert.equal(a.ticks[0].x, 120);
+});
+
+test("axis: a lone valued mark matches a lone valueless mark when no length is given", () => {
+  const valued = axis({ from, marks: [{ value: 5 }] });
+  const plain = axis({ from, marks: [{}] });
+  assert.deepEqual(valued.to, plain.to);
+  assert.deepEqual(valued.marks[0].x, plain.marks[0].x);
+  assert.deepEqual(valued.marks[0].labelAnchor, plain.marks[0].labelAnchor);
+});
+
+test("axis: a real domain with nothing to spread it over still throws", () => {
+  assert.throws(() => axis({ from, domain: [0, 10], marks: [{ value: 5 }] }), /axis.*length/);
+});
+
 test("axis: non-numeric numeric parameters throw, naming axis and the parameter", () => {
   const ok = { from, marks: [{}, {}] };
   for (const name of ["spacing", "labelOffset", "gap", "length"]) {

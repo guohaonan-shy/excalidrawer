@@ -1684,7 +1684,9 @@ const clean = (v) => Number(v.toPrecision(12));
  *
  * Placement of the marks:
  * - every mark has a `value` → linear over `domain` (default: min..max of the
- *   values), spread over the axis minus `extend` at both ends;
+ *   values), spread over the axis minus `extend` at both ends when the range
+ *   collapses to one value and there is no `length`, the axis is just the
+ *   `extend`s long and everything sits at the start;
  * - no mark has a `value` → evenly `spacing` apart, or, when `length` is
  *   given, evenly spread inside `extend`;
  * - some have, some don't → throws.
@@ -1791,9 +1793,15 @@ export function axis(opts = {}) {
 
   const n = marks.length;
   const [e0, e1] = extend;
-  const total = length ?? (Math.max(n - 1, 0) * spacing + e0 + e1);
+  const collapsed = dom !== undefined && dom[0] === dom[1];
+  // Valued marks on a collapsed range all sit on one value: with no `length`
+  // there is nothing to spread, so the axis is only as long as its `extend`s.
+  const total = length ??
+    (valued && collapsed ? e0 + e1 : Math.max(n - 1, 0) * spacing + e0 + e1);
   const span = total - e0 - e1;
-  if (dom !== undefined && !(span > 0)) {
+  // A collapsed range needs no stretch of its own (everything sits at the
+  // start); a real one needs room to be laid out on.
+  if (dom !== undefined && !(collapsed ? span >= 0 : span > 0)) {
     throw new Error("axis: `length` must leave a positive stretch inside `extend` to place the domain on");
   }
 
