@@ -1,6 +1,6 @@
 ---
 name: tree
-description: Generate a hand-drawn-style Excalidraw tree diagram from code and export to .excalidraw / SVG / PNG — no browser. For hierarchies that grow from one root — taxonomies, org charts, user-story maps (root → scenario → story), mind-map-like outlines, category → item breakdowns, file/module trees. Left-to-right or top-down tidy layout; parents centered on their children, no crossing edges. Triggers on draw a tree / hierarchy diagram / org chart / taxonomy / breakdown. Flow detect → clarify root, levels & direction → read references/tree.md → compute_layout tree → compose sugar → render_diagram. 中文触发词：树状图 / 树形图 / 层级图 / 组织架构图 / 分类树 / 用户故事地图 / 拆解图 / 脑图式大纲。
+description: Generate a hand-drawn-style Excalidraw tree diagram from code and export to .excalidraw / SVG / PNG / WebP — no browser. For hierarchies that grow from one root — taxonomies, org charts, user-story maps (root → scenario → story), mind-map-like outlines, category → item breakdowns, file/module trees. Left-to-right or top-down tidy layout; parents centered on their children, no crossing edges. Triggers on draw a tree / hierarchy diagram / org chart / taxonomy / breakdown. Flow detect → clarify root, levels & direction → read references/tree.md → compute_layout tree → compose sugar → render_diagram. 中文触发词：树状图 / 树形图 / 层级图 / 组织架构图 / 分类树 / 用户故事地图 / 拆解图 / 脑图式大纲。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
@@ -10,12 +10,12 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 先用 Read 工具读取 [`../shared/SKILL.md`](../shared/SKILL.md)
 ——它定义了所有图表类型通用的 MCP 前置检查 / CLI fallback、视觉语义（什么意思用什么组件/线型/配色）、sugar schema、
-文件命名、输出语言、导出格式选择、迭代规则。**缺一不可**，本 skill 只补充树状图专属的
+文件命名、输出语言、导出格式参考、迭代规则。**缺一不可**，本 skill 只补充树状图专属的
 clarify 问题与 layout recipe。
 
 ## 1. Clarify（必）
 
-用 **AskUserQuestion** 问 load-bearing 问题，最后一个固定是导出格式（shared §6）。
+用 **AskUserQuestion** 问 load-bearing 问题；导出格式见 shared §6 的格式参考。
 
 1. **根 + 层级内容** — 自由文本。一个根，下面每层是什么（`场景 → 用户故事`、
    `类别 → skill`）。每个父节点 1–8 个孩子最佳；超过就再分一层。
@@ -58,4 +58,4 @@ sugar 的写法（节点 rect + 连接线 L4 arrow）、配色继承规则、宽
 **不要手算坐标**——先调 `compute_layout({ helper: "tree", args: { root, direction, … } })`，
 它保证父节点居中于自己的孩子、子树互不重叠、连线只走层间空隙。再按 recipe 把
 `nodes` / `segments` 一一映射成 sugar。渲染顺序与 render 调用见 shared §2 / §7：
-`output: "./tree-<name>"`，formats 按 clarify。迭代见 recipe 末尾「Common pitfalls」与 shared §8。
+`output: "./tree-<name>"`，formats 见 shared §6。迭代见 recipe 末尾「Common pitfalls」与 shared §8。

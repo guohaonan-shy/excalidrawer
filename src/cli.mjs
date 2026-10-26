@@ -44,8 +44,8 @@ Commands:
 Options:
   --input, -i     Input JSON file (reads stdin if omitted)
   --output, -o    Output path without extension (e.g. ./docs/diagram)
-  --format, -f    Comma-separated formats: excalidraw,svg,png (default: all)
-  --scale         PNG pixel scale 1-4 (default: 2)
+  --format, -f    Comma-separated formats: excalidraw,svg,png,webp (default: excalidraw,svg,png)
+  --scale         Pixel scale 1-4 for png / webp (default: 2)
   --helper        Layout helper name (for compute-layout)
   --args, -a      JSON args object or file path (for compute-layout)
   --type, -t      Template type (for generate)

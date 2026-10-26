@@ -4,6 +4,22 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## Unreleased
+
+### Added
+
+- **Lossless WebP output.** `render()` accepts `webp` in `formats` and returns
+  `outputs.webp` as a Buffer; the new `toWebp(elements, scale)` export sits
+  next to `toPng` and shares its rasterization (fonts, white background,
+  `scale`) — only the final encode differs (lossless, via `@jsquash/webp`).
+  The MCP `render_diagram` tool and `excalidrawer render -f webp` write
+  `<output>.webp`. `webp` is opt-in: with no `formats` the output is still
+  excalidraw + svg + png. `generate` is unchanged.
+- **Export formats are a reference in the shared skill.** The fixed
+  four-option "format" question is gone; `skills/shared/SKILL.md` §6 now maps
+  each format to where it fits, and the agent picks from the conversation,
+  asking about the destination only when it can't tell.
+
 ## 0.5.15
 
 _engine 0.5.15 · plugin 0.0.6_

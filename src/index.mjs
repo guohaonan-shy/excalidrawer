@@ -21,7 +21,7 @@ export {
   excalidraw,
 } from "./elements.mjs";
 
-export { toSvg, toPng, registerFonts, autoRegisterCjkFont } from "./export.mjs";
+export { toSvg, toPng, toWebp, registerFonts, autoRegisterCjkFont } from "./export.mjs";
 
 export { estimateTextWidth, wrapText, lineCount, textHeight, fitBoundText } from "./text.mjs";
 

@@ -1,8 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, existsSync, rmSync } from "fs";
+import { readFileSync, existsSync, rmSync, mkdtempSync, writeFileSync } from "fs";
+import { execFileSync } from "child_process";
+import { fileURLToPath } from "url";
 import { tmpdir } from "os";
-import { join } from "path";
+import { join, dirname } from "path";
 
 import { toJsonSchema, parseArgs } from "../src/tools/schema.mjs";
 import { ALL_TOOLS, getTool, CORE_TOOLS } from "../src/tools/index.mjs";
@@ -105,6 +107,35 @@ test("render_diagram: returns structured error on bad elements", async () => {
   assert.ok(result.error);
   assert.equal(result.issues.length, 1);
   assert.equal(result.written, undefined);
+});
+
+test("render_diagram: formats [webp] writes <output>.webp", async () => {
+  const out = join(tmpdir(), `excalidrawer-webp-${Date.now()}`);
+  const result = await getTool("render_diagram").run({ elements: [el("a")], output: out, formats: ["webp"] });
+  assert.deepEqual(result.written, [`${out}.webp`]);
+  const buf = readFileSync(`${out}.webp`);
+  assert.equal(buf.toString("ascii", 0, 4), "RIFF");
+  assert.equal(buf.toString("ascii", 8, 12), "WEBP");
+  rmSync(`${out}.webp`);
+});
+
+test("CLI: render -f webp writes <output>.webp", () => {
+  const dir = mkdtempSync(join(tmpdir(), "excalidrawer-cli-"));
+  const input = join(dir, "els.json");
+  writeFileSync(input, JSON.stringify([el("a")]));
+  const cli = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "cli.mjs");
+  execFileSync(process.execPath, [cli, "render", "-i", input, "-o", join(dir, "out"), "-f", "webp"]);
+  const buf = readFileSync(join(dir, "out.webp"));
+  assert.equal(buf.toString("ascii", 8, 12), "WEBP");
+  assert.equal(existsSync(join(dir, "out.png")), false);
+  rmSync(dir, { recursive: true });
+});
+
+test("render_diagram: formats description lists webp; scale covers png and webp", () => {
+  const { formats, scale } = getTool("render_diagram").params;
+  assert.match(formats.description, /webp/);
+  assert.match(scale.description, /png/i);
+  assert.match(scale.description, /webp/i);
 });
 
 // --- compute_layout tool ---------------------------------------------------

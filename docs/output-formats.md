@@ -1,7 +1,6 @@
 # Design note: output format selection
 
-**Status:** planned — direction agreed 2026-08-17, not yet scheduled to a
-version.
+**Status:** specified — see spec `webp-output-format` (`docs/spec/webp-output-format/webp-output-format.md`).
 
 ## Current state
 
