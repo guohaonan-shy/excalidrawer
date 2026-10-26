@@ -60,3 +60,5 @@ excalidrawer 是代码生成 Excalidraw 图的库 + CLI + MCP server。timeline 
 - `tests/tools.test.mjs` 里 `compute_layout` 的派发测试：白名单再加一项
 - `tests/tree.test.mjs`：axis 沿用 tree 的线段格式，确认格式约定没被改
 - [ ] review 第 1 轮 C1（2026-10-26）：axis 的源码说明里不用术语表列为避免的叫法（GLOSSARY.md 在 axis 下写明 _Avoid_: segmented axis, timeline line），统一叫 axis
+- [ ] review 第 1 轮 S1（2026-10-26）：数值范围首尾相等（一个带数值的标记点、所有值相同、或 domain 写成 [3,3]）又要刻度时，调用正常返回：只出一个刻度，落在这个值上，标记点照旧在起点；配一条回归测试，确认这三种输入都在合理时间内返回
+- [ ] review 第 1 轮 S3（2026-10-26）：axis 的数字参数（spacing、labelOffset、gap、length、extend、ticks 的 step 和 count、mark 的 value）传成非数字时抛错，报错写明 axis 和参数名，写法与 stack、panel 已有的数字检查一致；不再返回 NaN 坐标

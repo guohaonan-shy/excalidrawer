@@ -186,12 +186,14 @@ panel({
 })
 → { kind: "panel", x, y, w, h,
     title: { x, y, w, h, fontSize },
-    body:  { kind: "stack", x, y, w, h, overflow, children } }
+    body:  { kind: "stack", x, y, w, h, overflow, children },
+    overflow }
 ```
 
 - `top`：标题区宽度等于 panel 内宽，标题按这个宽度折行、量出高度；内容区在它下方 `gap` 处。
 - `left`：标题区是左边一整列，高度等于 panel 内高，这样表头 rect 能撑满整行，标题文字由 recipe 在这个区域里居中；内容区在它右边 `gap` 处。
 - panel 的宽度：写了 `w` 就用 `w`，内容区随之变宽，按 body 的 `justify` 分布；没写就由内容撑出。
+- `w` 比内容需要的窄时：panel 撑大到装得下，结果的 `overflow` 写撑出的像素数（没撑大时为 0），跟 stack 的 `overflow` 同一个意思。（review 第 1 轮 S2，人批「接受撑大，并给 panel 加上超出量」，2026-10-26）
 - 依据：`top` 覆盖 comparison 的侧标题和 architecture 子泳道的标签，`left` 覆盖 architecture 的分层表头（`swimlane` 的 `headerW` 列）。命名出自 grill：recipe 里 card 已经指单个小格子，装子格的容器叫 panel（`GLOSSARY.md`）。
 
 ### axis 的接口
@@ -220,6 +222,7 @@ axis({
 
 - 摆位：所有 mark 都带 `value` 时按 `domain` 线性换算到轴上（`extend` 之内的那一段）；都不带时按 `spacing` 等距，写了 `length` 就均分；有的带有的不带：抛错。依据：两种摆法分别对应 timeline 的等距与按月份两种写法；混着写没有能对上的语义。
 - 好看的间隔：取 1、2、5 乘以 10 的整数次幂里，使刻度数最接近 `count` 的那个，刻度落在它的整数倍上。
+- 数值范围首尾相等（只有一个值，或所有值相同）又要刻度时：只出一个刻度，落在这个值上；标记点照旧在起点。（review 第 1 轮 S1，人批「S1 选只出一个刻度」，2026-10-26）
 - `scale` 给 #12 的图表用：数值 `v` 的坐标是 `origin + (v - domain[0]) * pxPerUnit`，沿轴方向。
 - 标签锚点是标签文字的参考点，`side` 说明文字放在锚点的哪一侧，recipe 照着摆 text 元素。`alternate` 时第 1、3、5… 个标记点在 before 侧，第 2、4… 个在 after 侧（timeline 上下交替的写法）。
 - 不管：柱子、折线、数据点、网格线。依据：人在 grill Q6 同意的范围；这些归 #12。

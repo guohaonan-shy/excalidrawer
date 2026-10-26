@@ -53,3 +53,4 @@ excalidrawer 是代码生成 Excalidraw 图的库 + CLI + MCP server。01 号工
 - 01 号工单新加的 stack 测试：panel 改动了 stack 的格子分派（新增 `{panel}`），嵌套和 equalize 的重排可能被连带改坏
 - `tests/validate.test.mjs`：复现验收要靠 `SHAPE_OVERLAP` 不出现来判，要确认 linter 本身的行为没变
 - `tests/tools.test.mjs` 里 `compute_layout` 的派发测试：白名单再加一项
+- [ ] review 第 1 轮 S2（2026-10-26）：写了 w 但内容放不下时，panel 照旧撑大，结果多一个 overflow，等于撑出的像素数；没撑大时为 0。标题在上方、在左侧两种都要；compute_layout 的说明和 sugar.md 里 panel 的返回补上 overflow
