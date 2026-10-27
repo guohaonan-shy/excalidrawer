@@ -1,0 +1,2916 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Example gallery · 变种板</title>
+<style>
+@font-face { font-family: "Excalifont"; src: url(assets/fonts/Excalifont-Regular.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Virgil"; src: url(assets/fonts/Virgil.woff2) format("woff2"); font-display: swap; }
+html, body { margin: 0; }
+body { background: #e7e7e4; color: #1d1d1b; font: 14px/1.55 -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; }
+.bd-top { position: sticky; top: 0; z-index: 50; background: #1d1d1b; color: #f2f2ef; padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; }
+.bd-top b { font-weight: 600; }
+.bd-top a { color: #f2f2ef; text-decoration: none; padding: 2px 8px; border: 1px solid #555; border-radius: 3px; }
+.bd-top a[aria-current="true"] { background: #f2f2ef; color: #1d1d1b; }
+.bd-top label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.bd-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.bd-intro { max-width: 860px; margin: 20px auto 0; padding: 0 16px; }
+.bd-intro p { margin: 0 0 8px; }
+.bd-variant { max-width: 860px; margin: 28px auto 56px; padding: 0 16px; }
+.bd-label { border-left: 4px solid #1d1d1b; padding: 4px 0 4px 12px; margin-bottom: 14px; }
+.bd-family { margin: 0; font-size: 12px; letter-spacing: .04em; color: #555; }
+.bd-name { margin: 2px 0 6px; font-size: 20px; }
+.bd-name code { font-size: 12px; font-weight: 400; color: #555; margin-left: 6px; }
+.bd-bet { margin: 0 0 6px; font-weight: 600; }
+.bd-diff, .bd-timing { margin: 0 0 4px; color: #333; }
+.bd-stage { outline: 1px dashed #9a9a96; outline-offset: 0; }
+body.bd-single .bd-variant:not(.bd-on) { display: none; }
+</style>
+</head>
+<body>
+<div class="bd-top" role="region" aria-label="变种板控制">
+  <b>Example gallery · 第 1 轮 · 语言</b>
+  <span class="bd-row" id="bd-vnav"><a href="?">全部</a><a href="?variant=fieldbook" data-v="fieldbook">fieldbook</a><a href="?variant=card-catalog" data-v="card-catalog">card-catalog</a><a href="?variant=galley" data-v="galley">galley</a><a href="?variant=meniscus" data-v="meniscus">meniscus</a><a href="?variant=viewbox" data-v="viewbox">viewbox</a></span>
+  <span class="bd-row" id="bd-snav">状态：<a data-s="default">default</a><a data-s="input-open">input-open</a><a data-s="load-error">load-error</a></span>
+  <label><input type="checkbox" id="bd-rm"> 预览减弱动效</label>
+</div>
+<div class="bd-intro">
+  <p><b>这一轮比的是语言</b>：底色、字体、形状、语气。每个变种上半是样张（色板、字体、形状、语气），下半是一块能点的图库片段（tab 能切、Input 能展开、图点开是原尺寸 PNG），图全是引擎真画的。</p>
+  <p><b>真正分开它们的是两件事</b>：白图和底色什么关系（贴在纸上 / 化进白页 / 暗处唯一亮的东西），手写体铺到哪（只到名字 / 所有人话 / 连链接都手写）。A、B、C 是同一族（暖纸 + 红色 accent + 手写配等宽），差在处理，不是三个方向。</p>
+</div>
+
+<article class="bd-variant" id="v-fieldbook" data-slug="fieldbook">
+  <header class="bd-label">
+    <p class="bd-family">暖纸一族 · A</p>
+    <h2 class="bd-name">Fieldbook 野外记录本 <code>?variant=fieldbook</code></h2>
+    <p class="bd-bet">赌页面像工程师的野外记录本：印好的方格表格里手写记录，图是贴进来的证据。</p>
+    <p class="bd-diff"><b>差别</b>　图怎么放：白图用四个相角贴在 buff 方格纸上，无阴影 · 手写到哪：标题、tab、图名、说明手写；表格标签、文件名、下载、JSON 用等宽 · accent：锈红 #B23A0E</p>
+    <p class="bd-timing"><b>时序</b>　点 tab：立即换图，新面板 0.22 秒淡入上浮 · 点 Input：立即展开</p>
+  </header>
+  <div class="bd-stage">
+<section class="v-fieldbook" data-variant="fieldbook" data-state="default">
+
+  <!-- 1 · Language sheet -->
+  <div class="fb-sheet" aria-label="Language sheet: fieldbook">
+    <p class="fb-sheet-kicker">Language sheet · fieldbook</p>
+    <div class="fb-sheet-grid">
+      <div class="fb-sheet-col">
+        <h4 class="fb-sheet-h">Palette</h4>
+        <ul class="fb-swatches">
+          <li><span class="fb-sw" style="background:#F2EEDC"></span><b>ground</b> <code>#F2EEDC</code><small>buff ledger paper</small></li>
+          <li><span class="fb-sw" style="background:#E4E2C6"></span><b>ruling</b> <code>#E4E2C6</code><small>quad grid, non-text</small></li>
+          <li><span class="fb-sw" style="background:#2A2D27"></span><b>graphite</b> <code>#2A2D27</code><small>12.0 on ground · 10.6 on ruling</small></li>
+          <li><span class="fb-sw" style="background:#5A6448"></span><b>printed</b> <code>#5A6448</code><small>5.38 on ground · 4.77 on ruling</small></li>
+          <li><span class="fb-sw" style="background:#B23A0E"></span><b>flag (accent)</b> <code>#B23A0E</code><small>5.15 on ground · white on it 5.99</small></li>
+          <li><span class="fb-sw" style="background:#F8F6EA"></span><b>slip</b> <code>#F8F6EA</code><small>JSON slip · graphite 12.9 · flag 5.52</small></li>
+        </ul>
+      </div>
+      <div class="fb-sheet-col">
+        <h4 class="fb-sheet-h">Type</h4>
+        <div class="fb-spec">
+          <p class="fb-spec-hand fb-spec-xl">excalidrawer <small>Excalifont 40 · title</small></p>
+          <p class="fb-spec-hand fb-spec-m">Flowchart, Decisions + branches <small>Excalifont 22 / 18 · tabs, names, notes</small></p>
+          <p class="fb-spec-mono">INPUT · flowchart.svg · {"type":"start"} <small>IBM Plex Mono 11–13 · printed form: labels, files, JSON</small></p>
+        </div>
+        <h4 class="fb-sheet-h">Shapes</h4>
+        <div class="fb-shapes">
+          <figure><span class="fb-shape-tab"><span class="fb-tab is-on">Tab</span><span class="fb-tab is-off">Tab</span></span><figcaption>column tab</figcaption></figure>
+          <figure><span><span class="fb-btn">file.svg</span></span><figcaption>action</figcaption></figure>
+          <figure><span><span class="fb-print fb-print--mini"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i></span></span><figcaption>tipped-in print</figcaption></figure>
+          <figure><span class="fb-shape-rule"><span class="fb-rule"></span></span><figcaption>double rule</figcaption></figure>
+        </div>
+      </div>
+    </div>
+    <div class="fb-tone">
+      <h4 class="fb-sheet-h">Tone</h4>
+      <p class="fb-tone-line fb-spec-hand">Diagrams from JSON, saved as files you can still edit.</p>
+      <p class="fb-tone-line"><span class="fb-btn">flowchart.excalidraw</span> <span class="fb-tone-note">— a download is named by the file it gives you.</span></p>
+    </div>
+  </div>
+
+  <!-- 2 · Gallery slice -->
+  <div class="fb-page">
+    <header class="fb-masthead">
+      <p class="fb-book" aria-hidden="true"><span>Level book</span><span>Sheet 1</span></p>
+      <h2 class="fb-title">excalidrawer</h2>
+      <p class="fb-lede">Diagrams from JSON or code, saved as Excalidraw files you can still edit. Every figure below is unretouched engine output.</p>
+      <nav class="fb-links" aria-label="Project links">
+        <a class="fb-btn" href="https://github.com/guohaonan-shy/excalidrawer">GitHub</a>
+        <a class="fb-btn" href="https://www.npmjs.com/package/excalidrawer">npm</a>
+      </nav>
+    </header>
+
+    <div class="fb-rule" role="presentation"></div>
+
+    <div class="fb-gallery">
+      <div class="fb-tabs" role="tablist" aria-label="Diagram types">
+        <button class="fb-tab" role="tab" id="fb-tab-flowchart" aria-controls="fb-panel-flowchart" aria-selected="true" tabindex="0">Flowchart</button>
+        <button class="fb-tab" role="tab" id="fb-tab-architecture" aria-controls="fb-panel-architecture" aria-selected="false" tabindex="-1">Architecture</button>
+        <button class="fb-tab" role="tab" id="fb-tab-sequence" aria-controls="fb-panel-sequence" aria-selected="false" tabindex="-1">Sequence</button>
+        <button class="fb-tab" role="tab" id="fb-tab-timeline" aria-controls="fb-panel-timeline" aria-selected="false" tabindex="-1">Timeline</button>
+        <button class="fb-tab" role="tab" id="fb-tab-comparison" aria-controls="fb-panel-comparison" aria-selected="false" tabindex="-1">Comparison</button>
+        <button class="fb-tab" role="tab" id="fb-tab-tree" aria-controls="fb-panel-tree" aria-selected="false" tabindex="-1">Tree<span class="fb-tab-count"> ×3</span></button>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-flowchart" aria-labelledby="fb-tab-flowchart" tabindex="0">
+      <article class="fb-entry" aria-labelledby="fb-n-flowchart">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-flowchart">Flowchart</h3>
+          <p class="fb-entry-desc">Decisions + branches</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 01</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/flowchart.png" target="_blank" rel="noopener" aria-label="Open Flowchart full size (PNG, opens in a new tab)"><img src="assets/figures/flowchart.png" alt="Flowchart — Decisions + branches" width="1260" height="270" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: flowchart</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: flowchart</b></p>
+            <pre><code>{
+  "title": "Pull request to production",
+  "direction": "horizontal",
+  "nodes": [
+    {
+      "id": "open",
+      "label": "PR opened",
+      "type": "start"
+    },
+    {
+      "id": "ci",
+      "label": "CI + review"
+    },
+    {
+      "id": "ok",
+      "label": "Approved?",
+      "type": "decision"
+    },
+    {
+      "id": "merge",
+      "label": "Merge to main"
+    },
+    {
+      "id": "fix",
+      "label": "Request changes",
+      "color": "red"
+    },
+    {
+      "id": "ship",
+      "label": "Deploy",
+      "type": "end"
+    }
+  ],
+  "edges": [
+    {
+      "from": "open",
+      "to": "ci"
+    },
+    {
+      "from": "ci",
+      "to": "ok"
+    },
+    {
+      "from": "ok",
+      "to": "merge",
+      "label": "yes"
+    },
+    {
+      "from": "ok",
+      "to": "fix",
+      "label": "no"
+    },
+    {
+      "from": "merge",
+      "to": "ship"
+    }
+  ]
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Flowchart">
+          <li><a class="fb-btn" href="#" download>flowchart.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>flowchart.svg</a></li>
+          <li><a class="fb-btn" href="#" download>flowchart.png</a></li>
+        </ul>
+      </article>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-architecture" aria-labelledby="fb-tab-architecture" tabindex="0" hidden>
+      <article class="fb-entry" aria-labelledby="fb-n-architecture">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-architecture">Architecture</h3>
+          <p class="fb-entry-desc">Layered components + connections</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 02</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/architecture.png" target="_blank" rel="noopener" aria-label="Open Architecture full size (PNG, opens in a new tab)"><img src="assets/figures/architecture.png" alt="Architecture — Layered components + connections" width="818" height="804" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: architecture</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: architecture</b></p>
+            <pre><code>{
+  "title": "Web app architecture",
+  "sections": [
+    { "label": "Clients", "color": "blue",
+      "items": ["Web app", "iOS app", "Admin console"] },
+    { "label": "Edge", "color": "purple",
+      "items": ["CDN", "API gateway"] },
+    …
+  ],
+  "connections": [ { "from": "Web app", "to": "CDN" }, … ]
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Architecture">
+          <li><a class="fb-btn" href="#" download>architecture.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>architecture.svg</a></li>
+          <li><a class="fb-btn" href="#" download>architecture.png</a></li>
+        </ul>
+      </article>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-sequence" aria-labelledby="fb-tab-sequence" tabindex="0" hidden>
+      <article class="fb-entry" aria-labelledby="fb-n-sequence">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-sequence">Sequence</h3>
+          <p class="fb-entry-desc">Messages between actors over time</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 03</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/sequence.png" target="_blank" rel="noopener" aria-label="Open Sequence full size (PNG, opens in a new tab)"><img src="assets/figures/sequence.png" alt="Sequence — Messages between actors over time" width="1970" height="974" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">sugar (sequence recipe)</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>sugar (sequence recipe)</b></p>
+            <pre><code>{
+  "elements": [
+    { "type": "box", "id": "a-browser", "label": "Browser", "x": 40, "y": 60 },
+    { "type": "line", "id": "life-browser", "x": 110, "y": 116, … },
+    { "type": "arrow", "id": "m1", "label": "GET /login", … },
+    …
+  ]
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Sequence">
+          <li><a class="fb-btn" href="#" download>sequence.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>sequence.svg</a></li>
+          <li><a class="fb-btn" href="#" download>sequence.png</a></li>
+        </ul>
+      </article>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-timeline" aria-labelledby="fb-tab-timeline" tabindex="0" hidden>
+      <article class="fb-entry" aria-labelledby="fb-n-timeline">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-timeline">Timeline</h3>
+          <p class="fb-entry-desc">Milestones on an axis</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 04</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/timeline.png" target="_blank" rel="noopener" aria-label="Open Timeline full size (PNG, opens in a new tab)"><img src="assets/figures/timeline.png" alt="Timeline — Milestones on an axis" width="1170" height="484" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: timeline</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: timeline</b></p>
+            <pre><code>{
+  "title": "2026 product roadmap",
+  "items": [
+    { "label": "Beta", "time": "Q1", "desc": "Invite-only, 200 teams" },
+    { "label": "Public launch", "time": "Q2", "desc": "Self-serve signup" },
+    …
+  ]
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Timeline">
+          <li><a class="fb-btn" href="#" download>timeline.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>timeline.svg</a></li>
+          <li><a class="fb-btn" href="#" download>timeline.png</a></li>
+        </ul>
+      </article>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-comparison" aria-labelledby="fb-tab-comparison" tabindex="0" hidden>
+      <article class="fb-entry" aria-labelledby="fb-n-comparison">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-comparison">Comparison</h3>
+          <p class="fb-entry-desc">A vs B, dimension by dimension</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 05</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/comparison.png" target="_blank" rel="noopener" aria-label="Open Comparison full size (PNG, opens in a new tab)"><img src="assets/figures/comparison.png" alt="Comparison — A vs B, dimension by dimension" width="960" height="410" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">sugar (comparison recipe)</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>sugar (comparison recipe)</b></p>
+            <pre><code>{
+  "elements": [
+    { "type": "text", "id": "left-h", "text": "Hand-drawn in the app", … },
+    { "type": "text", "id": "vs", "text": "VS", … },
+    { "type": "box", "id": "l1", "label": "Drag every box", "y": 120, "h": 64, … },
+    …
+  ]
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Comparison">
+          <li><a class="fb-btn" href="#" download>comparison.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>comparison.svg</a></li>
+          <li><a class="fb-btn" href="#" download>comparison.png</a></li>
+        </ul>
+      </article>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-tree" aria-labelledby="fb-tab-tree" tabindex="0" hidden>
+      <article class="fb-entry" aria-labelledby="fb-n-tree-right">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-tree-right">Tree · left → right</h3>
+          <p class="fb-entry-desc">Parent → children, split sideways</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 06</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/tree-right.png" target="_blank" rel="noopener" aria-label="Open Tree · left → right full size (PNG, opens in a new tab)"><img src="assets/figures/tree-right.png" alt="Tree · left → right — Parent → children, split sideways" width="718" height="570" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: tree</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: tree</b></p>
+            <pre><code>{
+  "direction": "horizontal",
+  "root": { "label": "excalidrawer",
+    "children": [
+      { "label": "CLI", "children": ["render", "generate", …] },
+      …
+    ] }
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Tree · left → right">
+          <li><a class="fb-btn" href="#" download>tree-right.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>tree-right.svg</a></li>
+          <li><a class="fb-btn" href="#" download>tree-right.png</a></li>
+        </ul>
+      </article>
+      <article class="fb-entry" aria-labelledby="fb-n-tree-down">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-tree-down">Tree · top → down</h3>
+          <p class="fb-entry-desc">Parent → children, split downward</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 07</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/tree-down.png" target="_blank" rel="noopener" aria-label="Open Tree · top → down full size (PNG, opens in a new tab)"><img src="assets/figures/tree-down.png" alt="Tree · top → down — Parent → children, split downward" width="1310" height="432" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: tree</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: tree</b></p>
+            <pre><code>{
+  "direction": "vertical",
+  "root": { "label": "Platform",
+    "children": [ { "label": "Web", "children": [ … ] }, … ] }
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Tree · top → down">
+          <li><a class="fb-btn" href="#" download>tree-down.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>tree-down.svg</a></li>
+          <li><a class="fb-btn" href="#" download>tree-down.png</a></li>
+        </ul>
+      </article>
+      <article class="fb-entry" aria-labelledby="fb-n-tree-stories">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-tree-stories">Tree · user-story map</h3>
+          <p class="fb-entry-desc">23 numbered stories in 6 groups</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 08</span>
+        </header>
+        <div class="fb-plate"><div class="fb-tall"><div class="fb-tall-frame" tabindex="0" role="region" aria-label="Tree · user-story map, scrollable — 1119 × 2449 px sheet"><div class="fb-print fb-print--full"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><a class="fb-print-link" href="assets/figures/tree-stories.png" target="_blank" rel="noopener" aria-label="Open Tree · user-story map full size (PNG, opens in a new tab)"><img src="assets/figures/tree-stories.png" alt="Tree · user-story map — 23 numbered stories in 6 groups" width="1119" height="2449" loading="lazy"></a></div></div><p class="fb-tall-note">Tall sheet (2449 px). Scroll inside the frame, or open it full size.</p></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: tree</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: tree</b></p>
+            <pre><code>{
+  "title": "User-story map",
+  "direction": "horizontal",
+  "numberLeaves": true,
+  "root": { "label": "Gallery page",
+    "children": [ { "label": "Browse", "children": [ … ] }, … ] }
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Tree · user-story map">
+          <li><a class="fb-btn" href="#" download>tree-stories.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>tree-stories.svg</a></li>
+          <li><a class="fb-btn" href="#" download>tree-stories.png</a></li>
+        </ul>
+      </article>
+      </div>
+    </div>
+
+    <div class="fb-error" role="alert">
+      <p class="fb-error-hand">The gallery didn't load.</p>
+      <p class="fb-error-print">gallery.json couldn't be read, so there are no figures to show here. The same figures, inputs and files are in the repository.</p>
+      <p><a class="fb-btn" href="https://github.com/guohaonan-shy/excalidrawer">github.com/guohaonan-shy/excalidrawer</a></p>
+    </div>
+  </div>
+</section>
+<style>
+@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap);
+.v-fieldbook {
+  --fb-ground: #F2EEDC;
+  --fb-ruling: #E4E2C6;
+  --fb-ink: #2A2D27;
+  --fb-printed: #5A6448;
+  --fb-flag: #B23A0E;
+  --fb-on-flag: #FFFFFF;
+  --fb-slip: #F8F6EA;
+  --fb-hand: 'Excalifont', 'Virgil', 'Comic Sans MS', cursive;
+  --fb-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  box-sizing: border-box;
+  color: var(--fb-ink);
+  background-color: var(--fb-ground);
+  background-image:
+    linear-gradient(var(--fb-ruling) 1px, transparent 1px),
+    linear-gradient(90deg, var(--fb-ruling) 1px, transparent 1px);
+  background-size: 16px 16px;
+  font-family: var(--fb-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 28px 32px 40px 56px;
+  position: relative;
+  max-width: 100%;
+  overflow: hidden;
+}
+/* field-book margin: double vertical rule on the left */
+.v-fieldbook::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 30px;
+  width: 4px; border-left: 1px solid var(--fb-printed); border-right: 1px solid var(--fb-printed);
+  opacity: .55;
+}
+.v-fieldbook *, .v-fieldbook *::before, .v-fieldbook *::after { box-sizing: border-box; }
+.v-fieldbook a { color: var(--fb-flag); }
+.v-fieldbook :focus-visible { outline: 2px solid var(--fb-ink); outline-offset: 3px; }
+
+/* ---------- shapes ---------- */
+.v-fieldbook .fb-rule { display: block; height: 5px; border-top: 1px solid var(--fb-printed); border-bottom: 1px solid var(--fb-printed); margin: 22px 0; }
+.v-fieldbook .fb-btn {
+  display: inline-block; font-family: var(--fb-mono); font-size: 12px; font-weight: 600; letter-spacing: .02em;
+  color: var(--fb-flag); text-decoration: none; background: transparent;
+  border: 1.5px solid var(--fb-flag); border-radius: 2px; padding: 5px 10px 4px; line-height: 1.3;
+}
+.v-fieldbook a.fb-btn:hover { background: var(--fb-flag); color: var(--fb-on-flag); }
+.v-fieldbook a.fb-btn:active { transform: translateY(1px); }
+.v-fieldbook .fb-tab {
+  font-family: var(--fb-hand); font-size: 19px; color: var(--fb-ink); background: transparent;
+  border: 0; border-right: 1px solid var(--fb-printed); padding: 8px 14px 12px; cursor: pointer; position: relative; line-height: 1.1;
+  display: inline-block;
+}
+.v-fieldbook .fb-tab:first-child { border-left: 1px solid var(--fb-printed); }
+.v-fieldbook .fb-tab[aria-selected="false"], .v-fieldbook .fb-tab.is-off { color: var(--fb-printed); }
+.v-fieldbook .fb-tab[aria-selected="false"]:hover { color: var(--fb-ink); }
+.v-fieldbook .fb-tab[aria-selected="true"], .v-fieldbook .fb-tab.is-on { background: var(--fb-slip); }
+.v-fieldbook .fb-tab[aria-selected="true"]::after, .v-fieldbook .fb-tab.is-on::after {
+  content: ""; position: absolute; left: 10px; right: 10px; bottom: 3px; height: 8px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M1 5 C 20 2, 35 7, 55 4 S 85 3, 99 5' fill='none' stroke='%232A2D27' stroke-width='2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+}
+.v-fieldbook .fb-tab-count { font-family: var(--fb-mono); font-size: 11px; }
+/* tipped-in print: white sheet held by photo corners */
+.v-fieldbook .fb-print {
+  position: relative; display: inline-block; max-width: 100%; background: #fff;
+  border: 1px solid #CFCBB4; padding: 0; vertical-align: top;
+}
+.v-fieldbook .fb-print img { display: block; max-width: 100%; height: auto; max-height: 520px; width: auto; }
+.v-fieldbook .fb-c { position: absolute; width: 18px; height: 18px; z-index: 1; pointer-events: none; }
+.v-fieldbook .fb-c-tl { top: -4px; left: -4px; background: linear-gradient(135deg, var(--fb-printed) 50%, transparent 50%); }
+.v-fieldbook .fb-c-tr { top: -4px; right: -4px; background: linear-gradient(225deg, var(--fb-printed) 50%, transparent 50%); }
+.v-fieldbook .fb-c-bl { bottom: -4px; left: -4px; background: linear-gradient(45deg, var(--fb-printed) 50%, transparent 50%); }
+.v-fieldbook .fb-c-br { bottom: -4px; right: -4px; background: linear-gradient(315deg, var(--fb-printed) 50%, transparent 50%); }
+
+/* ---------- language sheet ---------- */
+.v-fieldbook .fb-sheet { border: 1px solid var(--fb-printed); background: rgba(248,246,234,.92); padding: 14px 18px 16px; margin-bottom: 36px; }
+.v-fieldbook .fb-sheet-kicker { margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--fb-printed); border-bottom: 1px solid var(--fb-printed); padding-bottom: 6px; }
+.v-fieldbook .fb-sheet-grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 22px; }
+.v-fieldbook .fb-sheet-h { margin: 0 0 6px; font: 600 11px/1.4 var(--fb-mono); text-transform: uppercase; letter-spacing: .12em; color: var(--fb-printed); }
+.v-fieldbook .fb-swatches { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.v-fieldbook .fb-swatches li { display: grid; grid-template-columns: 26px auto 1fr; grid-template-rows: auto auto; column-gap: 8px; align-items: baseline; font-size: 12px; }
+.v-fieldbook .fb-sw { grid-row: span 2; width: 26px; height: 26px; border: 1px solid var(--fb-ink); align-self: center; }
+.v-fieldbook .fb-swatches code { font-family: var(--fb-mono); }
+.v-fieldbook .fb-swatches small { grid-column: 2 / span 2; color: var(--fb-printed); font-size: 11px; }
+.v-fieldbook .fb-spec p { margin: 0 0 6px; }
+.v-fieldbook .fb-spec small { display: block; font-family: var(--fb-mono); font-size: 11px; color: var(--fb-printed); }
+.v-fieldbook .fb-spec-hand { font-family: var(--fb-hand); }
+.v-fieldbook .fb-spec-xl { font-size: 40px; line-height: 1; }
+.v-fieldbook .fb-spec-m { font-size: 22px; line-height: 1.2; }
+.v-fieldbook .fb-spec-mono { font-size: 13px; }
+.v-fieldbook .fb-shapes { display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 6px 20px; margin-top: 4px; }
+.v-fieldbook .fb-shapes figure { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.v-fieldbook .fb-shapes figure > span { display: flex; align-items: center; min-height: 48px; }
+.v-fieldbook .fb-shapes figcaption { white-space: nowrap; font-size: 11px; color: var(--fb-printed); }
+.v-fieldbook .fb-shape-tab .fb-tab { font-size: 17px; cursor: default; }
+.v-fieldbook .fb-print--mini { width: 56px; height: 40px; }
+.v-fieldbook .fb-print--mini .fb-c { width: 12px; height: 12px; }
+.v-fieldbook .fb-shape-rule { width: 64px; }
+.v-fieldbook .fb-shape-rule .fb-rule { width: 100%; margin: 0; }
+.v-fieldbook .fb-tone { margin-top: 12px; border-top: 1px dashed var(--fb-printed); padding-top: 10px; }
+.v-fieldbook .fb-tone-line { margin: 0 0 6px; }
+.v-fieldbook .fb-tone-line.fb-spec-hand { font-size: 20px; }
+.v-fieldbook .fb-tone-note { color: var(--fb-printed); font-size: 12px; }
+
+/* ---------- gallery page ---------- */
+.v-fieldbook .fb-book { display: flex; justify-content: space-between; margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--fb-printed); }
+.v-fieldbook .fb-title { font-family: var(--fb-hand); font-weight: 400; font-size: 44px; line-height: 1.05; margin: 0 0 8px; }
+.v-fieldbook .fb-lede { font-family: var(--fb-hand); font-size: 20px; line-height: 1.35; margin: 0 0 14px; max-width: 34em; }
+.v-fieldbook .fb-links { display: flex; gap: 10px; }
+.v-fieldbook .fb-tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--fb-printed); margin-bottom: 22px; }
+.v-fieldbook .fb-panel:focus-visible { outline-offset: 6px; }
+.v-fieldbook .fb-panel:not([hidden]) { animation: fieldbook-in .22s ease-out; }
+@keyframes fieldbook-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.v-fieldbook .fb-entry + .fb-entry { margin-top: 30px; padding-top: 22px; border-top: 1px dashed var(--fb-printed); }
+.v-fieldbook .fb-entry-head { display: grid; grid-template-columns: 1fr auto; column-gap: 12px; align-items: baseline; margin-bottom: 12px; }
+.v-fieldbook .fb-entry-name { grid-column: 1; font-family: var(--fb-hand); font-weight: 400; font-size: 26px; margin: 0; line-height: 1.1; }
+.v-fieldbook .fb-entry-desc { grid-column: 1; font-family: var(--fb-hand); font-size: 18px; margin: 2px 0 0; color: var(--fb-printed); }
+.v-fieldbook .fb-entry-no { grid-column: 2; grid-row: 1; font-size: 11px; letter-spacing: .1em; color: var(--fb-printed); border: 1px solid var(--fb-printed); padding: 1px 6px; }
+.v-fieldbook .fb-plate { text-align: center; padding: 6px 4px; }
+.v-fieldbook .fb-print-link { display: block; }
+.v-fieldbook .fb-print-link:focus-visible { outline-offset: 5px; }
+/* tall sheet: fixed window with visible scroll + note */
+.v-fieldbook .fb-tall-frame { height: 440px; overflow-y: auto; overflow-x: hidden; border: 1px solid var(--fb-printed); background: var(--fb-slip); padding: 10px; scrollbar-color: var(--fb-printed) var(--fb-slip); }
+.v-fieldbook .fb-print--full { display: block; }
+.v-fieldbook .fb-print--full img { width: 100%; max-height: none; }
+.v-fieldbook .fb-tall-note { margin: 6px 0 0; font-size: 11px; color: var(--fb-printed); text-align: left; }
+.v-fieldbook .fb-input { margin-top: 14px; border-top: 1px solid var(--fb-printed); }
+.v-fieldbook .fb-input summary { cursor: pointer; list-style: none; display: flex; gap: 12px; align-items: baseline; padding: 8px 0; }
+.v-fieldbook .fb-input summary::-webkit-details-marker { display: none; }
+.v-fieldbook .fb-input summary::before { content: "+"; font-weight: 600; width: 1ch; }
+.v-fieldbook .fb-input[open] summary::before { content: "−"; }
+.v-fieldbook .fb-sum-label { font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: 12px; }
+.v-fieldbook .fb-sum-src { font-size: 12px; color: var(--fb-printed); }
+.v-fieldbook .fb-input-body { background: var(--fb-slip); border: 1px solid var(--fb-printed); border-left: 4px double var(--fb-printed); padding: 10px 14px; }
+.v-fieldbook .fb-src { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--fb-printed); }
+.v-fieldbook .fb-src b { color: var(--fb-ink); text-transform: none; letter-spacing: 0; }
+.v-fieldbook .fb-input pre { margin: 0; max-height: 300px; overflow: auto; font: 12.5px/1.5 var(--fb-mono); color: var(--fb-ink); white-space: pre; }
+.v-fieldbook .fb-dl { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; padding: 0; }
+
+/* ---------- states ---------- */
+.v-fieldbook .fb-error { display: none; }
+.v-fieldbook[data-state="load-error"] .fb-gallery { display: none; }
+.v-fieldbook[data-state="load-error"] .fb-error { display: block; border: 1px solid var(--fb-printed); border-left: 4px double var(--fb-printed); background: var(--fb-slip); padding: 16px 18px; }
+.v-fieldbook .fb-error-hand { font-family: var(--fb-hand); font-size: 26px; margin: 0 0 6px; }
+.v-fieldbook .fb-error-print { margin: 0 0 12px; max-width: 46em; }
+
+html.reduce-motion .v-fieldbook .fb-panel:not([hidden]) { animation: none; }
+html.reduce-motion .v-fieldbook a.fb-btn:active { transform: none; }
+
+@media (max-width: 560px) {
+  .v-fieldbook { padding: 20px 14px 28px 30px; }
+  .v-fieldbook::before { left: 14px; }
+  .v-fieldbook .fb-sheet-grid { grid-template-columns: 1fr; }
+  .v-fieldbook .fb-shapes { grid-template-columns: repeat(2, auto); }
+  .v-fieldbook .fb-title { font-size: 36px; }
+  .v-fieldbook .fb-tabs { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--fb-printed); border-bottom: 0; }
+  .v-fieldbook .fb-tabs .fb-tab { border: 0; border-bottom: 1px solid var(--fb-printed); border-right: 1px solid var(--fb-printed); font-size: 17px; padding: 8px 6px 12px; }
+  .v-fieldbook .fb-tabs .fb-tab:nth-child(3n) { border-right: 0; }
+  .v-fieldbook .fb-tall-frame { height: 360px; }
+  .v-fieldbook .fb-spec-xl { font-size: 32px; }
+}
+</style>
+<script>
+(function () {
+  var root = document.querySelector('[data-variant="fieldbook"]');
+  if (!root) return;
+  var tabs = Array.prototype.slice.call(root.querySelectorAll('.fb-gallery [role="tab"]'));
+  var panels = Array.prototype.slice.call(root.querySelectorAll('.fb-gallery [role="tabpanel"]'));
+  function select(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+    });
+    panels.forEach(function (p) { p.hidden = p.id !== tab.getAttribute('aria-controls'); });
+    if (focus) tab.focus();
+    syncState();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t, false); });
+    t.addEventListener('keydown', function (e) {
+      var n = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') n = 0;
+      else if (e.key === 'End') n = tabs.length - 1;
+      if (n !== null) { e.preventDefault(); select(tabs[n], true); }
+    });
+  });
+  // dead download links in the mock: keep the page where it is
+  root.querySelectorAll('.fb-dl a[href="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); });
+  });
+  function syncState() {
+    var st = root.getAttribute('data-state') || 'default';
+    var open = st === 'input-open';
+    var active = panels.filter(function (p) { return !p.hidden; })[0];
+    root.querySelectorAll('.fb-input').forEach(function (d) {
+      d.open = open && active && active.contains(d) && d === active.querySelector('.fb-input');
+    });
+  }
+  new MutationObserver(syncState).observe(root, { attributes: true, attributeFilter: ['data-state'] });
+  syncState();
+})();
+</script>
+
+  </div>
+</article>
+
+<article class="bd-variant" id="v-card-catalog" data-slug="card-catalog">
+  <header class="bd-label">
+    <p class="bd-family">暖纸一族 · B</p>
+    <h2 class="bd-name">Card catalog 卡片抽屉 <code>?variant=card-catalog</code></h2>
+    <p class="bd-bet">赌页面像图书馆的卡片抽屉：每张图是一张归档的白卡，下面一张打字的记录。</p>
+    <p class="bd-diff"><b>差别</b>　图怎么放：白卡 1.5px 墨线边，背后错开 5px 一张马尼拉卡（硬边），卡底打孔 · 手写到哪：同 A；机器的东西用打字机字体 Courier Prime · accent：印章红 #A0281C，下载链接像盖章（转不到 1°）</p>
+    <p class="bd-timing"><b>时序</b>　点 tab：立即换图，卡片 0.22 秒从抽屉里抽出 · 点 Input：立即展开</p>
+  </header>
+  <div class="bd-stage">
+<section class="v-card-catalog" data-variant="card-catalog" data-state="default">
+
+  <!-- ============ 1. LANGUAGE SHEET ============ -->
+  <div class="cc-sheet" aria-label="Card catalog language sheet">
+    <p class="cc-call">guide card · language</p>
+    <h2 class="cc-sheet-title">Card catalog</h2>
+    <p class="cc-sheet-lede">Manila drawer, white cards. Handwriting for what a person says about a drawing; typewriter for what a machine can reproduce.</p>
+
+    <div class="cc-sheet-grid">
+      <div class="cc-swatches">
+        <div class="cc-sw"><span class="cc-chip" style="background:#E8D8A6"></span><span class="cc-sw-name">Drawer · ground</span><code>#E8D8A6</code><code>ink 11.06 · muted 6.02</code></div>
+        <div class="cc-sw"><span class="cc-chip" style="background:#F4EBCB"></span><span class="cc-sw-name">Guide card · panel</span><code>#F4EBCB</code><code>ink 13.14 · muted 7.15</code></div>
+        <div class="cc-sw"><span class="cc-chip" style="background:#2A2216"></span><span class="cc-sw-name">Ribbon ink · text</span><code>#2A2216</code><code>on white 15.69</code></div>
+        <div class="cc-sw"><span class="cc-chip" style="background:#5B4A2B"></span><span class="cc-sw-name">Faded ink · meta</span><code>#5B4A2B</code><code>on drawer 6.02</code></div>
+        <div class="cc-sw"><span class="cc-chip" style="background:#A0281C"></span><span class="cc-sw-name">Stamp red · actions only</span><code>#A0281C</code><code>on drawer 5.26 · on card 6.25 · card-on-red 6.25</code></div>
+        <div class="cc-sw"><span class="cc-chip cc-chip-white" style="background:#FFFFFF"></span><span class="cc-sw-name">Figure sheet (engine)</span><code>#FFFFFF</code><code>stamp red on it 7.46</code></div>
+      </div>
+
+      <div class="cc-type">
+        <div class="cc-spec">
+          <span class="cc-spec-big cc-hand">Aa Excalifont</span>
+          <code>title 46 · tabs 18 · figure name 22 · prose 17</code>
+        </div>
+        <div class="cc-spec">
+          <span class="cc-spec-mid cc-type-face">Aa Courier Prime</span>
+          <code>call no. 12 caps · JSON 13 · file links 14</code>
+        </div>
+        <div class="cc-shapes" aria-label="Shape samples">
+          <span class="cc-shape-tab">Tab</span>
+          <a class="cc-dl" href="#" tabindex="-1">.excalidraw</a>
+          <span class="cc-shape-card"><span class="cc-hole" aria-hidden="true"></span></span>
+          <span class="cc-shape-rule" aria-hidden="true">- - - - - - - - - -</span>
+        </div>
+        <div class="cc-tone">
+          <p class="cc-hand">“JSON in, a drawing out. Each card below is filed as the engine made it.”</p>
+          <p><a class="cc-link" href="#" tabindex="-1">Take the .excalidraw file</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 2. GALLERY SLICE ============ -->
+  <div class="cc-page">
+    <header class="cc-head">
+      <h1 class="cc-title">excalidrawer</h1>
+      <p class="cc-pos">Describe a diagram as JSON; get an Excalidraw file, SVG and PNG back. Every card in this drawer is unedited output.</p>
+      <p class="cc-headlinks"><a class="cc-link" href="https://github.com/guohaonan-shy/excalidrawer">GitHub</a><span aria-hidden="true"> · </span><a class="cc-link" href="https://www.npmjs.com/package/excalidrawer">npm</a></p>
+    </header>
+
+    <div class="cc-gallery">
+      <p class="cc-tabhint" aria-hidden="true">6 tabs · scroll sideways →</p>
+      <div class="cc-tabs" role="tablist" aria-label="Diagram types">
+        <button class="cc-tab" role="tab" id="cc-t-flow" aria-controls="cc-p-flow" aria-selected="true" tabindex="0">Flowchart</button>
+        <button class="cc-tab" role="tab" id="cc-t-arch" aria-controls="cc-p-arch" aria-selected="false" tabindex="-1">Architecture</button>
+        <button class="cc-tab" role="tab" id="cc-t-seq" aria-controls="cc-p-seq" aria-selected="false" tabindex="-1">Sequence</button>
+        <button class="cc-tab" role="tab" id="cc-t-time" aria-controls="cc-p-time" aria-selected="false" tabindex="-1">Timeline</button>
+        <button class="cc-tab" role="tab" id="cc-t-cmp" aria-controls="cc-p-cmp" aria-selected="false" tabindex="-1">Comparison</button>
+        <button class="cc-tab" role="tab" id="cc-t-tree" aria-controls="cc-p-tree" aria-selected="false" tabindex="-1">Tree <span class="cc-count">3</span></button>
+      </div>
+
+      <div class="cc-drawer">
+        <!-- Flowchart -->
+        <div class="cc-panel" role="tabpanel" id="cc-p-flow" aria-labelledby="cc-t-flow" tabindex="0">
+          <article class="cc-fig">
+            <a class="cc-sheetwrap" href="assets/figures/flowchart.png" target="_blank" rel="noopener"><img src="assets/figures/flowchart.png" width="2520" height="540" alt="Flowchart — Decisions + branches"></a>
+            <div class="cc-record">
+              <p class="cc-callno">template: flowchart</p>
+              <h3 class="cc-name">Flowchart</h3>
+              <p class="cc-desc">Decisions + branches</p>
+              <button class="cc-input-btn" aria-expanded="false" aria-controls="cc-in-flow">Input</button>
+              <div class="cc-input" id="cc-in-flow" hidden>
+                <p class="cc-src">source — template: flowchart</p>
+<pre><code>{
+  "title": "Pull request to production",
+  "direction": "horizontal",
+  "nodes": [
+    { "id": "open", "label": "PR opened", "type": "start" },
+    { "id": "ci", "label": "CI + review" },
+    { "id": "ok", "label": "Approved?", "type": "decision" },
+    { "id": "merge", "label": "Merge to main" },
+    { "id": "fix", "label": "Request changes", "color": "red" },
+    { "id": "ship", "label": "Deploy", "type": "end" }
+  ],
+  "edges": [
+    { "from": "open", "to": "ci" },
+    { "from": "ci", "to": "ok" },
+    { "from": "ok", "to": "merge", "label": "yes" },
+    { "from": "ok", "to": "fix", "label": "no" },
+    { "from": "merge", "to": "ship" }
+  ]
+}</code></pre>
+              </div>
+              <p class="cc-dls"><span class="cc-dls-label">Download</span><a class="cc-dl" href="#">.excalidraw</a><a class="cc-dl" href="#">SVG</a><a class="cc-dl" href="#">PNG</a></p>
+              <span class="cc-hole" aria-hidden="true"></span>
+            </div>
+          </article>
+        </div>
+
+        <!-- Architecture -->
+        <div class="cc-panel" role="tabpanel" id="cc-p-arch" aria-labelledby="cc-t-arch" tabindex="0" hidden>
+          <article class="cc-fig">
+            <a class="cc-sheetwrap cc-narrow" href="assets/figures/architecture.png" target="_blank" rel="noopener"><img src="assets/figures/architecture.png" width="1636" height="1608" alt="Architecture — Layered components + connections" loading="lazy"></a>
+            <div class="cc-record">
+              <p class="cc-callno">template: architecture</p>
+              <h3 class="cc-name">Architecture</h3>
+              <p class="cc-desc">Layered components + connections</p>
+              <button class="cc-input-btn" aria-expanded="false" aria-controls="cc-in-arch">Input</button>
+              <div class="cc-input" id="cc-in-arch" hidden>
+                <p class="cc-src">source — template: architecture</p>
+<pre><code>{
+  "title": "Web app architecture",
+  "sections": [
+    { "label": "Clients", "color": "blue", "items": ["Web app", "iOS app", "Admin console"] },
+    { "label": "Edge", "color": "purple", "items": ["CDN", "API gateway"] },
+    { "label": "Services", "color": "green", "items": ["Auth", "Orders", "Payments", "Notifications"] },
+    { "label": "Data", "color": "orange", "items": ["Postgres", "Redis", "Object storage"] }
+  ],
+  "connections": [ … ]
+}</code></pre>
+              </div>
+              <p class="cc-dls"><span class="cc-dls-label">Download</span><a class="cc-dl" href="#">.excalidraw</a><a class="cc-dl" href="#">SVG</a><a class="cc-dl" href="#">PNG</a></p>
+              <span class="cc-hole" aria-hidden="true"></span>
+            </div>
+          </article>
+        </div>
+
+        <!-- Sequence -->
+        <div class="cc-panel" role="tabpanel" id="cc-p-seq" aria-labelledby="cc-t-seq" tabindex="0" hidden>
+          <article class="cc-fig">
+            <a class="cc-sheetwrap" href="assets/figures/sequence.png" target="_blank" rel="noopener"><img src="assets/figures/sequence.png" width="3940" height="1948" alt="Sequence — Messages between actors over time" loading="lazy"></a>
+            <div class="cc-record">
+              <p class="cc-callno">sugar (sequence recipe)</p>
+              <h3 class="cc-name">Sequence</h3>
+              <p class="cc-desc">Messages between actors over time</p>
+              <button class="cc-input-btn" aria-expanded="false" aria-controls="cc-in-seq">Input</button>
+              <div class="cc-input" id="cc-in-seq" hidden>
+                <p class="cc-src">source — sugar (sequence recipe)</p>
+<pre><code>[
+  { "shape": "text", "at": [40, 14], "size": [1940, 36],
+    "text": "Report audio — browser cache read / write", "fontSize": 24 },
+  { "shape": "line", "at": [155, 120], "points": [[0, 0], [0, 820]],
+    "strokeStyle": "dashed", "stroke": "gray" },
+  { "shape": "rect", "id": "up", "at": [40, 64], "size": [230, 56],
+    "fill": "yellow", "text": "Upload pipeline", "fontSize": 15 },
+  …
+]</code></pre>
+              </div>
+              <p class="cc-dls"><span class="cc-dls-label">Download</span><a class="cc-dl" href="#">.excalidraw</a><a class="cc-dl" href="#">SVG</a><a class="cc-dl" href="#">PNG</a></p>
+              <span class="cc-hole" aria-hidden="true"></span>
+            </div>
+          </article>
+        </div>
+
+        <!-- Timeline -->
+        <div class="cc-panel" role="tabpanel" id="cc-p-time" aria-labelledby="cc-t-time" tabindex="0" hidden>
+          <article class="cc-fig">
+            <a class="cc-sheetwrap" href="assets/figures/timeline.png" target="_blank" rel="noopener"><img src="assets/figures/timeline.png" width="2340" height="968" alt="Timeline — Milestones on an axis" loading="lazy"></a>
+            <div class="cc-record">
+              <p class="cc-callno">template: timeline</p>
+              <h3 class="cc-name">Timeline</h3>
+              <p class="cc-desc">Milestones on an axis</p>
+              <button class="cc-input-btn" aria-expanded="false" aria-controls="cc-in-time">Input</button>
+              <div class="cc-input" id="cc-in-time" hidden>
+                <p class="cc-src">source — template: timeline</p>
+<pre><code>{
+  "title": "2026 product roadmap",
+  "items": [
+    { "label": "Beta", "time": "Q1", "desc": "Invite-only, 200 teams" },
+    { "label": "Public launch", "time": "Q2", "desc": "Self-serve signup" },
+    { "label": "Teams plan", "time": "Q3", "desc": "SSO + shared workspaces" },
+    …
+  ]
+}</code></pre>
+              </div>
+              <p class="cc-dls"><span class="cc-dls-label">Download</span><a class="cc-dl" href="#">.excalidraw</a><a class="cc-dl" href="#">SVG</a><a class="cc-dl" href="#">PNG</a></p>
+              <span class="cc-hole" aria-hidden="true"></span>
+            </div>
+          </article>
+        </div>
+
+        <!-- Comparison -->
+        <div class="cc-panel" role="tabpanel" id="cc-p-cmp" aria-labelledby="cc-t-cmp" tabindex="0" hidden>
+          <article class="cc-fig">
+            <a class="cc-sheetwrap" href="assets/figures/comparison.png" target="_blank" rel="noopener"><img src="assets/figures/comparison.png" width="1920" height="820" alt="Comparison — A vs B, dimension by dimension" loading="lazy"></a>
+            <div class="cc-record">
+              <p class="cc-callno">sugar (comparison recipe)</p>
+              <h3 class="cc-name">Comparison</h3>
+              <p class="cc-desc">A vs B, dimension by dimension</p>
+              <button class="cc-input-btn" aria-expanded="false" aria-controls="cc-in-cmp">Input</button>
+              <div class="cc-input" id="cc-in-cmp" hidden>
+                <p class="cc-src">source — sugar (comparison recipe)</p>
+<pre><code>[
+  { "shape": "text", "at": [40, 30], "size": [880, 34],
+    "text": "MySpeakingScore vs TOEFLAIR: coverage", "fontSize": 22 },
+  { "shape": "rect", "id": "lh", "at": [40, 90], "size": [400, 60],
+    "fill": "gray", "stroke": "gray", "text": "MySpeakingScore", "fontSize": 18 },
+  { "shape": "text", "text": "VS", "fontSize": 22, "textColor": "gray", … },
+  …
+]</code></pre>
+              </div>
+              <p class="cc-dls"><span class="cc-dls-label">Download</span><a class="cc-dl" href="#">.excalidraw</a><a class="cc-dl" href="#">SVG</a><a class="cc-dl" href="#">PNG</a></p>
+              <span class="cc-hole" aria-hidden="true"></span>
+            </div>
+          </article>
+        </div>
+
+        <!-- Tree (3 cards) -->
+        <div class="cc-panel" role="tabpanel" id="cc-p-tree" aria-labelledby="cc-t-tree" tabindex="0" hidden>
+          <article class="cc-fig">
+            <a class="cc-sheetwrap cc-narrow" href="assets/figures/tree-right.png" target="_blank" rel="noopener"><img src="assets/figures/tree-right.png" width="1436" height="1140" alt="Tree · left → right — Parent → children, split sideways" loading="lazy"></a>
+            <div class="cc-record">
+              <p class="cc-callno">template: tree · 1 of 3</p>
+              <h3 class="cc-name">Tree · left → right</h3>
+              <p class="cc-desc">Parent → children, split sideways</p>
+              <button class="cc-input-btn" aria-expanded="false" aria-controls="cc-in-tr">Input</button>
+              <div class="cc-input" id="cc-in-tr" hidden>
+                <p class="cc-src">source — template: tree</p>
+<pre><code>{
+  "title": "Skills",
+  "direction": "horizontal",
+  "root": { "label": "Skills", "children": [
+    { "label": "Design", "desc": "ui · visual · ux", "children": [ … ] },
+    { "label": "Engineering", "desc": "ship · review · test", "children": [ … ] },
+    …
+  ] }
+}</code></pre>
+              </div>
+              <p class="cc-dls"><span class="cc-dls-label">Download</span><a class="cc-dl" href="#">.excalidraw</a><a class="cc-dl" href="#">SVG</a><a class="cc-dl" href="#">PNG</a></p>
+              <span class="cc-hole" aria-hidden="true"></span>
+            </div>
+          </article>
+
+          <article class="cc-fig">
+            <a class="cc-sheetwrap" href="assets/figures/tree-down.png" target="_blank" rel="noopener"><img src="assets/figures/tree-down.png" width="2620" height="864" alt="Tree · top → down — Parent → children, split downward" loading="lazy"></a>
+            <div class="cc-record">
+              <p class="cc-callno">template: tree · 2 of 3</p>
+              <h3 class="cc-name">Tree · top → down</h3>
+              <p class="cc-desc">Parent → children, split downward</p>
+              <button class="cc-input-btn" aria-expanded="false" aria-controls="cc-in-td">Input</button>
+              <div class="cc-input" id="cc-in-td" hidden>
+                <p class="cc-src">source — template: tree</p>
+<pre><code>{
+  "title": "Skills",
+  "direction": "vertical",
+  "root": { "label": "Skills", "children": [ … ] }
+}</code></pre>
+              </div>
+              <p class="cc-dls"><span class="cc-dls-label">Download</span><a class="cc-dl" href="#">.excalidraw</a><a class="cc-dl" href="#">SVG</a><a class="cc-dl" href="#">PNG</a></p>
+              <span class="cc-hole" aria-hidden="true"></span>
+            </div>
+          </article>
+
+          <article class="cc-fig">
+            <p class="cc-tallnote">This card is 4898 px tall. It scrolls inside its frame; open it for full size.</p>
+            <div class="cc-tallframe" tabindex="0" aria-label="Tree · user-story map, scrollable frame">
+              <a class="cc-sheetwrap cc-tall" href="assets/figures/tree-stories.png" target="_blank" rel="noopener"><img src="assets/figures/tree-stories.png" width="2238" height="4898" alt="Tree · user-story map — 23 numbered stories in 6 groups" loading="lazy"></a>
+            </div>
+            <div class="cc-record">
+              <p class="cc-callno">template: tree · 3 of 3</p>
+              <h3 class="cc-name">Tree · user-story map</h3>
+              <p class="cc-desc">23 numbered stories in 6 groups</p>
+              <button class="cc-input-btn" aria-expanded="false" aria-controls="cc-in-ts">Input</button>
+              <div class="cc-input" id="cc-in-ts" hidden>
+                <p class="cc-src">source — template: tree</p>
+<pre><code>{
+  "title": "Report audio prefetch &amp; shared cache · user stories",
+  "numberLeaves": true,
+  "root": { "label": "Report audio prefetch &amp; shared cache", "children": [
+    { "label": "Right after practice", "children": [ … ] },
+    { "label": "Opening from history", "children": [ … ] },
+    { "label": "Player", "children": [ … ] },
+    …
+  ] }
+}</code></pre>
+              </div>
+              <p class="cc-dls"><span class="cc-dls-label">Download</span><a class="cc-dl" href="#">.excalidraw</a><a class="cc-dl" href="#">SVG</a><a class="cc-dl" href="#">PNG</a></p>
+              <span class="cc-hole" aria-hidden="true"></span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <!-- load-error -->
+    <div class="cc-error" role="alert">
+      <p class="cc-callno">gallery.json · not loaded</p>
+      <h3 class="cc-err-title">The drawer came up empty.</h3>
+      <p class="cc-err-body">The list of figures (gallery.json) didn't load, so there are no cards to show. Nothing was swapped in to cover the gap. The same figures and their inputs are in the repository.</p>
+      <p><a class="cc-link" href="https://github.com/guohaonan-shy/excalidrawer">Open the repository on GitHub</a></p>
+      <span class="cc-hole" aria-hidden="true"></span>
+    </div>
+  </div>
+</section>
+<style>
+@import url(https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap);
+
+.v-card-catalog {
+  --cc-ground: #E8D8A6;
+  --cc-card: #F4EBCB;
+  --cc-tabback: #DCC890;
+  --cc-ink: #2A2216;
+  --cc-muted: #5B4A2B;
+  --cc-accent: #A0281C;
+  --cc-sheet: #FFFFFF;
+  --cc-hand: 'Excalifont', 'Virgil', 'Comic Sans MS', cursive;
+  --cc-type: 'Courier Prime', 'Courier New', ui-monospace, monospace;
+  --cc-line: 1.5px solid var(--cc-ink);
+  --cc-drop: 3px 3px 0 rgba(42, 34, 22, 0.22);
+  background: var(--cc-ground);
+  color: var(--cc-ink);
+  font-family: var(--cc-hand);
+  font-size: 17px;
+  line-height: 1.45;
+  padding: 28px 24px 40px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.v-card-catalog *, .v-card-catalog *::before, .v-card-catalog *::after { box-sizing: border-box; }
+.v-card-catalog p, .v-card-catalog h1, .v-card-catalog h2, .v-card-catalog h3 { margin: 0; }
+.v-card-catalog code, .v-card-catalog pre { font-family: var(--cc-type); }
+.v-card-catalog .cc-hand { font-family: var(--cc-hand); }
+.v-card-catalog .cc-type-face { font-family: var(--cc-type); }
+
+/* ---------- shared atoms ---------- */
+.v-card-catalog .cc-call,
+.v-card-catalog .cc-callno {
+  font-family: var(--cc-type);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cc-muted);
+}
+.v-card-catalog .cc-link {
+  font-family: var(--cc-type);
+  font-size: 15px;
+  color: var(--cc-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+.v-card-catalog .cc-link:hover { text-decoration-style: wavy; }
+.v-card-catalog a:focus-visible,
+.v-card-catalog button:focus-visible,
+.v-card-catalog [tabindex="0"]:focus-visible {
+  outline: 2px dashed var(--cc-accent);
+  outline-offset: 3px;
+}
+/* download link = rubber stamp */
+.v-card-catalog .cc-dl {
+  display: inline-block;
+  font-family: var(--cc-type);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--cc-accent);
+  text-decoration: none;
+  border: 1.5px solid var(--cc-accent);
+  border-radius: 3px 5px 4px 6px;
+  padding: 3px 9px 2px;
+  transform: rotate(-0.8deg);
+}
+.v-card-catalog .cc-dl:nth-of-type(2) { transform: rotate(0.6deg); }
+.v-card-catalog .cc-dl:nth-of-type(3) { transform: rotate(-0.3deg); }
+.v-card-catalog .cc-dl:hover { background: var(--cc-accent); color: var(--cc-card); }
+/* punched rod hole of a catalog card */
+.v-card-catalog .cc-hole {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 50%;
+  background: var(--cc-ground);
+  border: 1.5px solid var(--cc-ink);
+}
+
+/* ---------- 1. language sheet ---------- */
+.v-card-catalog .cc-sheet {
+  position: relative;
+  background: var(--cc-card);
+  border: var(--cc-line);
+  border-radius: 4px 7px 5px 6px;
+  box-shadow: var(--cc-drop);
+  padding: 18px 20px 20px;
+  margin-bottom: 36px;
+}
+.v-card-catalog .cc-sheet-title { font-size: 30px; font-weight: 400; line-height: 1.1; margin-top: 4px; }
+.v-card-catalog .cc-sheet-lede { font-size: 17px; margin: 4px 0 14px; max-width: 60ch; }
+.v-card-catalog .cc-sheet-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 18px 24px;
+}
+.v-card-catalog .cc-swatches { display: grid; gap: 6px; }
+.v-card-catalog .cc-sw {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: center;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed rgba(42, 34, 22, 0.35);
+}
+.v-card-catalog .cc-chip {
+  grid-row: span 3;
+  width: 30px; height: 38px;
+  border: var(--cc-line);
+  border-radius: 2px 4px 3px 2px;
+}
+.v-card-catalog .cc-sw-name { font-size: 16px; line-height: 1.2; }
+.v-card-catalog .cc-sw code { font-size: 12px; color: var(--cc-muted); line-height: 1.3; }
+.v-card-catalog .cc-sw code:nth-of-type(1) { color: var(--cc-ink); }
+.v-card-catalog .cc-type { display: grid; gap: 12px; align-content: start; }
+.v-card-catalog .cc-spec { border-bottom: 1px dashed rgba(42, 34, 22, 0.35); padding-bottom: 8px; }
+.v-card-catalog .cc-spec code { display: block; font-size: 12px; color: var(--cc-muted); }
+.v-card-catalog .cc-spec-big { display: block; font-size: 34px; line-height: 1.1; }
+.v-card-catalog .cc-spec-mid { display: block; font-size: 24px; line-height: 1.2; }
+.v-card-catalog .cc-shapes { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; padding: 6px 0 2px; }
+.v-card-catalog .cc-shape-tab {
+  background: var(--cc-card);
+  border: var(--cc-line);
+  border-bottom: none;
+  border-radius: 12px 9px 0 0 / 10px 12px 0 0;
+  padding: 3px 16px 4px;
+  font-size: 18px;
+  box-shadow: 0 1.5px 0 var(--cc-card), 0 3px 0 var(--cc-ink);
+}
+.v-card-catalog .cc-shape-card {
+  position: relative;
+  display: inline-block;
+  width: 70px; height: 44px;
+  background: var(--cc-sheet);
+  border: var(--cc-line);
+  border-radius: 3px 5px 4px 3px;
+  box-shadow: 4px 4px 0 -1.5px var(--cc-card), 4px 4px 0 0 var(--cc-ink);
+}
+.v-card-catalog .cc-shape-card .cc-hole { width: 10px; height: 10px; margin-left: -5px; bottom: 4px; }
+.v-card-catalog .cc-shape-rule { font-family: var(--cc-type); font-size: 14px; color: var(--cc-muted); letter-spacing: 0.02em; }
+.v-card-catalog .cc-tone p { font-size: 18px; line-height: 1.35; }
+.v-card-catalog .cc-tone p + p { margin-top: 6px; }
+
+/* ---------- 2. gallery slice ---------- */
+.v-card-catalog .cc-head { margin-bottom: 22px; }
+.v-card-catalog .cc-title { font-size: 46px; font-weight: 400; line-height: 1; letter-spacing: 0.01em; }
+.v-card-catalog .cc-pos { font-size: 20px; line-height: 1.35; margin-top: 8px; max-width: 34em; }
+.v-card-catalog .cc-headlinks { margin-top: 8px; color: var(--cc-muted); }
+
+/* tabs = staggered guide-card tabs */
+.v-card-catalog .cc-tabs {
+  display: flex;
+  gap: 3px;
+  padding: 4px 4px 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  position: relative;
+  z-index: 2;
+  margin-bottom: -1.5px;
+}
+.v-card-catalog .cc-tab {
+  flex: 0 0 auto;
+  font-family: var(--cc-hand);
+  font-size: 18px;
+  color: var(--cc-ink);
+  background: var(--cc-tabback);
+  border: var(--cc-line);
+  border-bottom: none;
+  border-radius: 12px 9px 0 0 / 10px 12px 0 0;
+  padding: 6px 12px 5px;
+  margin-top: 8px;
+  cursor: pointer;
+  line-height: 1.2;
+  transition: margin-top 120ms ease;
+}
+.v-card-catalog .cc-tab:nth-child(even) { border-radius: 9px 13px 0 0 / 12px 9px 0 0; }
+.v-card-catalog .cc-tab:hover { margin-top: 4px; }
+.v-card-catalog .cc-tab:focus-visible { outline-offset: -5px; }
+.v-card-catalog .cc-tab[aria-selected="true"] {
+  background: var(--cc-card);
+  margin-top: 0;
+  padding-top: 10px;
+  padding-bottom: 7px;
+  position: relative;
+}
+.v-card-catalog .cc-tab[aria-selected="true"]::after {
+  /* erase the drawer's top border under the active tab so they read as one card */
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 4px;
+  background: var(--cc-card);
+}
+.v-card-catalog .cc-count {
+  font-family: var(--cc-type);
+  font-size: 12px;
+  border: 1px solid var(--cc-ink);
+  border-radius: 50%;
+  display: inline-block;
+  width: 18px; height: 18px;
+  line-height: 16px;
+  text-align: center;
+  vertical-align: 2px;
+  margin-left: 3px;
+}
+.v-card-catalog .cc-drawer {
+  background: var(--cc-card);
+  border: var(--cc-line);
+  border-radius: 3px 6px 5px 4px;
+  box-shadow: var(--cc-drop);
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+.v-card-catalog .cc-panel:focus-visible { outline-offset: 6px; }
+.v-card-catalog .cc-panel:not([hidden]) { animation: card-catalog-pull 220ms ease-out; }
+@keyframes card-catalog-pull {
+  from { transform: translateY(8px); opacity: 0.4; }
+  to { transform: none; opacity: 1; }
+}
+
+/* figure block: white engine sheet filed in front of a manila card */
+.v-card-catalog .cc-fig + .cc-fig {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1.5px dashed rgba(42, 34, 22, 0.45);
+}
+.v-card-catalog .cc-sheetwrap {
+  display: block;
+  background: var(--cc-sheet);
+  border: var(--cc-line);
+  border-radius: 3px 5px 4px 3px;
+  padding: 6px;
+  /* a second card peeking out behind: the sheet is "filed", not floating */
+  box-shadow: 5px 5px 0 -1.5px var(--cc-tabback), 5px 5px 0 0 var(--cc-ink);
+  margin-right: 5px;
+}
+.v-card-catalog .cc-sheetwrap img { display: block; width: 100%; height: auto; }
+.v-card-catalog .cc-narrow { max-width: 460px; margin-left: auto; margin-right: auto; }
+.v-card-catalog .cc-sheetwrap:hover { border-color: var(--cc-accent); }
+
+.v-card-catalog .cc-tallnote { font-family: var(--cc-type); font-size: 13px; color: var(--cc-muted); margin-bottom: 8px; }
+.v-card-catalog .cc-tallframe {
+  max-height: 480px;
+  overflow-y: auto;
+  padding: 0 0 6px;
+  border-bottom: 2px dashed var(--cc-ink);
+  scrollbar-gutter: stable;
+}
+.v-card-catalog .cc-tall { max-width: 400px; margin: 0 auto; box-shadow: none; }
+
+.v-card-catalog .cc-record {
+  position: relative;
+  margin-top: 16px;
+  padding: 0 4px 34px;
+}
+.v-card-catalog .cc-name { font-size: 26px; font-weight: 400; line-height: 1.15; margin-top: 2px; }
+.v-card-catalog .cc-desc { font-size: 18px; color: var(--cc-muted); }
+
+.v-card-catalog .cc-input-btn {
+  margin-top: 12px;
+  font-family: var(--cc-hand);
+  font-size: 18px;
+  color: var(--cc-ink);
+  background: transparent;
+  border: var(--cc-line);
+  border-radius: 6px 4px 7px 5px;
+  padding: 3px 12px 3px 10px;
+  cursor: pointer;
+}
+.v-card-catalog .cc-input-btn::before {
+  content: "";
+  display: inline-block;
+  width: 0; height: 0;
+  border-left: 7px solid var(--cc-ink);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  margin-right: 8px;
+  vertical-align: 1px;
+  transition: transform 140ms ease;
+}
+.v-card-catalog .cc-input-btn[aria-expanded="true"] { background: var(--cc-ground); }
+.v-card-catalog .cc-input-btn[aria-expanded="true"]::before { transform: rotate(90deg); }
+.v-card-catalog .cc-input {
+  margin-top: 10px;
+  background-color: var(--cc-sheet);
+  /* ruled index card */
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 19px, rgba(42, 34, 22, 0.10) 19px, rgba(42, 34, 22, 0.10) 20px);
+  background-position: 0 28px;
+  border: var(--cc-line);
+  border-radius: 3px 5px 4px 3px;
+  padding: 8px 14px 10px;
+}
+.v-card-catalog .cc-input[hidden] { display: none; }
+.v-card-catalog .cc-src { font-family: var(--cc-type); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cc-muted); margin-bottom: 6px; }
+.v-card-catalog .cc-input pre {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--cc-ink);
+  overflow-x: auto;
+  white-space: pre;
+}
+.v-card-catalog .cc-dls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
+.v-card-catalog .cc-dls-label { font-family: var(--cc-type); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cc-muted); }
+
+.v-card-catalog .cc-tabhint { display: none; font-family: var(--cc-type); font-size: 12px; color: var(--cc-muted); margin: 0 0 4px 4px; }
+
+/* ---------- states ---------- */
+.v-card-catalog .cc-error { display: none; }
+.v-card-catalog[data-state="load-error"] .cc-gallery { display: none; }
+.v-card-catalog[data-state="load-error"] .cc-error {
+  display: block;
+  position: relative;
+  background: var(--cc-card);
+  border: var(--cc-line);
+  border-radius: 4px 7px 5px 6px;
+  box-shadow: var(--cc-drop);
+  padding: 18px 22px 40px;
+  max-width: 560px;
+}
+.v-card-catalog .cc-err-title { font-size: 30px; font-weight: 400; margin: 6px 0 6px; }
+.v-card-catalog .cc-err-body { font-size: 18px; margin-bottom: 12px; }
+
+/* ---------- reduced motion ---------- */
+html.reduce-motion .v-card-catalog .cc-panel:not([hidden]) { animation: none; }
+html.reduce-motion .v-card-catalog .cc-tab,
+html.reduce-motion .v-card-catalog .cc-input-btn::before { transition: none; }
+
+/* ---------- narrow ---------- */
+@media (max-width: 560px) {
+  .v-card-catalog { padding: 20px 14px 32px; }
+  .v-card-catalog .cc-sheet-grid { grid-template-columns: minmax(0, 1fr); }
+  .v-card-catalog .cc-title { font-size: 38px; }
+  .v-card-catalog .cc-pos { font-size: 18px; }
+  .v-card-catalog .cc-drawer { padding: 14px 12px; }
+  .v-card-catalog .cc-tab { font-size: 17px; padding: 5px 10px 4px; }
+  .v-card-catalog .cc-tabs::after { content: ""; flex: 0 0 4px; }
+  .v-card-catalog .cc-tallframe { max-height: 380px; }
+  .v-card-catalog .cc-tabhint { display: block; }
+}
+</style>
+<script>
+(function () {
+  var root = document.querySelector('[data-variant="card-catalog"]');
+  if (!root) return;
+  var tabs = Array.prototype.slice.call(root.querySelectorAll('.cc-tab'));
+  var panels = tabs.map(function (t) { return root.querySelector('#' + t.getAttribute('aria-controls')); });
+
+  function select(i, focus) {
+    tabs.forEach(function (t, j) {
+      var on = j === i;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      panels[j].hidden = !on;
+    });
+    if (focus) tabs[i].focus();
+    syncState();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(i, false); });
+    t.addEventListener('keydown', function (e) {
+      var n = tabs.length, k = e.key, to = null;
+      if (k === 'ArrowRight') to = (i + 1) % n;
+      else if (k === 'ArrowLeft') to = (i - 1 + n) % n;
+      else if (k === 'Home') to = 0;
+      else if (k === 'End') to = n - 1;
+      if (to !== null) { e.preventDefault(); select(to, true); }
+    });
+  });
+
+  function setOpen(btn, open) {
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    var body = root.querySelector('#' + btn.getAttribute('aria-controls'));
+    if (body) body.hidden = !open;
+  }
+  var btns = Array.prototype.slice.call(root.querySelectorAll('.cc-input-btn'));
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () { setOpen(b, b.getAttribute('aria-expanded') !== 'true'); });
+  });
+
+  // The board shell drives data-state; mirror it onto the Input disclosure.
+  var lastState = null;
+  function syncState() {
+    var s = root.getAttribute('data-state') || 'default';
+    if (s === lastState) return;
+    lastState = s;
+    if (s === 'input-open') {
+      var active = panels.filter(function (p) { return !p.hidden; })[0];
+      var first = active && active.querySelector('.cc-input-btn');
+      if (first) setOpen(first, true);
+    } else if (s === 'default') {
+      btns.forEach(function (b) { setOpen(b, false); });
+    }
+  }
+  new MutationObserver(syncState).observe(root, { attributes: true, attributeFilter: ['data-state'] });
+  syncState();
+})();
+</script>
+
+  </div>
+</article>
+
+<article class="bd-variant" id="v-galley" data-slug="galley">
+  <header class="bd-label">
+    <p class="bd-family">暖纸一族 · C</p>
+    <h2 class="bd-name">Galley 校样台 <code>?variant=galley</code></h2>
+    <p class="bd-bet">赌页面像印刷厂的校样台：每张图是刚从机器上拉下来的校样，红笔只圈能动手的地方。</p>
+    <p class="bd-diff"><b>差别</b>　图怎么放：白校样压在灰纸板上，4px 平移硬阴影，四角裁切标记，上方一行工单 slug（PROOF 01/08 · 2520×540 @2X） · 手写到哪：所有标签和句子，连下载链接都手写；只有 JSON 和 slug 行用等宽 · accent：胭脂红 #A3122D</p>
+    <p class="bd-timing"><b>时序</b>　点 tab：立即换图，0.18 秒淡入 · 点 Input：立即展开</p>
+  </header>
+  <div class="bd-stage">
+<section class="v-galley" data-variant="galley" data-state="default">
+
+  <!-- ============ 1. LANGUAGE SHEET ============ -->
+  <div class="v-galley-lang" aria-label="Language sheet: galley">
+    <p class="v-galley-slug">Language sheet · galley · seed +fGjVhm78zMwbrcJ → 355° carmine, “+” registration mark</p>
+
+    <div class="v-galley-lang-grid">
+      <div class="v-galley-lang-col">
+        <h3 class="v-galley-lang-h">Palette</h3>
+        <ul class="v-galley-swatches">
+          <li><span class="v-galley-chip" style="background:#DAD3C3"></span><span><b>ground</b> · chipboard</span><code>#DAD3C3</code></li>
+          <li><span class="v-galley-chip" style="background:#1F1C19"></span><span><b>ink</b> · body text</span><code>#1F1C19 · 11.4 on ground · 17.0 on sheet</code></li>
+          <li><span class="v-galley-chip" style="background:#544D44"></span><span><b>pencil</b> · secondary</span><code>#544D44 · 5.6 on ground · 8.3 on sheet</code></li>
+          <li><span class="v-galley-chip" style="background:#A3122D"></span><span><b>carmine</b> · actions only</span><code>#A3122D · 5.3 on ground · 7.8 on sheet · 6.9 on copy</code></li>
+          <li><span class="v-galley-chip v-galley-chip--white" style="background:#FFFFFF"></span><span><b>sheet</b> · figure paper</span><code>#FFFFFF · white on carmine 7.8</code></li>
+          <li><span class="v-galley-chip" style="background:#F4F0E6"></span><span><b>copy</b> · input paper</span><code>#F4F0E6 · ink 14.9 · pencil 7.3</code></li>
+        </ul>
+      </div>
+
+      <div class="v-galley-lang-col">
+        <h3 class="v-galley-lang-h">Type</h3>
+        <p class="v-galley-spec-hand1">Excalifont 40</p><p class="v-galley-spec-hand2" style="font-size:26px;margin-top:2px">Excalifont 26 · names</p>
+        <p class="v-galley-spec-note">40 project name · 26 figure names · 18 tabs</p>
+        <p class="v-galley-spec-hand2">Excalifont 19 — sentences, descriptions, links</p>
+        <p class="v-galley-spec-mono">IBM Plex Mono 12.5 — {"input": "json"}, slug lines</p>
+        <p class="v-galley-spec-note">Hand = what the engine's pen writes. Mono = what you type in.</p>
+
+        <h3 class="v-galley-lang-h">Shapes</h3>
+        <div class="v-galley-shapes">
+          <span class="v-galley-tab is-demo" aria-hidden="true"><i>01</i> Tab</span>
+          <a class="v-galley-act" href="#" tabindex="-1" aria-hidden="true">Download SVG</a>
+          <span class="v-galley-mini-frame" aria-hidden="true"><span></span></span>
+          <span class="v-galley-trim v-galley-trim--demo" aria-hidden="true"><em>trim</em></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="v-galley-tone">
+      <h3 class="v-galley-lang-h">Tone</h3>
+      <p class="v-galley-tone-sub">Eight proofs, pulled straight from the engine. Nothing retouched.</p>
+      <p class="v-galley-tone-link"><a class="v-galley-act" href="#" tabindex="-1">Take the .excalidraw</a> <span class="v-galley-mono-inline">— edit it in Excalidraw</span></p>
+    </div>
+  </div>
+
+  <div class="v-galley-trim" role="presentation"><em>cut here · page below</em></div>
+
+  <!-- ============ 2. GALLERY SLICE ============ -->
+  <div class="v-galley-page">
+    <header class="v-galley-head">
+      <h2 class="v-galley-title">excalidrawer</h2>
+      <p class="v-galley-pos">Write JSON or one sentence. Get a diagram you can still open in Excalidraw.</p>
+      <p class="v-galley-headlinks">
+        <a class="v-galley-act" href="https://github.com/guohaonan-shy/excalidrawer">GitHub</a>
+        <a class="v-galley-act" href="https://www.npmjs.com/package/excalidrawer">npm</a>
+        <span class="v-galley-mono-inline v-galley-count">8 proofs · fixed seed · engine output, not retouched</span>
+      </p>
+    </header>
+
+    <div class="v-galley-tabs" role="tablist" aria-label="Diagram types"></div>
+    <div class="v-galley-panels"></div>
+
+    <div class="v-galley-error" role="alert">
+      <p class="v-galley-slug">Proof failed · gallery.json · fetch error</p>
+      <div class="v-galley-frame">
+        <div class="v-galley-sheet v-galley-sheet--empty">
+          <p class="v-galley-err-h">No sheets to show.</p>
+          <p class="v-galley-err-p">gallery.json didn't load, so this page has nothing to print. The same figures and their inputs are in the repo.</p>
+          <p><a class="v-galley-act" href="https://github.com/guohaonan-shy/excalidrawer">Open the repo on GitHub</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap);
+
+.v-galley {
+  --g-ground: #DAD3C3;
+  --g-ink: #1F1C19;
+  --g-pencil: #544D44;
+  --g-carmine: #A3122D;
+  --g-sheet: #FFFFFF;
+  --g-copy: #F4F0E6;
+  --g-shadow: #BDB4A0;
+  --g-hand: 'Excalifont', 'Virgil', 'Comic Sans MS', cursive;
+  --g-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --g-wobble: 255px 12px 225px 10px / 10px 225px 12px 255px;
+  background: var(--g-ground);
+  color: var(--g-ink);
+  font-family: var(--g-hand);
+  padding: 28px 28px 36px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+.v-galley *, .v-galley *::before, .v-galley *::after { box-sizing: border-box; }
+.v-galley p, .v-galley h2, .v-galley h3, .v-galley ul { margin: 0; padding: 0; }
+
+/* ---------- shared bits ---------- */
+.v-galley .v-galley-slug {
+  font-family: var(--g-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--g-pencil);
+  margin-bottom: 8px;
+}
+.v-galley .v-galley-slug::before { content: "+ "; color: var(--g-ink); font-weight: 500; }
+.v-galley .v-galley-mono-inline { font-family: var(--g-mono); font-size: 12px; color: var(--g-pencil); }
+
+/* action: the proofreader's red pencil — only links/buttons wear carmine */
+.v-galley .v-galley-act {
+  font-family: var(--g-hand);
+  font-size: 19px;
+  color: var(--g-carmine);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  background: none; border: 0; padding: 2px 0; cursor: pointer;
+}
+.v-galley .v-galley-act:hover { text-decoration-thickness: 3px; }
+.v-galley a:focus-visible, .v-galley button:focus-visible, .v-galley summary:focus-visible, .v-galley [role="tab"]:focus-visible {
+  outline: 2px dashed var(--g-ink);
+  outline-offset: 3px;
+}
+
+/* trim line divider */
+.v-galley .v-galley-trim {
+  display: flex; align-items: center; gap: 10px;
+  margin: 26px 0;
+  font-family: var(--g-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--g-pencil);
+}
+.v-galley .v-galley-trim::before, .v-galley .v-galley-trim::after {
+  content: ""; flex: 1; border-top: 1.5px dashed var(--g-ink);
+}
+.v-galley .v-galley-trim em { font-style: normal; }
+
+/* proof frame: crop marks at four corners, white sheet with a flat offset (no blur, no glow) */
+.v-galley .v-galley-frame {
+  --c: var(--g-ink);
+  padding: 12px;
+  background:
+    linear-gradient(var(--c),var(--c)) left 12px top 0 / 1px 9px no-repeat,
+    linear-gradient(var(--c),var(--c)) left 0 top 12px / 9px 1px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 12px top 0 / 1px 9px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 0 top 12px / 9px 1px no-repeat,
+    linear-gradient(var(--c),var(--c)) left 12px bottom 0 / 1px 9px no-repeat,
+    linear-gradient(var(--c),var(--c)) left 0 bottom 12px / 9px 1px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 12px bottom 0 / 1px 9px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 0 bottom 12px / 9px 1px no-repeat;
+}
+.v-galley .v-galley-sheet {
+  background: var(--g-sheet);
+  box-shadow: 4px 4px 0 var(--g-shadow);
+  display: block;
+}
+.v-galley .v-galley-sheet img { display: block; width: 100%; height: auto; }
+.v-galley .v-galley-sheet--tall { max-height: 520px; overflow-y: auto; overscroll-behavior: contain; }
+.v-galley .v-galley-sheet--empty {
+  background: transparent; box-shadow: none;
+  border: 1.5px dashed var(--g-ink);
+  padding: 34px 28px;
+  min-height: 220px;
+}
+
+/* ---------- language sheet ---------- */
+.v-galley .v-galley-lang-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; }
+.v-galley .v-galley-lang-h {
+  font-family: var(--g-mono); font-weight: 500; font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--g-ink); border-bottom: 1px solid var(--g-ink); padding-bottom: 4px; margin: 10px 0 10px;
+}
+.v-galley .v-galley-swatches { list-style: none; display: grid; gap: 7px; }
+.v-galley .v-galley-swatches li { display: grid; grid-template-columns: 30px 1fr; column-gap: 10px; font-size: 17px; align-items: center; }
+.v-galley .v-galley-swatches b { font-weight: 400; }
+.v-galley .v-galley-swatches li > span:not(.v-galley-chip) { grid-column: 2; }
+.v-galley .v-galley-swatches code { grid-column: 2; font-family: var(--g-mono); font-size: 11px; color: var(--g-pencil); }
+.v-galley .v-galley-chip { grid-row: span 2; width: 30px; height: 30px; border: 1.5px solid var(--g-ink); border-radius: var(--g-wobble); }
+.v-galley .v-galley-spec-hand1 { font-size: 40px; line-height: 1.05; }
+.v-galley .v-galley-spec-hand2 { font-size: 19px; margin-top: 8px; }
+.v-galley .v-galley-spec-mono { font-family: var(--g-mono); font-size: 12.5px; margin-top: 6px; }
+.v-galley .v-galley-spec-note { font-family: var(--g-mono); font-size: 11px; color: var(--g-pencil); margin-top: 4px; }
+.v-galley .v-galley-shapes { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 20px; }
+.v-galley .v-galley-mini-frame { display: inline-block; width: 64px; height: 44px; }
+.v-galley .v-galley-mini-frame {
+  padding: 7px; --c: var(--g-ink);
+  background:
+    linear-gradient(var(--c),var(--c)) left 7px top 0 / 1px 5px no-repeat,
+    linear-gradient(var(--c),var(--c)) left 0 top 7px / 5px 1px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 7px bottom 0 / 1px 5px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 0 bottom 7px / 5px 1px no-repeat;
+}
+.v-galley .v-galley-mini-frame span { display: block; width: 100%; height: 100%; background: #fff; box-shadow: 3px 3px 0 var(--g-shadow); }
+.v-galley .v-galley-trim--demo { margin: 0; flex: 1 1 120px; min-width: 120px; }
+.v-galley .v-galley-tone { margin-top: 6px; }
+.v-galley .v-galley-tone-sub { font-size: 21px; }
+.v-galley .v-galley-tone-link { margin-top: 4px; }
+
+/* ---------- page header ---------- */
+.v-galley .v-galley-title { font-family: var(--g-hand); font-weight: 400; font-size: 46px; line-height: 1; }
+.v-galley .v-galley-pos { font-size: 21px; margin-top: 10px; max-width: 36em; }
+.v-galley .v-galley-headlinks { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; margin-top: 10px; }
+
+/* ---------- tabs ---------- */
+.v-galley .v-galley-tabs {
+  display: flex; flex-wrap: wrap; gap: 6px 2px;
+  margin: 26px 0 18px;
+  border-bottom: 1.5px solid var(--g-ink);
+  padding-bottom: 8px;
+}
+.v-galley .v-galley-tab {
+  font-family: var(--g-hand); font-size: 18px; color: var(--g-ink);
+  background: transparent; border: 1.5px solid transparent;
+  border-radius: var(--g-wobble);
+  padding: 5px 8px 4px; gap: 4px; cursor: pointer;
+  display: inline-flex; align-items: baseline;
+}
+.v-galley .v-galley-tab i { font-family: var(--g-mono); font-style: normal; font-size: 11px; color: var(--g-pencil); }
+.v-galley .v-galley-tab:hover { border-color: var(--g-pencil); border-style: dashed; }
+.v-galley .v-galley-tab[aria-selected="true"], .v-galley .v-galley-tab.is-demo {
+  background: var(--g-sheet); border: 1.5px solid var(--g-ink); border-style: solid;
+  box-shadow: 3px 3px 0 var(--g-shadow);
+}
+
+/* ---------- figure blocks ---------- */
+.v-galley .v-galley-panel[hidden] { display: none; }
+.v-galley .v-galley-panel { animation: galley-in .18s ease-out; }
+@keyframes galley-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+html.reduce-motion .v-galley .v-galley-panel { animation: none; }
+
+.v-galley .v-galley-fig + .v-galley-fig { margin-top: 8px; }
+.v-galley .v-galley-fig + .v-galley-fig::before {
+  content: ""; display: block; border-top: 1.5px dashed var(--g-ink); margin: 26px 0 22px;
+}
+.v-galley .v-galley-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; align-items: baseline; margin-top: 14px; }
+.v-galley .v-galley-name { font-size: 27px; font-weight: 400; font-family: var(--g-hand); }
+.v-galley .v-galley-desc { font-size: 19px; color: var(--g-pencil); width: 100%; margin-top: -2px; }
+.v-galley .v-galley-tallnote { font-family: var(--g-mono); font-size: 11px; color: var(--g-pencil); margin-top: 8px; }
+
+.v-galley .v-galley-actions { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px; margin-top: 12px; }
+.v-galley .v-galley-actions .v-galley-dl-label { font-family: var(--g-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--g-pencil); }
+
+.v-galley details.v-galley-input { margin-top: 12px; }
+.v-galley details.v-galley-input > summary {
+  list-style: none; display: inline-flex; align-items: baseline; gap: 8px;
+  font-family: var(--g-hand); font-size: 19px; color: var(--g-carmine); cursor: pointer;
+  text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px;
+}
+.v-galley details.v-galley-input > summary::-webkit-details-marker { display: none; }
+.v-galley details.v-galley-input > summary::before {
+  content: "+"; font-family: var(--g-mono); font-size: 15px; display: inline-block; width: 12px; text-decoration: none;
+}
+.v-galley details.v-galley-input[open] > summary::before { content: "−"; }
+.v-galley .v-galley-copy {
+  margin-top: 10px; background: var(--g-copy);
+  border: 1.5px solid var(--g-ink); border-radius: 3px 9px 4px 11px / 11px 4px 9px 3px;
+  padding: 12px 14px;
+}
+.v-galley .v-galley-copy pre {
+  margin: 8px 0 0; font-family: var(--g-mono); font-size: 12.5px; line-height: 1.55; color: var(--g-ink);
+  max-height: 300px; overflow: auto; white-space: pre;
+}
+.v-galley .v-galley-copy .k { color: var(--g-pencil); }
+.v-galley .v-galley-copy .v-galley-slug { margin: 0; }
+
+/* ---------- states ---------- */
+.v-galley .v-galley-error { display: none; margin-top: 26px; }
+.v-galley[data-state="load-error"] .v-galley-tabs,
+.v-galley[data-state="load-error"] .v-galley-panels,
+.v-galley[data-state="load-error"] .v-galley-count { display: none; }
+.v-galley[data-state="load-error"] .v-galley-error { display: block; }
+.v-galley .v-galley-err-h { font-size: 30px; }
+.v-galley .v-galley-err-p { font-size: 19px; color: var(--g-pencil); margin: 8px 0 14px; max-width: 32em; }
+
+/* ---------- narrow ---------- */
+@media (max-width: 640px) {
+  .v-galley { padding: 20px 16px 28px; }
+  .v-galley .v-galley-lang-grid { grid-template-columns: 1fr; gap: 6px; }
+  .v-galley .v-galley-title { font-size: 38px; }
+  .v-galley .v-galley-spec-hand1 { font-size: 32px; }
+  .v-galley .v-galley-tab { font-size: 17px; padding: 5px 8px 4px; }
+  .v-galley .v-galley-frame { padding: 10px; }
+}
+</style>
+<script>
+(function () {
+  var root = document.querySelector('[data-variant="galley"]');
+  if (!root) return;
+
+  var FLOW = {"title":"Pull request to production","direction":"horizontal","nodes":[{"id":"open","label":"PR opened","type":"start"},{"id":"ci","label":"CI + review"},{"id":"ok","label":"Approved?","type":"decision"},{"id":"merge","label":"Merge to main"},{"id":"fix","label":"Request changes","color":"red"},{"id":"ship","label":"Deploy","type":"end"}],"edges":[{"from":"open","to":"ci"},{"from":"ci","to":"ok"},{"from":"ok","to":"merge","label":"yes"},{"from":"ok","to":"fix","label":"no"},{"from":"merge","to":"ship"}]};
+
+  var TYPES = [
+    { id: 'flowchart', label: 'Flowchart', figs: [
+      { slug: 'flowchart', name: 'Flowchart', desc: 'Decisions + branches', src: 'template: flowchart', w: 2520, h: 540, json: JSON.stringify(FLOW, null, 2) } ] },
+    { id: 'architecture', label: 'Architecture', figs: [
+      { slug: 'architecture', name: 'Architecture', desc: 'Layered components + connections', src: 'template: architecture', w: 1636, h: 1608,
+        json: '{\n  "title": "Web app architecture",\n  "sections": [\n    { "label": "Clients", "color": "blue", "items": ["Web app", "iOS app", "Admin console"] },\n    { "label": "Edge", "color": "purple", "items": ["CDN", "API gateway"] },\n    { "label": "Services", "color": "green", "items": ["Auth", "Orders", "Payments", "Notifications"] },\n    …\n  ],\n  "connections": [ … ]\n}' } ] },
+    { id: 'sequence', label: 'Sequence', figs: [
+      { slug: 'sequence', name: 'Sequence', desc: 'Messages between actors over time', src: 'sugar (sequence recipe)', w: 3940, h: 1948,
+        json: '[\n  { "shape": "rect", "id": "user", "at": [40, 80], "size": [160, 56], "fill": "bgBlue", "text": "User" },\n  { "shape": "rect", "id": "app", "at": [300, 80], "size": [160, 56], "fill": "bgGreen", "text": "App" },\n  { "shape": "text", "at": [120, 180], "size": [260, 18], "text": "POST /login", "fontSize": 14 },\n  …\n]' } ] },
+    { id: 'timeline', label: 'Timeline', figs: [
+      { slug: 'timeline', name: 'Timeline', desc: 'Milestones on an axis', src: 'template: timeline', w: 2340, h: 968,
+        json: '{\n  "title": "2026 product roadmap",\n  "items": [\n    { "label": "Beta", "time": "Q1", "desc": "Invite-only, 200 teams" },\n    { "label": "Public launch", "time": "Q2", "desc": "Self-serve signup" },\n    …\n  ]\n}' } ] },
+    { id: 'comparison', label: 'Comparison', figs: [
+      { slug: 'comparison', name: 'Comparison', desc: 'A vs B, dimension by dimension', src: 'sugar (comparison recipe)', w: 1920, h: 820,
+        json: '[\n  { "shape": "text", "at": [0, 24], "size": [960, 32], "text": "MySpeakingScore vs TOEFLAIR: coverage", "fontSize": 24 },\n  { "shape": "rect", "at": [20, 80], "size": [400, 60], "fill": "#f8f9fa", "stroke": "gray", "text": "MySpeakingScore" },\n  { "shape": "rect", "at": [540, 80], "size": [400, 60], "fill": "bgBlue", "stroke": "blue", "text": "TOEFLAIR", "textColor": "blue" },\n  …\n]' } ] },
+    { id: 'tree', label: 'Tree', figs: [
+      { slug: 'tree-right', name: 'Tree · left → right', desc: 'Parent → children, split sideways', src: 'template: tree', w: 1436, h: 1140,
+        json: '{\n  "direction": "horizontal",\n  "root": { "label": "excalidrawer", "children": [ … ] }\n}' },
+      { slug: 'tree-down', name: 'Tree · top → down', desc: 'Parent → children, split downward', src: 'template: tree', w: 2620, h: 864,
+        json: '{\n  "direction": "vertical",\n  "root": { "label": "…", "children": [ … ] }\n}' },
+      { slug: 'tree-stories', name: 'Tree · user-story map', desc: '23 numbered stories in 6 groups', src: 'template: tree', w: 2238, h: 4898, tall: true,
+        json: '{\n  "direction": "horizontal",\n  "numberLeaves": true,\n  "root": { "label": "…", "children": [ … 6 groups, 23 stories … ] }\n}' } ] }
+  ];
+
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function hl(json) { return esc(json).replace(/("[^"]*")(\s*:)/g, '<span class="k">$1</span>$2'); }
+
+  var tablist = root.querySelector('.v-galley-tabs');
+  var panels = root.querySelector('.v-galley-panels');
+  var n = 0;
+
+  TYPES.forEach(function (t, i) {
+    var tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'v-galley-tab';
+    tab.id = 'v-galley-tab-' + t.id;
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-controls', 'v-galley-panel-' + t.id);
+    tab.innerHTML = '<i>0' + (i + 1) + '</i>' + esc(t.label);
+    tablist.appendChild(tab);
+
+    var p = document.createElement('div');
+    p.className = 'v-galley-panel';
+    p.id = 'v-galley-panel-' + t.id;
+    p.setAttribute('role', 'tabpanel');
+    p.setAttribute('aria-labelledby', tab.id);
+    p.tabIndex = 0;
+    p.innerHTML = t.figs.map(function (f) {
+      n += 1;
+      var png = 'assets/figures/' + f.slug + '.png';
+      return '<article class="v-galley-fig">' +
+        '<p class="v-galley-slug">Proof 0' + n + '/08 · ' + esc(f.slug) + ' · ' + f.w + '×' + f.h + ' @2x</p>' +
+        '<div class="v-galley-frame"><a class="v-galley-sheet' + (f.tall ? ' v-galley-sheet--tall' : '') + '" href="' + png + '" target="_blank" rel="noopener" ' +
+          (f.tall ? 'tabindex="0" ' : '') + 'title="Open full-size PNG">' +
+          '<img src="' + png + '" width="' + f.w + '" height="' + f.h + '" loading="lazy" alt="' + esc(f.name + ' — ' + f.desc) + '"></a></div>' +
+        (f.tall ? '<p class="v-galley-tallnote">Tall sheet (' + f.w + '×' + f.h + '): scroll inside the frame, or click it for the full PNG.</p>' : '') +
+        '<div class="v-galley-meta"><h3 class="v-galley-name">' + esc(f.name) + '</h3><p class="v-galley-desc">' + esc(f.desc) + '</p></div>' +
+        '<details class="v-galley-input"><summary>Input</summary>' +
+          '<div class="v-galley-copy"><p class="v-galley-slug">Source · ' + esc(f.src) + '</p><pre>' + hl(f.json) + '</pre></div></details>' +
+        '<p class="v-galley-actions"><span class="v-galley-dl-label">Download</span>' +
+          '<a class="v-galley-act" href="#">.excalidraw</a><a class="v-galley-act" href="#">SVG</a><a class="v-galley-act" href="#">PNG</a></p>' +
+        '</article>';
+    }).join('');
+    panels.appendChild(p);
+  });
+
+  var tabs = Array.prototype.slice.call(tablist.querySelectorAll('[role="tab"]'));
+
+  function select(i, focus) {
+    tabs.forEach(function (tab, j) {
+      var on = i === j;
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.tabIndex = on ? 0 : -1;
+      document.getElementById(tab.getAttribute('aria-controls')).hidden = !on;
+    });
+    if (focus) tabs[i].focus();
+  }
+
+  tabs.forEach(function (tab, i) {
+    tab.addEventListener('click', function () { select(i, false); });
+    tab.addEventListener('keydown', function (e) {
+      var k = e.key, j = null;
+      if (k === 'ArrowRight' || k === 'ArrowDown') j = (i + 1) % tabs.length;
+      else if (k === 'ArrowLeft' || k === 'ArrowUp') j = (i - 1 + tabs.length) % tabs.length;
+      else if (k === 'Home') j = 0;
+      else if (k === 'End') j = tabs.length - 1;
+      if (j !== null) { e.preventDefault(); select(j, true); }
+    });
+  });
+
+  select(0, false);
+
+  function applyState() {
+    var s = root.getAttribute('data-state') || 'default';
+    var first = root.querySelector('#v-galley-panel-flowchart details.v-galley-input');
+    if (s === 'input-open' || s === 'default') {
+      select(0, false);
+      if (first) first.open = (s === 'input-open');
+    }
+  }
+  applyState();
+  new MutationObserver(applyState).observe(root, { attributes: true, attributeFilter: ['data-state'] });
+})();
+</script>
+
+  </div>
+</article>
+
+<article class="bd-variant" id="v-meniscus" data-slug="meniscus">
+  <header class="bd-label">
+    <p class="bd-family">白底</p>
+    <h2 class="bd-name">Meniscus 量杯 <code>?variant=meniscus</code></h2>
+    <p class="bd-bet">赌页面不是纸、是一台校准过的仪器：全白，图没有边框直接化进页面，整页就是一张引擎画布。</p>
+    <p class="bd-diff"><b>差别</b>　图怎么放：页面白 = 图的白，图无框无影，靠左侧刻度尺和图下一条细线分块 · 手写到哪：只到名字和标题（字标、tab、图名、Input）；说明和读数用 Instrument Sans，JSON 用等宽 · accent：橄榄绿 #4B6A00；当前 tab 下有一道凹液面弧线</p>
+    <p class="bd-timing"><b>时序</b>　点 tab：立即换图，液面弧线 0.28 秒升起 · 点 Input：立即展开</p>
+  </header>
+  <div class="bd-stage">
+<section class="v-meniscus" data-variant="meniscus" data-state="default">
+
+  <!-- ───────────── 1. Language sheet ───────────── -->
+  <div class="vm-sheet" aria-label="Meniscus visual language">
+    <div class="vm-sheet-head">
+      <h2 class="vm-hand vm-sheet-title">meniscus</h2>
+      <p class="vm-sheet-seed">Seed OGwMLqmPRP/gnsUM → first decoded byte 0x38 = hue 79° (olive) · letters “mL”, “PRP” → lab volumetric glassware. The page is a calibrated vessel; the figures are what it holds.</p>
+    </div>
+
+    <div class="vm-sheet-grid">
+      <div class="vm-sheet-col">
+        <h3 class="vm-label">Palette · ratios measured against #FFFFFF</h3>
+        <ul class="vm-swatches">
+          <li><span class="vm-vial" style="--c:#FFFFFF"></span><b>Ground</b><code>#FFFFFF</code><span>= engine sheet</span></li>
+          <li><span class="vm-vial" style="--c:#1E1E1E"></span><b>Ink</b><code>#1E1E1E</code><span>16.67 : 1</span></li>
+          <li><span class="vm-vial" style="--c:#5A6152"></span><b>Readout</b><code>#5A6152</code><span>6.43 : 1</span></li>
+          <li><span class="vm-vial" style="--c:#4B6A00"></span><b>Action</b><code>#4B6A00</code><span>6.25 : 1 · white on it 6.25</span></li>
+          <li><span class="vm-vial" style="--c:#EEF6D2"></span><b>Fill</b><code>#EEF6D2</code><span>ink on it 14.88 · action 5.58</span></li>
+          <li><span class="vm-vial" style="--c:#C8D0B8"></span><b>Graduation</b><code>#C8D0B8</code><span>ticks only, never text</span></li>
+        </ul>
+      </div>
+
+      <div class="vm-sheet-col">
+        <h3 class="vm-label">Type</h3>
+        <div class="vm-spec">
+          <p class="vm-hand vm-spec-big">Excalifont — names</p>
+          <p class="vm-spec-note">wordmark 44 · figure name 24 · tabs 20 · Input 20</p>
+        </div>
+        <div class="vm-spec">
+          <p class="vm-sans vm-spec-mid">Instrument Sans — readouts</p>
+          <p class="vm-spec-note">descriptions 15 · scale numerals 12 tabular · links 14/600</p>
+        </div>
+        <div class="vm-spec">
+          <p class="vm-mono vm-spec-mono">{"json": "JetBrains Mono"}</p>
+          <p class="vm-spec-note">Input body only · 13</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="vm-sheet-grid">
+      <div class="vm-sheet-col">
+        <h3 class="vm-label">Shapes</h3>
+        <div class="vm-shapes">
+          <figure class="vm-shape">
+            <span class="vm-shape-tab"><span class="vm-hand">Tab</span>
+              <svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg>
+            </span>
+            <figcaption>tab · meniscus</figcaption>
+          </figure>
+          <figure class="vm-shape"><a class="vm-tube" href="#" tabindex="-1">PNG <span aria-hidden="true">↓</span></a><figcaption>action · tube</figcaption></figure>
+          <figure class="vm-shape"><span class="vm-shape-edge" aria-hidden="true"></span><figcaption>edge · scale</figcaption></figure>
+          <figure class="vm-shape"><span class="vm-shape-div" aria-hidden="true"></span><figcaption>divider · rule</figcaption></figure>
+        </div>
+      </div>
+      <div class="vm-sheet-col">
+        <h3 class="vm-label">Tone</h3>
+        <p class="vm-tone">Each figure is unedited engine output. Its input is right under it.</p>
+        <p class="vm-tone"><span class="vm-tone-link">.excalidraw ↓</span> <span class="vm-readout">— opens in Excalidraw, still editable</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="vm-divider" aria-hidden="true"><span>0</span><span>100</span><span>200</span><span>300</span><span>mL</span></div>
+
+  <!-- ───────────── 2. Gallery slice ───────────── -->
+  <div class="vm-page">
+    <header class="vm-head">
+      <h1 class="vm-hand vm-wordmark">excalidrawer</h1>
+      <p class="vm-pos">Give it JSON or one sentence. It returns an .excalidraw file, an SVG and a PNG.</p>
+      <nav class="vm-links" aria-label="Project">
+        <a href="https://github.com/guohaonan-shy/excalidrawer">GitHub</a>
+        <a href="https://www.npmjs.com/package/excalidrawer">npm</a>
+      </nav>
+    </header>
+
+    <div class="vm-gallery">
+      <div class="vm-tabs" role="tablist" aria-label="Diagram types">
+        <button class="vm-tab" role="tab" id="vm-t-flowchart" aria-controls="vm-p-flowchart" aria-selected="true">Flowchart<svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+        <button class="vm-tab" role="tab" id="vm-t-architecture" aria-controls="vm-p-architecture" aria-selected="false" tabindex="-1">Architecture<svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+        <button class="vm-tab" role="tab" id="vm-t-sequence" aria-controls="vm-p-sequence" aria-selected="false" tabindex="-1">Sequence<svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+        <button class="vm-tab" role="tab" id="vm-t-timeline" aria-controls="vm-p-timeline" aria-selected="false" tabindex="-1">Timeline<svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+        <button class="vm-tab" role="tab" id="vm-t-comparison" aria-controls="vm-p-comparison" aria-selected="false" tabindex="-1">Comparison<svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+        <button class="vm-tab" role="tab" id="vm-t-tree" aria-controls="vm-p-tree" aria-selected="false" tabindex="-1">Tree <span class="vm-count">×3</span><svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+      </div>
+
+      <!-- Flowchart -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-flowchart" aria-labelledby="vm-t-flowchart" tabindex="0">
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img" href="assets/figures/flowchart.png" target="_blank" rel="noopener"><img src="assets/figures/flowchart.png" width="2520" height="540" alt="Flowchart — Decisions + branches"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Flowchart</h3><p class="vm-desc">Decisions + branches</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: flowchart</span></summary>
+<pre class="vm-mono"><code>{
+  "title": "Pull request to production",
+  "direction": "horizontal",
+  "nodes": [
+    { "id": "open",  "label": "PR opened", "type": "start" },
+    { "id": "ci",    "label": "CI + review" },
+    { "id": "ok",    "label": "Approved?", "type": "decision" },
+    { "id": "merge", "label": "Merge to main" },
+    { "id": "fix",   "label": "Request changes", "color": "red" },
+    { "id": "ship",  "label": "Deploy", "type": "end" }
+  ],
+  "edges": [
+    { "from": "open",  "to": "ci" },
+    { "from": "ci",    "to": "ok" },
+    { "from": "ok",    "to": "merge", "label": "yes" },
+    { "from": "ok",    "to": "fix",   "label": "no" },
+    { "from": "merge", "to": "ship" }
+  ]
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- Architecture -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-architecture" aria-labelledby="vm-t-architecture" tabindex="0" hidden>
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img vm-img-narrow" href="assets/figures/architecture.png" target="_blank" rel="noopener"><img src="assets/figures/architecture.png" width="1636" height="1608" alt="Architecture — Layered components + connections"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Architecture</h3><p class="vm-desc">Layered components + connections</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: architecture</span></summary>
+<pre class="vm-mono"><code>{
+  "title": "Web app architecture",
+  "sections": [
+    { "label": "Clients", "color": "blue",
+      "items": ["Web app", "iOS app", "Admin console"] },
+    { "label": "Edge", "color": "purple",
+      "items": ["CDN", "API gateway"] },
+    { "label": "Services", "color": "green",
+      "items": ["Auth", "Orders", "Payments", "Notifications"] },
+    …
+  ],
+  "connections": [
+    { "from": "Web app", "to": "CDN" },
+    { "from": "API gateway", "to": "Orders" },
+    …
+  ]
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- Sequence -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-sequence" aria-labelledby="vm-t-sequence" tabindex="0" hidden>
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img" href="assets/figures/sequence.png" target="_blank" rel="noopener"><img src="assets/figures/sequence.png" width="3940" height="1948" alt="Sequence — Messages between actors over time"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Sequence</h3><p class="vm-desc">Messages between actors over time</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">sugar (sequence recipe)</span></summary>
+<pre class="vm-mono"><code>{
+  "elements": [
+    { "type": "text", "id": "title",
+      "text": "Report audio — browser cache read / write" },
+    { "type": "box", "id": "a1", "label": "Upload pipeline", "color": "yellow" },
+    { "type": "box", "id": "a3", "label": "Audio source\n(getAudio)", "color": "blue" },
+    …
+    { "type": "arrow", "from": "a1", "to": "a6",
+      "label": "1. POST recording + Idempotency-Key" },
+    { "type": "arrow", "from": "a6", "to": "a1", "strokeStyle": "dashed",
+      "label": "2. 200 confirmed (failure: stop, cache untouched)" },
+    …
+  ]
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- Timeline -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-timeline" aria-labelledby="vm-t-timeline" tabindex="0" hidden>
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img" href="assets/figures/timeline.png" target="_blank" rel="noopener"><img src="assets/figures/timeline.png" width="2340" height="968" alt="Timeline — Milestones on an axis"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Timeline</h3><p class="vm-desc">Milestones on an axis</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: timeline</span></summary>
+<pre class="vm-mono"><code>{
+  "title": "2026 product roadmap",
+  "items": [
+    { "label": "Beta", "time": "Q1", "desc": "Invite-only, 200 teams" },
+    { "label": "Public launch", "time": "Q2", "desc": "Self-serve signup" },
+    …
+  ]
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- Comparison -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-comparison" aria-labelledby="vm-t-comparison" tabindex="0" hidden>
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img" href="assets/figures/comparison.png" target="_blank" rel="noopener"><img src="assets/figures/comparison.png" width="1920" height="820" alt="Comparison — A vs B, dimension by dimension"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Comparison</h3><p class="vm-desc">A vs B, dimension by dimension</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">sugar (comparison recipe)</span></summary>
+<pre class="vm-mono"><code>{
+  "elements": [
+    { "type": "text", "id": "title",
+      "text": "MySpeakingScore vs TOEFLAIR: coverage" },
+    { "type": "box", "id": "lh", "label": "MySpeakingScore", "color": "gray" },
+    { "type": "box", "id": "rh", "label": "TOEFLAIR", "color": "blue" },
+    { "type": "box", "id": "l1", "label": "Speaking: Listen &amp; Repeat, Interview" },
+    …
+  ]
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- Tree ×3 -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-tree" aria-labelledby="vm-t-tree" tabindex="0" hidden>
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img vm-img-narrow" href="assets/figures/tree-right.png" target="_blank" rel="noopener"><img src="assets/figures/tree-right.png" width="1436" height="1140" alt="Tree · left → right — Parent → children, split sideways"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Tree · left → right</h3><p class="vm-desc">Parent → children, split sideways</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: tree</span></summary>
+<pre class="vm-mono"><code>{
+  "title": "Skills",
+  "direction": "horizontal",
+  "levels": ["Root", "Category", "Skill"],
+  "root": { "label": "Skills", "children": [
+    { "label": "Design", "desc": "ui · visual · ux", "color": "blue",
+      "children": [{ "label": "polish", "desc": "align · space · rhythm" }, …] },
+    …
+  ] }
+}</code></pre>
+            </details>
+          </div>
+        </article>
+
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>02</span></div>
+          <div class="vm-body">
+            <a class="vm-img" href="assets/figures/tree-down.png" target="_blank" rel="noopener"><img src="assets/figures/tree-down.png" width="2620" height="864" alt="Tree · top → down — Parent → children, split downward"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Tree · top → down</h3><p class="vm-desc">Parent → children, split downward</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: tree</span></summary>
+<pre class="vm-mono"><code>{
+  "direction": "vertical",
+  "root": { "label": "…", "children": [ … ] }
+}</code></pre>
+            </details>
+          </div>
+        </article>
+
+        <article class="vm-fig vm-fig-tall">
+          <div class="vm-scale" aria-hidden="true"><span>03</span><em class="vm-level" data-level>level —</em></div>
+          <div class="vm-body">
+            <div class="vm-cap-wrap">
+              <a class="vm-img vm-capped" href="assets/figures/tree-stories.png" target="_blank" rel="noopener"><img src="assets/figures/tree-stories.png" width="2238" height="4898" alt="Tree · user-story map — 23 numbered stories in 6 groups"></a>
+              <p class="vm-fillnote"><span class="vm-fillnote-line" aria-hidden="true"></span><span data-fillnote>Showing the top of a tall figure. Scroll inside it, or open the PNG at full size.</span></p>
+            </div>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Tree · user-story map</h3><p class="vm-desc">23 numbered stories in 6 groups</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: tree</span></summary>
+<pre class="vm-mono"><code>{
+  "direction": "vertical",
+  "numberLeaves": true,
+  "root": { "label": "…", "children": [
+    { "label": "…", "children": ["…", "…", …] },
+    …
+  ] }
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- load-error -->
+      <div class="vm-error" role="alert">
+        <div class="vm-scale vm-scale-empty" aria-hidden="true"><span>00</span></div>
+        <div>
+          <p class="vm-hand vm-error-title">Nothing to show: gallery.json didn’t load.</p>
+          <p class="vm-desc">This page only shows real engine output, so it shows nothing rather than stand-ins. The examples and their inputs are in the repo.</p>
+          <p><a class="vm-tube" href="https://github.com/guohaonan-shy/excalidrawer">Open the repo on GitHub <span aria-hidden="true">→</span></a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+
+.v-meniscus {
+  --ground: #FFFFFF;
+  --ink: #1E1E1E;
+  --readout: #5A6152;
+  --action: #4B6A00;
+  --on-action: #FFFFFF;
+  --fill: #EEF6D2;
+  --grad: #C8D0B8;
+  --hand: 'Excalifont', 'Virgil', 'Comic Sans MS', cursive;
+  --sans: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* graduation scale: minor tick every 8px, major every 40px */
+  --ticks-v:
+    linear-gradient(var(--grad), var(--grad)) right top / 1px 100% no-repeat,
+    repeating-linear-gradient(to bottom, var(--grad) 0 1px, transparent 1px 40px) right top / 14px 100% no-repeat,
+    repeating-linear-gradient(to bottom, var(--grad) 0 1px, transparent 1px 8px) right top / 7px 100% no-repeat;
+  display: block;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 28px 24px 40px;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.v-meniscus *, .v-meniscus *::before, .v-meniscus *::after { box-sizing: border-box; }
+.v-meniscus h1, .v-meniscus h2, .v-meniscus h3, .v-meniscus p, .v-meniscus ul, .v-meniscus figure, .v-meniscus pre { margin: 0; }
+.v-meniscus .vm-hand { font-family: var(--hand); font-weight: 400; }
+.v-meniscus .vm-sans { font-family: var(--sans); }
+.v-meniscus .vm-mono { font-family: var(--mono); }
+.v-meniscus .vm-readout { color: var(--readout); }
+.v-meniscus a { color: var(--action); }
+.v-meniscus a:focus-visible, .v-meniscus button:focus-visible, .v-meniscus summary:focus-visible, .v-meniscus [tabindex="0"]:focus-visible {
+  outline: 2px solid var(--action); outline-offset: 3px; border-radius: 2px;
+}
+
+/* ── language sheet ── */
+.v-meniscus .vm-sheet { display: grid; gap: 22px; }
+.v-meniscus .vm-sheet-head { display: grid; gap: 4px; }
+.v-meniscus .vm-sheet-title { font-size: 30px; line-height: 1.1; }
+.v-meniscus .vm-sheet-seed { color: var(--readout); font-size: 13px; max-width: 62ch; }
+.v-meniscus .vm-sheet-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; }
+.v-meniscus .vm-sheet-col { min-width: 0; }
+.v-meniscus .vm-label { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--readout); margin-bottom: 10px; }
+.v-meniscus .vm-swatches { list-style: none; padding: 0; display: grid; gap: 6px; }
+.v-meniscus .vm-swatches li { display: grid; grid-template-columns: 16px 82px 70px 1fr; align-items: center; gap: 8px; font-size: 13px; }
+.v-meniscus .vm-swatches b { font-weight: 600; }
+.v-meniscus .vm-swatches code { font-family: var(--sans); font-variant-numeric: tabular-nums; color: var(--ink); }
+.v-meniscus .vm-swatches span:last-child { color: var(--readout); font-variant-numeric: tabular-nums; }
+.v-meniscus .vm-vial { width: 14px; height: 22px; background: var(--c); border: 1.5px solid var(--ink); border-top: 0; border-radius: 0 0 8px 8px; }
+.v-meniscus .vm-spec { padding: 6px 0 8px; }
+.v-meniscus .vm-spec + .vm-spec { border-top: 1px solid var(--grad); }
+.v-meniscus .vm-spec-big { font-size: 26px; line-height: 1.2; }
+.v-meniscus .vm-spec-mid { font-size: 18px; font-weight: 500; }
+.v-meniscus .vm-spec-mono { font-size: 14px; }
+.v-meniscus .vm-spec-note { font-size: 12px; color: var(--readout); }
+.v-meniscus .vm-shapes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: end; }
+.v-meniscus .vm-shape { display: grid; gap: 8px; justify-items: start; }
+.v-meniscus .vm-shape figcaption { font-size: 12px; color: var(--readout); }
+.v-meniscus .vm-shape-tab { position: relative; display: inline-block; font-size: 20px; padding: 0 10px 16px; border-bottom: 1.5px solid var(--ink); }
+.v-meniscus .vm-shape-tab .vm-men { transform: none; }
+.v-meniscus .vm-shape-edge { width: 26px; height: 48px; background: var(--ticks-v); }
+.v-meniscus .vm-shape-div { width: 100%; height: 14px; border-top: 1.5px solid var(--ink);
+  background: repeating-linear-gradient(to right, var(--grad) 0 1px, transparent 1px 8px) left top / 100% 6px no-repeat,
+              repeating-linear-gradient(to right, var(--ink) 0 1.5px, transparent 1.5px 40px) left top / 100% 12px no-repeat; }
+.v-meniscus .vm-tone { font-size: 15px; margin-bottom: 8px; }
+.v-meniscus .vm-tone-link { color: var(--action); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+/* full-width graduated divider between sheet and page */
+.v-meniscus .vm-divider {
+  margin: 34px 0 30px; height: 30px; border-top: 1.5px solid var(--ink);
+  display: flex; justify-content: space-between; align-items: flex-end;
+  font-size: 11px; color: var(--readout); font-variant-numeric: tabular-nums;
+  background:
+    repeating-linear-gradient(to right, var(--ink) 0 1.5px, transparent 1.5px 25%) left top / calc(100% + 1.5px) 12px no-repeat,
+    repeating-linear-gradient(to right, var(--grad) 0 1px, transparent 1px 2.5%) left top / 100% 6px no-repeat;
+}
+
+/* ── page header ── */
+.v-meniscus .vm-head { display: grid; grid-template-columns: 1fr auto; column-gap: 20px; row-gap: 4px; align-items: baseline; margin-bottom: 26px; }
+.v-meniscus .vm-wordmark { font-size: 44px; line-height: 1.05; grid-column: 1; }
+.v-meniscus .vm-pos { grid-column: 1; grid-row: 2; color: var(--readout); font-size: 16px; max-width: 52ch; }
+.v-meniscus .vm-links { grid-column: 2; grid-row: 1; display: flex; gap: 18px; }
+.v-meniscus .vm-links a { font-weight: 600; font-size: 15px; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.v-meniscus .vm-links a:hover { background: var(--fill); }
+
+/* ── tabs: labels standing on a graduated rule; active = meniscus ── */
+.v-meniscus .vm-tabs {
+  display: flex; gap: 2px; overflow-x: auto; scrollbar-width: thin;
+  border-bottom: 1.5px solid var(--ink);
+  margin-bottom: 30px; padding-top: 2px;
+  background: repeating-linear-gradient(to right, var(--grad) 0 1px, transparent 1px 8px) left bottom / 100% 6px no-repeat;
+}
+.v-meniscus .vm-tab {
+  position: relative; flex: 0 0 auto;
+  appearance: none; border: 0; background: none; cursor: pointer;
+  font-family: var(--hand); font-size: 20px; color: var(--readout);
+  padding: 4px 14px 20px; line-height: 1.2;
+}
+.v-meniscus .vm-tab:hover { color: var(--ink); }
+.v-meniscus .vm-tab[aria-selected="true"] { color: var(--ink); }
+.v-meniscus .vm-count { font-family: var(--sans); font-size: 12px; color: var(--readout); vertical-align: 2px; }
+.v-meniscus .vm-men {
+  position: absolute; left: 4px; right: 4px; bottom: 0; width: calc(100% - 8px); height: 15px;
+  transform-origin: 50% 100%; transform: scaleY(0);
+  transition: transform .28s cubic-bezier(.3,.7,.3,1);
+  overflow: visible;
+}
+.v-meniscus .vm-tab[aria-selected="true"] .vm-men { transform: scaleY(1); }
+.v-meniscus .vm-men-fill { fill: var(--fill); }
+.v-meniscus .vm-men-line { fill: none; stroke: var(--action); stroke-width: 2.5px; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+
+/* ── figure blocks: borderless on the same white; a scale on the left is the only edge ── */
+.v-meniscus .vm-panel { display: grid; gap: 44px; }
+.v-meniscus .vm-panel[hidden] { display: none; }
+.v-meniscus .vm-fig { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 18px; }
+.v-meniscus .vm-scale { position: relative; background: var(--ticks-v); min-height: 100%; }
+.v-meniscus .vm-scale span { position: absolute; top: -2px; left: 0; font-size: 12px; font-weight: 600; color: var(--readout); font-variant-numeric: tabular-nums; background: var(--ground); padding-bottom: 2px; }
+.v-meniscus .vm-level { position: absolute; left: 0; font-style: normal; font-size: 11px; line-height: 1.2; color: var(--readout); writing-mode: vertical-rl; transform: rotate(180deg); background: var(--ground); padding: 4px 0; top: 32px; }
+.v-meniscus .vm-body { min-width: 0; display: grid; gap: 14px; }
+.v-meniscus .vm-img { display: block; }
+.v-meniscus .vm-img img { display: block; width: 100%; height: auto; }
+.v-meniscus .vm-img-narrow { max-width: 520px; }
+.v-meniscus .vm-img:hover { outline: 1px dashed var(--grad); outline-offset: 6px; }
+.v-meniscus .vm-cap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px 18px; border-top: 1px solid var(--grad); padding-top: 10px; }
+.v-meniscus .vm-name { font-size: 24px; line-height: 1.15; }
+.v-meniscus .vm-desc { color: var(--readout); font-size: 15px; }
+.v-meniscus .vm-dl { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* action shape: a test tube — flat mouth, round bottom */
+.v-meniscus .vm-tube {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--sans); font-size: 14px; font-weight: 600; line-height: 1;
+  color: var(--action); text-decoration: none;
+  border: 1.5px solid var(--action); border-radius: 2px 2px 14px 14px;
+  padding: 6px 12px 9px; background: var(--ground);
+  transition: background-color .15s, color .15s;
+}
+.v-meniscus .vm-tube:hover { background: var(--action); color: var(--on-action); }
+
+/* Input disclosure */
+.v-meniscus .vm-input { min-width: 0; }
+.v-meniscus .vm-input summary { list-style: none; cursor: pointer; display: inline-flex; align-items: baseline; gap: 12px; color: var(--action); }
+.v-meniscus .vm-input summary::-webkit-details-marker { display: none; }
+.v-meniscus .vm-input summary .vm-hand { font-size: 20px; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.v-meniscus .vm-input summary .vm-hand::before { content: "+"; display: inline-block; width: 1em; font-family: var(--sans); font-weight: 600; text-decoration: none; }
+.v-meniscus .vm-input[open] summary .vm-hand::before { content: "−"; }
+.v-meniscus .vm-src { font-family: var(--sans); font-size: 13px; color: var(--readout); }
+.v-meniscus .vm-input pre {
+  margin-top: 10px; padding: 12px 0 12px 22px; font-size: 13px; line-height: 1.55; color: var(--ink);
+  overflow: auto; max-height: 340px;
+  background:
+    linear-gradient(var(--action), var(--action)) left top / 2.5px 100% no-repeat,
+    repeating-linear-gradient(to bottom, var(--grad) 0 1px, transparent 1px 8px) 2.5px top / 6px 100% no-repeat;
+}
+.v-meniscus .vm-input pre code { font-family: inherit; }
+
+/* tall figure: capped vessel with a visible fill line */
+.v-meniscus .vm-capped { max-height: 520px; overflow-y: auto; overscroll-behavior: contain; }
+.v-meniscus .vm-fillnote { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--readout); margin-top: 6px; }
+.v-meniscus .vm-fillnote-line { flex: 0 0 48px; height: 0; border-top: 2.5px solid var(--action); }
+.v-meniscus .vm-cap-wrap { display: grid; }
+.v-meniscus .vm-cap-wrap .vm-capped { border-bottom: 2.5px solid var(--action); }
+
+/* ── states ── */
+.v-meniscus .vm-error { display: none; grid-template-columns: 30px minmax(0,1fr); gap: 18px; min-height: 240px; }
+.v-meniscus[data-state="load-error"] .vm-tabs,
+.v-meniscus[data-state="load-error"] .vm-panel { display: none; }
+.v-meniscus[data-state="load-error"] .vm-error { display: grid; }
+.v-meniscus .vm-error-title { font-size: 28px; line-height: 1.2; margin-bottom: 8px; }
+.v-meniscus .vm-error .vm-desc { max-width: 54ch; margin-bottom: 18px; }
+.v-meniscus .vm-scale-empty { border-bottom: 2.5px solid var(--action); }
+
+/* ── motion ── */
+html.reduce-motion .v-meniscus .vm-men,
+html.reduce-motion .v-meniscus .vm-tube { transition: none; }
+
+/* ── narrow ── */
+@media (max-width: 640px) {
+  .v-meniscus { padding: 20px 16px 32px; }
+  .v-meniscus .vm-sheet-grid { grid-template-columns: 1fr; gap: 20px; }
+  .v-meniscus .vm-shapes { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; }
+  .v-meniscus .vm-swatches li { grid-template-columns: 16px 76px 66px 1fr; font-size: 12px; }
+  .v-meniscus .vm-head { grid-template-columns: 1fr; }
+  .v-meniscus .vm-links { grid-column: 1; grid-row: 3; margin-top: 6px; }
+  .v-meniscus .vm-wordmark { font-size: 36px; }
+  .v-meniscus .vm-fig, .v-meniscus .vm-error { grid-template-columns: 18px minmax(0, 1fr); gap: 10px; }
+  .v-meniscus .vm-scale span { font-size: 11px; }
+  .v-meniscus .vm-level { display: none; }
+  .v-meniscus .vm-capped { max-height: 420px; }
+  .v-meniscus .vm-tab { font-size: 18px; padding: 4px 10px 18px; }
+  .v-meniscus .vm-input pre { font-size: 12px; }
+}
+</style>
+<script>
+(function () {
+  var root = document.querySelector('[data-variant="meniscus"]');
+  if (!root) return;
+  var tabs = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
+
+  function select(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      var p = root.querySelector('#' + t.getAttribute('aria-controls'));
+      if (p) p.hidden = !on;
+    });
+    if (focus) tab.focus();
+    measure();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t, false); });
+    t.addEventListener('keydown', function (e) {
+      var n = null;
+      if (e.key === 'ArrowRight') n = tabs[(i + 1) % tabs.length];
+      else if (e.key === 'ArrowLeft') n = tabs[(i - 1 + tabs.length) % tabs.length];
+      else if (e.key === 'Home') n = tabs[0];
+      else if (e.key === 'End') n = tabs[tabs.length - 1];
+      if (n) { e.preventDefault(); select(n, true); }
+    });
+  });
+
+  /* tall figure: write the real fill level (shown px / full px) */
+  function measure() {
+    var cap = root.querySelector('.vm-capped');
+    if (!cap || cap.offsetParent === null) return;
+    var img = cap.querySelector('img');
+    var full = Math.round(img.getBoundingClientRect().height);
+    var shown = Math.round(cap.clientHeight);
+    if (!full) return;
+    var lvl = root.querySelector('[data-level]');
+    var note = root.querySelector('[data-fillnote]');
+    if (lvl) lvl.textContent = 'level ' + shown + ' / ' + full + ' px';
+    if (note) note.textContent = 'Showing ' + shown + ' of ' + full + ' px. Scroll inside the figure, or open the PNG at full size.';
+  }
+  root.querySelectorAll('img').forEach(function (im) { im.addEventListener('load', measure); });
+  window.addEventListener('resize', measure);
+
+  /* shell-driven state: input-open expands the flowchart Input */
+  function syncState() {
+    var st = root.getAttribute('data-state');
+    var d = root.querySelector('#vm-p-flowchart details');
+    if (d) d.open = st === 'input-open';
+  }
+  new MutationObserver(syncState).observe(root, { attributes: true, attributeFilter: ['data-state'] });
+  syncState();
+})();
+</script>
+
+  </div>
+</article>
+
+<article class="bd-variant" id="v-viewbox" data-slug="viewbox">
+  <header class="bd-label">
+    <p class="bd-family">暗底</p>
+    <h2 class="bd-name">Viewbox 看片灯 <code>?variant=viewbox</code></h2>
+    <p class="bd-bet">赌页面是一间暗着的读片室：每张图是灯箱上唯一亮着的东西，人的批注写在旁边。</p>
+    <p class="bd-diff"><b>差别</b>　图怎么放：深石板底 #0F151D，白图夹在灯箱里，顶部一个夹子，所有 UI 都比图暗 · 手写到哪：所有人话（标题、tab、图名、说明、Input、报错）；文件名尺寸用窄体 sans，JSON 用等宽 · accent：琥珀 #E7B54A（深字压在上面）</p>
+    <p class="bd-timing"><b>时序</b>　点 tab：立即换图，0.3 秒灯管启动式闪一下 · 点 Input：立即展开 · tree-stories 里滚动时实时显示看到百分之几</p>
+  </header>
+  <div class="bd-stage">
+<section class="v-viewbox" data-variant="viewbox" data-state="default">
+
+  <!-- ===================== 1. Language sheet ===================== -->
+  <div class="vb-sheet" aria-label="Viewbox language sheet">
+    <div class="vb-sheet-head">
+      <h2 class="vb-hand vb-sheet-title">Viewbox</h2>
+      <p class="vb-print">Reading room · films clipped to a lit panel · the figure is the only light in the room</p>
+    </div>
+
+    <div class="vb-sheet-grid">
+      <div class="vb-sw-col">
+        <h3 class="vb-print vb-label">Palette · ratio vs room</h3>
+        <ul class="vb-swatches">
+          <li><span class="vb-chip" style="background:#0F151D"></span><b class="vb-hand">Room</b><span class="vb-print">#0F151D · ground · L* 6.6</span></li>
+          <li><span class="vb-chip" style="background:#18212C"></span><b class="vb-hand">Housing</b><span class="vb-print">#18212C · panel body</span></li>
+          <li><span class="vb-chip" style="background:#DCE3EC"></span><b class="vb-hand">Note</b><span class="vb-print">#DCE3EC · body · 14.18 room / 12.56 housing</span></li>
+          <li><span class="vb-chip" style="background:#9AA8B8"></span><b class="vb-hand">Overlay</b><span class="vb-print">#9AA8B8 · meta · 7.57 / 6.70</span></li>
+          <li><span class="vb-chip" style="background:#E7B54A"></span><b class="vb-hand">Switch</b><span class="vb-print">#E7B54A · actions only · 9.70 / 8.59 · room on it 9.70</span></li>
+          <li><span class="vb-chip vb-chip-lit"></span><b class="vb-hand">Lit</b><span class="vb-print">#FFFFFF plate · #E9EEF3 lit tab · room on tab 15.9</span></li>
+        </ul>
+      </div>
+
+      <div class="vb-type-col">
+        <h3 class="vb-print vb-label">Type</h3>
+        <div class="vb-spec">
+          <p class="vb-hand" style="font-size:30px;line-height:1.1">Grease pencil</p>
+          <p class="vb-print">Excalifont · what a person writes on the film · 40 / 22 / 18 / 16</p>
+        </div>
+        <div class="vb-spec">
+          <p class="vb-print" style="font-size:15px;letter-spacing:.08em;color:var(--vb-note)">PRINTED OVERLAY 2520 × 540</p>
+          <p class="vb-print">IBM Plex Sans Condensed · what the machine prints · 12 / 13 / 15</p>
+        </div>
+        <div class="vb-spec">
+          <p class="vb-mono" style="font-size:13px">{ "direction": "horizontal" }</p>
+          <p class="vb-print">JetBrains Mono · the input, verbatim · 12.5</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="vb-shapes">
+      <div class="vb-shape"><span class="vb-tab-demo">Sequence</span><span class="vb-tab-demo is-lit">Flowchart</span><span class="vb-print vb-cap">tab · unlit / lit</span></div>
+      <div class="vb-shape"><a class="vb-dl-link" href="#" onclick="return false">PNG</a><span class="vb-print vb-cap">action · amber, arrow-down rule</span></div>
+      <div class="vb-shape"><span class="vb-housing-demo"><span class="vb-clip"></span><span class="vb-plate-demo"></span></span><span class="vb-print vb-cap">housing · clip · plate</span></div>
+      <div class="vb-shape vb-shape-rail"><span class="vb-rail"></span><span class="vb-print vb-cap">divider · panel seam</span></div>
+    </div>
+
+    <div class="vb-tone">
+      <p class="vb-hand">Each diagram came out of the engine as-is. Its input is clipped underneath.</p>
+      <p><a class="vb-dl-link" href="#" onclick="return false">.excalidraw</a> <span class="vb-print">— the source file; opens and edits in Excalidraw</span></p>
+    </div>
+  </div>
+
+  <!-- ===================== 2. Gallery slice ===================== -->
+  <div class="vb-page">
+    <header class="vb-header">
+      <h1 class="vb-hand vb-title">excalidrawer</h1>
+      <p class="vb-hand vb-pos">Describe a diagram in JSON; get a hand-drawn Excalidraw file back. CLI, library or MCP.</p>
+      <nav class="vb-ext" aria-label="Project links">
+        <a class="vb-link" href="https://github.com/guohaonan-shy/excalidrawer">GitHub</a>
+        <a class="vb-link" href="https://www.npmjs.com/package/excalidrawer">npm</a>
+      </nav>
+    </header>
+
+    <div class="vb-gallery">
+      <div class="vb-tabs" role="tablist" aria-label="Diagram types">
+        <button class="vb-tab" role="tab" id="vb-t-flowchart" aria-controls="vb-p-flowchart" aria-selected="true" tabindex="0">Flowchart</button>
+        <button class="vb-tab" role="tab" id="vb-t-architecture" aria-controls="vb-p-architecture" aria-selected="false" tabindex="-1">Architecture</button>
+        <button class="vb-tab" role="tab" id="vb-t-sequence" aria-controls="vb-p-sequence" aria-selected="false" tabindex="-1">Sequence</button>
+        <button class="vb-tab" role="tab" id="vb-t-timeline" aria-controls="vb-p-timeline" aria-selected="false" tabindex="-1">Timeline</button>
+        <button class="vb-tab" role="tab" id="vb-t-comparison" aria-controls="vb-p-comparison" aria-selected="false" tabindex="-1">Comparison</button>
+        <button class="vb-tab" role="tab" id="vb-t-tree" aria-controls="vb-p-tree" aria-selected="false" tabindex="-1">Tree <span class="vb-count">3</span></button>
+      </div>
+
+      <!-- Flowchart -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-flowchart" aria-labelledby="vb-t-flowchart" tabindex="0">
+        <article class="vb-fig" data-fig="flowchart">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/flowchart.png" target="_blank" rel="noopener"><img src="assets/figures/flowchart.png" width="1260" height="270" alt="Flowchart: Decisions + branches"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>flowchart.png</span><span>2520 × 540 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div>
+              <h3 class="vb-hand vb-name">Flowchart</h3>
+              <p class="vb-hand vb-desc">Decisions + branches</p>
+            </div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-flowchart"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: flowchart</span></button>
+            <div class="vb-in-body" id="vb-in-flowchart" hidden>
+<pre class="vb-mono"><code>{
+  "title": "Pull request to production",
+  "direction": "horizontal",
+  "nodes": [
+    { "id": "open", "label": "PR opened", "type": "start" },
+    { "id": "ci", "label": "CI + review" },
+    { "id": "ok", "label": "Approved?", "type": "decision" },
+    { "id": "merge", "label": "Merge to main" },
+    { "id": "fix", "label": "Request changes", "color": "red" },
+    { "id": "ship", "label": "Deploy", "type": "end" }
+  ],
+  "edges": [
+    { "from": "open", "to": "ci" },
+    { "from": "ci", "to": "ok" },
+    { "from": "ok", "to": "merge", "label": "yes" },
+    { "from": "ok", "to": "fix", "label": "no" },
+    { "from": "merge", "to": "ship" }
+  ]
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Architecture -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-architecture" aria-labelledby="vb-t-architecture" tabindex="0" hidden>
+        <article class="vb-fig" data-fig="architecture">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/architecture.png" target="_blank" rel="noopener"><img src="assets/figures/architecture.png" width="818" height="804" alt="Architecture: Layered components + connections" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>architecture.png</span><span>1636 × 1608 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Architecture</h3><p class="vb-hand vb-desc">Layered components + connections</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-architecture"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: architecture</span></button>
+            <div class="vb-in-body" id="vb-in-architecture" hidden>
+<pre class="vb-mono"><code>{
+  "title": "Web app architecture",
+  "sections": [
+    { "label": "Clients", "color": "blue", "items": ["Web app", "iOS app", "Admin console"] },
+    { "label": "Edge", "color": "purple", "items": ["CDN", "API gateway"] },
+    { "label": "Services", "color": "green", "items": ["Auth", "Orders", "Payments", "Notifications"] },
+    …
+  ],
+  "connections": [ { "from": "Web app", "to": "CDN" }, … ]
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Sequence -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-sequence" aria-labelledby="vb-t-sequence" tabindex="0" hidden>
+        <article class="vb-fig" data-fig="sequence">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/sequence.png" target="_blank" rel="noopener"><img src="assets/figures/sequence.png" width="1970" height="974" alt="Sequence: Messages between actors over time" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>sequence.png</span><span>3940 × 1948 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Sequence</h3><p class="vb-hand vb-desc">Messages between actors over time</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-sequence"><span class="vb-hand">Input</span><span class="vb-print vb-src">sugar (sequence recipe)</span></button>
+            <div class="vb-in-body" id="vb-in-sequence" hidden>
+<pre class="vb-mono"><code>{
+  "elements": [
+    { "type": "text", "id": "title", "x": 40, "y": 20, "text": "OAuth sign-in" },
+    { "type": "box", "id": "user", "x": 40, "y": 80, "w": 160, "h": 56, "label": "User" },
+    { "type": "box", "id": "app", "x": 400, "y": 80, "w": 160, "h": 56, "label": "App" },
+    { "type": "arrow", "id": "m1", "x": 120, "y": 200, "points": [[0, 0], [360, 0]], "label": "Sign in" },
+    …
+  ]
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Timeline -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-timeline" aria-labelledby="vb-t-timeline" tabindex="0" hidden>
+        <article class="vb-fig" data-fig="timeline">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/timeline.png" target="_blank" rel="noopener"><img src="assets/figures/timeline.png" width="1170" height="484" alt="Timeline: Milestones on an axis" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>timeline.png</span><span>2340 × 968 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Timeline</h3><p class="vb-hand vb-desc">Milestones on an axis</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-timeline"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: timeline</span></button>
+            <div class="vb-in-body" id="vb-in-timeline" hidden>
+<pre class="vb-mono"><code>{
+  "title": "2026 product roadmap",
+  "items": [
+    { "label": "Beta", "time": "Q1", "desc": "Invite-only, 200 teams" },
+    { "label": "Public launch", "time": "Q2", "desc": "Self-serve signup" },
+    …
+  ]
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Comparison -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-comparison" aria-labelledby="vb-t-comparison" tabindex="0" hidden>
+        <article class="vb-fig" data-fig="comparison">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/comparison.png" target="_blank" rel="noopener"><img src="assets/figures/comparison.png" width="960" height="410" alt="Comparison: A vs B, dimension by dimension" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>comparison.png</span><span>1920 × 820 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Comparison</h3><p class="vb-hand vb-desc">A vs B, dimension by dimension</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-comparison"><span class="vb-hand">Input</span><span class="vb-print vb-src">sugar (comparison recipe)</span></button>
+            <div class="vb-in-body" id="vb-in-comparison" hidden>
+<pre class="vb-mono"><code>{
+  "elements": [
+    { "type": "box", "id": "a-head", "x": 40, "y": 70, "w": 380, "h": 56, "label": "REST" },
+    { "type": "box", "id": "b-head", "x": 520, "y": 70, "w": 380, "h": 56, "label": "GraphQL" },
+    { "type": "text", "id": "vs", "x": 450, "y": 84, "text": "VS" },
+    …
+  ]
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Tree (3 figures) -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-tree" aria-labelledby="vb-t-tree" tabindex="0" hidden>
+        <article class="vb-fig" data-fig="tree-right">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/tree-right.png" target="_blank" rel="noopener"><img src="assets/figures/tree-right.png" width="718" height="570" alt="Tree · left → right: Parent → children, split sideways" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>tree-right.png · 1 of 3</span><span>1436 × 1140 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Tree · left → right</h3><p class="vb-hand vb-desc">Parent → children, split sideways</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-tree-right"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: tree</span></button>
+            <div class="vb-in-body" id="vb-in-tree-right" hidden>
+<pre class="vb-mono"><code>{
+  "direction": "horizontal",
+  "root": {
+    "label": "excalidrawer",
+    "children": [
+      { "label": "CLI", "children": ["render", "compute-layout", "generate"] },
+      { "label": "MCP server", "children": ["render_diagram", "compute_layout"] },
+      …
+    ]
+  }
+}</code></pre>
+            </div>
+          </div>
+        </article>
+
+        <article class="vb-fig" data-fig="tree-down">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/tree-down.png" target="_blank" rel="noopener"><img src="assets/figures/tree-down.png" width="1310" height="432" alt="Tree · top → down: Parent → children, split downward" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>tree-down.png · 2 of 3</span><span>2620 × 864 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Tree · top → down</h3><p class="vb-hand vb-desc">Parent → children, split downward</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-tree-down"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: tree</span></button>
+            <div class="vb-in-body" id="vb-in-tree-down" hidden>
+<pre class="vb-mono"><code>{
+  "direction": "vertical",
+  "root": {
+    "label": "Checkout",
+    "children": [
+      { "label": "Cart", "children": ["Add item", "Remove item"] },
+      { "label": "Payment", "children": ["Card", "Wallet"] },
+      …
+    ]
+  }
+}</code></pre>
+            </div>
+          </div>
+        </article>
+
+        <article class="vb-fig vb-fig-tall" data-fig="tree-stories">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <div class="vb-plate vb-plate-scroll" tabindex="0" aria-label="Tree · user-story map, scrollable">
+              <a href="assets/figures/tree-stories.png" target="_blank" rel="noopener"><img src="assets/figures/tree-stories.png" width="1119" height="2449" alt="Tree · user-story map: 23 numbered stories in 6 groups" loading="lazy"></a>
+            </div>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>tree-stories.png · 3 of 3</span><span class="vb-scrollpos">2238 × 4898 · showing <i>0–21</i>%</span></div>
+          </div>
+          <p class="vb-hand vb-tallnote">Taller than the panel. Scroll inside it, or open the PNG at full size.</p>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Tree · user-story map</h3><p class="vb-hand vb-desc">23 numbered stories in 6 groups</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-tree-stories"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: tree</span></button>
+            <div class="vb-in-body" id="vb-in-tree-stories" hidden>
+<pre class="vb-mono"><code>{
+  "direction": "horizontal",
+  "numberLeaves": true,
+  "root": {
+    "label": "Team wiki",
+    "children": [
+      { "label": "Write", "children": ["Create a page", "Edit with preview", …] },
+      { "label": "Find", "children": ["Search by title", …] },
+      …
+    ]
+  }
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- load-error -->
+    <div class="vb-error" role="alert">
+      <div class="vb-box vb-box-off">
+        <span class="vb-clip" aria-hidden="true"></span>
+        <div class="vb-plate-off">
+          <p class="vb-hand vb-err-title">Nothing on the light.</p>
+          <p class="vb-hand vb-err-body">gallery.json didn't load, so no figures got clipped up. The same diagrams and their inputs are in the repo:</p>
+          <p><a class="vb-link" href="https://github.com/guohaonan-shy/excalidrawer">github.com/guohaonan-shy/excalidrawer</a></p>
+        </div>
+        <div class="vb-overlay vb-print" aria-hidden="true"><span>gallery.json</span><span>not loaded</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap);
+
+.v-viewbox {
+  --vb-room: #0F151D;
+  --vb-housing: #18212C;
+  --vb-rim: #2C3846;
+  --vb-seam: #222D3A;
+  --vb-note: #DCE3EC;
+  --vb-overlay: #9AA8B8;
+  --vb-switch: #E7B54A;
+  --vb-lit-tab: #E9EEF3;
+  --vb-plate: #FFFFFF;
+  --vb-hand: 'Excalifont', 'Virgil', 'Comic Sans MS', cursive;
+  --vb-print: 'IBM Plex Sans Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --vb-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  background: var(--vb-room);
+  color: var(--vb-note);
+  font-family: var(--vb-print);
+  padding: 28px 24px 40px;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.v-viewbox *, .v-viewbox *::before, .v-viewbox *::after { box-sizing: border-box; }
+.v-viewbox p, .v-viewbox h1, .v-viewbox h2, .v-viewbox h3, .v-viewbox ul { margin: 0; padding: 0; }
+.v-viewbox .vb-hand { font-family: var(--vb-hand); font-weight: 400; }
+.v-viewbox .vb-print { font-family: var(--vb-print); font-size: 12.5px; color: var(--vb-overlay); letter-spacing: .02em; }
+.v-viewbox .vb-mono { font-family: var(--vb-mono); }
+
+/* ---------- language sheet ---------- */
+.v-viewbox .vb-sheet { border-bottom: 1px solid var(--vb-seam); padding-bottom: 26px; margin-bottom: 30px; }
+.v-viewbox .vb-sheet-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+.v-viewbox .vb-sheet-title { font-size: 26px; color: var(--vb-note); }
+.v-viewbox .vb-label { text-transform: uppercase; letter-spacing: .12em; font-size: 11.5px; font-weight: 600; margin-bottom: 10px; }
+.v-viewbox .vb-sheet-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; }
+.v-viewbox .vb-swatches { list-style: none; display: grid; gap: 7px; }
+.v-viewbox .vb-swatches li { display: grid; grid-template-columns: 30px 70px 1fr; align-items: center; gap: 10px; }
+.v-viewbox .vb-swatches b { font-size: 17px; color: var(--vb-note); }
+.v-viewbox .vb-chip { width: 30px; height: 22px; border-radius: 3px; border: 1px solid var(--vb-rim); display: block; }
+.v-viewbox .vb-chip-lit { background: linear-gradient(90deg, #FFFFFF 50%, #E9EEF3 50%); }
+.v-viewbox .vb-spec { padding: 8px 0 9px; border-top: 1px solid var(--vb-seam); }
+.v-viewbox .vb-spec:first-of-type { border-top: 0; padding-top: 0; }
+.v-viewbox .vb-spec p:first-child { margin-bottom: 3px; color: var(--vb-note); }
+
+.v-viewbox .vb-shapes { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 16px; margin-top: 20px; align-items: end; }
+.v-viewbox .vb-shape { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.v-viewbox .vb-cap { flex-basis: 100%; font-size: 11.5px; }
+.v-viewbox .vb-tab-demo { font-family: var(--vb-hand); font-size: 15px; padding: 5px 10px 4px; border: 1px solid var(--vb-rim); border-radius: 3px; background: var(--vb-housing); color: var(--vb-note); }
+.v-viewbox .vb-tab-demo.is-lit { background: var(--vb-lit-tab); color: var(--vb-room); border-color: var(--vb-lit-tab); }
+.v-viewbox .vb-housing-demo { position: relative; display: block; width: 92px; height: 50px; background: var(--vb-housing); border: 1px solid var(--vb-rim); border-radius: 6px; padding: 7px; }
+.v-viewbox .vb-plate-demo { display: block; width: 100%; height: 100%; background: var(--vb-plate); border-radius: 1px; }
+.v-viewbox .vb-housing-demo .vb-clip { top: -3px; width: 30px; }
+.v-viewbox .vb-rail { display: block; width: 100%; height: 9px; border-top: 1px solid var(--vb-rim); border-bottom: 1px solid #0A0F15; background: var(--vb-housing); border-radius: 1px; }
+.v-viewbox .vb-tone { margin-top: 20px; padding: 14px 16px; background: var(--vb-housing); border-radius: 6px; border: 1px solid var(--vb-seam); display: grid; gap: 8px; }
+.v-viewbox .vb-tone .vb-hand { font-size: 18px; }
+
+/* ---------- shared shapes ---------- */
+.v-viewbox .vb-clip { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); width: 64px; height: 9px; background: #3A4757; border: 1px solid #4A5868; border-radius: 2px; z-index: 2; }
+.v-viewbox a { color: inherit; }
+.v-viewbox .vb-link, .v-viewbox .vb-dl-link { color: var(--vb-switch); text-decoration: none; border-bottom: 1.5px solid currentColor; padding-bottom: 1px; }
+.v-viewbox .vb-link { font-family: var(--vb-hand); font-size: 18px; }
+.v-viewbox .vb-dl-link { font-family: var(--vb-print); font-weight: 600; font-size: 14px; letter-spacing: .03em; }
+.v-viewbox .vb-dl-link::before { content: "↓ "; font-weight: 400; }
+.v-viewbox .vb-link:hover, .v-viewbox .vb-dl-link:hover { border-bottom-width: 3px; }
+.v-viewbox a:focus-visible, .v-viewbox button:focus-visible, .v-viewbox [tabindex]:focus-visible { outline: 2px solid var(--vb-switch); outline-offset: 3px; border-radius: 3px; }
+
+/* ---------- page header ---------- */
+.v-viewbox .vb-header { display: grid; grid-template-columns: 1fr auto; gap: 4px 20px; align-items: end; margin-bottom: 22px; }
+.v-viewbox .vb-title { font-size: 40px; line-height: 1; color: var(--vb-note); grid-column: 1; }
+.v-viewbox .vb-pos { grid-column: 1; font-size: 18px; color: var(--vb-overlay); line-height: 1.35; }
+.v-viewbox .vb-ext { grid-column: 2; grid-row: 1 / span 2; display: flex; gap: 18px; align-self: center; }
+
+/* ---------- tabs ---------- */
+.v-viewbox .vb-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 14px; border-bottom: 1px solid var(--vb-seam); margin-bottom: 26px; }
+.v-viewbox .vb-tab { font-family: var(--vb-hand); font-size: 18px; color: var(--vb-note); background: var(--vb-housing); border: 1px solid var(--vb-rim); border-radius: 3px; padding: 6px 13px 5px; cursor: pointer; line-height: 1.2; }
+.v-viewbox .vb-tab:hover { border-color: var(--vb-overlay); }
+.v-viewbox .vb-tab[aria-selected="true"] { background: var(--vb-lit-tab); color: var(--vb-room); border-color: var(--vb-lit-tab); }
+.v-viewbox .vb-count { font-family: var(--vb-print); font-size: 12px; font-weight: 600; margin-left: 3px; padding: 0 5px; border: 1px solid currentColor; border-radius: 2px; vertical-align: 2px; }
+.v-viewbox .vb-panel[hidden] { display: none; }
+.v-viewbox .vb-panel { outline-offset: 6px; }
+
+/* ---------- figure block ---------- */
+.v-viewbox .vb-fig + .vb-fig { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--vb-seam); }
+.v-viewbox .vb-box { position: relative; background: var(--vb-housing); border: 1px solid var(--vb-rim); border-radius: 6px; padding: 14px 14px 0; }
+.v-viewbox .vb-plate { display: flex; justify-content: center; align-items: center; background: var(--vb-plate); border-radius: 1px; overflow: hidden; }
+.v-viewbox .vb-plate img { display: block; max-width: 100%; height: auto; max-height: 460px; width: auto; }
+.v-viewbox .vb-overlay { display: flex; justify-content: space-between; gap: 12px; padding: 7px 2px 8px; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; }
+.v-viewbox .vb-overlay i { font-style: normal; color: var(--vb-note); }
+.v-viewbox .vb-overlay span:first-child { text-transform: none; letter-spacing: .03em; }
+.v-viewbox .vb-plate-scroll { display: block; max-height: 440px; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #4A5868 var(--vb-housing); }
+.v-viewbox .vb-plate-scroll a { display: block; }
+.v-viewbox .vb-plate-scroll img { max-height: none; width: 100%; }
+.v-viewbox .vb-tallnote { font-size: 16px; color: var(--vb-overlay); margin-top: 8px; }
+
+.v-viewbox .vb-meta { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px 20px; flex-wrap: wrap; margin-top: 14px; }
+.v-viewbox .vb-name { font-size: 22px; color: var(--vb-note); line-height: 1.15; }
+.v-viewbox .vb-desc { font-size: 17px; color: var(--vb-overlay); }
+.v-viewbox .vb-dls { display: flex; gap: 16px; }
+
+.v-viewbox .vb-input { margin-top: 14px; border-top: 1px solid var(--vb-seam); }
+.v-viewbox .vb-in-btn { all: unset; cursor: pointer; display: flex; align-items: baseline; gap: 12px; padding: 10px 2px; width: 100%; color: var(--vb-note); }
+.v-viewbox .vb-in-btn .vb-hand { font-size: 18px; color: var(--vb-switch); }
+.v-viewbox .vb-in-btn .vb-hand::before { content: "+ "; display: inline-block; width: 1.1em; }
+.v-viewbox .vb-in-btn[aria-expanded="true"] .vb-hand::before { content: "− "; }
+.v-viewbox .vb-src { margin-left: auto; }
+.v-viewbox .vb-in-body pre { margin: 0; background: #0B1016; border: 1px solid var(--vb-seam); border-left: 3px solid var(--vb-rim); border-radius: 3px; padding: 14px 16px; font-size: 12.5px; line-height: 1.55; color: var(--vb-note); overflow-x: auto; white-space: pre; }
+.v-viewbox .vb-in-body[hidden] { display: none; }
+
+/* ---------- switch-on animation ---------- */
+.v-viewbox .vb-panel.is-striking .vb-plate { animation: viewbox-strike 300ms steps(1, end); }
+@keyframes viewbox-strike {
+  0% { opacity: .18; }
+  25% { opacity: .9; }
+  45% { opacity: .45; }
+  70% { opacity: 1; }
+  100% { opacity: 1; }
+}
+html.reduce-motion .v-viewbox .vb-panel.is-striking .vb-plate { animation: none; }
+
+/* ---------- states ---------- */
+.v-viewbox .vb-error { display: none; }
+.v-viewbox[data-state="load-error"] .vb-gallery { display: none; }
+.v-viewbox[data-state="load-error"] .vb-error { display: block; }
+.v-viewbox[data-state="input-open"] [data-fig="flowchart"] .vb-in-body { display: block; }
+.v-viewbox .vb-box-off { padding-bottom: 0; }
+.v-viewbox .vb-plate-off { background: #121A24; border: 1.5px dashed var(--vb-rim); border-radius: 1px; min-height: 230px; padding: 34px 28px; display: grid; align-content: center; gap: 12px; }
+.v-viewbox .vb-err-title { font-size: 28px; color: var(--vb-note); }
+.v-viewbox .vb-err-body { font-size: 18px; color: var(--vb-overlay); max-width: 52ch; line-height: 1.4; }
+
+/* ---------- narrow ---------- */
+@media (max-width: 640px) {
+  .v-viewbox { padding: 20px 16px 32px; }
+  .v-viewbox .vb-sheet-grid { grid-template-columns: 1fr; gap: 18px; }
+  .v-viewbox .vb-swatches li { grid-template-columns: 30px 64px 1fr; }
+  .v-viewbox .vb-shapes { grid-template-columns: 1fr 1fr; }
+  .v-viewbox .vb-header { grid-template-columns: 1fr; }
+  .v-viewbox .vb-ext { grid-column: 1; grid-row: auto; margin-top: 8px; }
+  .v-viewbox .vb-title { font-size: 34px; }
+  .v-viewbox .vb-tab { font-size: 16px; padding: 5px 10px 4px; }
+  .v-viewbox .vb-box { padding: 10px 10px 0; }
+  .v-viewbox .vb-overlay { flex-direction: column; gap: 2px; }
+  .v-viewbox .vb-plate-scroll { max-height: 380px; }
+  .v-viewbox .vb-src { margin-left: 0; }
+  .v-viewbox .vb-in-btn { flex-wrap: wrap; }
+}
+</style>
+<script>
+(function () {
+  var root = document.querySelector('[data-variant="viewbox"]');
+  if (!root) return;
+  var tabs = Array.prototype.slice.call(root.querySelectorAll('.vb-tab'));
+  var reduce = function () { return document.documentElement.classList.contains('reduce-motion'); };
+
+  function select(tab, focus, strike) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      var p = root.querySelector('#' + t.getAttribute('aria-controls'));
+      if (p) {
+        p.hidden = !on;
+        if (on && strike && !reduce()) {
+          p.classList.remove('is-striking'); void p.offsetWidth; p.classList.add('is-striking');
+        }
+      }
+    });
+    if (focus) tab.focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t, false, true); });
+    t.addEventListener('keydown', function (e) {
+      var n = null;
+      if (e.key === 'ArrowRight') n = tabs[(i + 1) % tabs.length];
+      else if (e.key === 'ArrowLeft') n = tabs[(i - 1 + tabs.length) % tabs.length];
+      else if (e.key === 'Home') n = tabs[0];
+      else if (e.key === 'End') n = tabs[tabs.length - 1];
+      if (n) { e.preventDefault(); select(n, true, true); }
+    });
+  });
+
+  function setInput(btn, open) {
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    var body = root.querySelector('#' + btn.getAttribute('aria-controls'));
+    if (body) body.hidden = !open;
+  }
+  root.querySelectorAll('.vb-in-btn').forEach(function (b) {
+    b.addEventListener('click', function () { setInput(b, b.getAttribute('aria-expanded') !== 'true'); });
+  });
+
+  /* scroll position read-out for the tall plate */
+  root.querySelectorAll('.vb-plate-scroll').forEach(function (s) {
+    var out = s.parentNode.querySelector('.vb-scrollpos i');
+    function upd() {
+      if (!out || !s.scrollHeight) return;
+      var lo = Math.round(s.scrollTop / s.scrollHeight * 100);
+      var hi = Math.min(100, Math.round((s.scrollTop + s.clientHeight) / s.scrollHeight * 100));
+      out.textContent = lo + '–' + hi;
+    }
+    s.addEventListener('scroll', upd, { passive: true });
+    var img = s.querySelector('img');
+    if (img) img.addEventListener('load', upd);
+    window.addEventListener('resize', upd);
+    setTimeout(upd, 0);
+  });
+
+  /* follow the shell's data-state */
+  var last = null;
+  function syncState() {
+    var st = root.getAttribute('data-state');
+    if (st === last) return;
+    last = st;
+    var fb = root.querySelector('[data-fig="flowchart"] .vb-in-btn');
+    if (st === 'input-open') {
+      select(tabs[0], false);
+      if (fb) setInput(fb, true);
+    } else if (st === 'default') {
+      select(tabs[0], false);
+      if (fb) setInput(fb, false);
+    }
+  }
+  new MutationObserver(syncState).observe(root, { attributes: true, attributeFilter: ['data-state'] });
+  syncState();
+})();
+</script>
+
+  </div>
+</article>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  var v = q.get("variant"), s = q.get("state") || "default";
+  if (["default","input-open","load-error"].indexOf(s) < 0) s = "default";
+  if (v && document.getElementById("v-" + v)) {
+    document.body.classList.add("bd-single");
+    document.getElementById("v-" + v).classList.add("bd-on");
+  }
+  document.querySelectorAll("#bd-vnav a").forEach(function(a){
+    var on = (a.dataset.v || null) === (v || null);
+    if (on) a.setAttribute("aria-current","true");
+    var u = new URLSearchParams(); if (a.dataset.v) u.set("variant", a.dataset.v); if (s !== "default") u.set("state", s);
+    a.href = "?" + u.toString();
+  });
+  document.querySelectorAll("#bd-snav a").forEach(function(a){
+    if (a.dataset.s === s) a.setAttribute("aria-current","true");
+    var u = new URLSearchParams(); if (v) u.set("variant", v); if (a.dataset.s !== "default") u.set("state", a.dataset.s);
+    a.href = "?" + u.toString();
+  });
+  var rm = document.getElementById("bd-rm");
+  try { rm.checked = localStorage.getItem("bd-rm") === "1"; } catch(e) {}
+  function applyRm(){ document.documentElement.classList.toggle("reduce-motion", rm.checked); try { localStorage.setItem("bd-rm", rm.checked ? "1" : "0"); } catch(e) {} }
+  rm.addEventListener("change", applyRm); applyRm();
+  document.querySelectorAll("[data-variant]").forEach(function(r){ r.setAttribute("data-state", s); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,574 @@
+<section class="v-meniscus" data-variant="meniscus" data-state="default">
+
+  <!-- ───────────── 1. Language sheet ───────────── -->
+  <div class="vm-sheet" aria-label="Meniscus visual language">
+    <div class="vm-sheet-head">
+      <h2 class="vm-hand vm-sheet-title">meniscus</h2>
+      <p class="vm-sheet-seed">Seed OGwMLqmPRP/gnsUM → first decoded byte 0x38 = hue 79° (olive) · letters “mL”, “PRP” → lab volumetric glassware. The page is a calibrated vessel; the figures are what it holds.</p>
+    </div>
+
+    <div class="vm-sheet-grid">
+      <div class="vm-sheet-col">
+        <h3 class="vm-label">Palette · ratios measured against #FFFFFF</h3>
+        <ul class="vm-swatches">
+          <li><span class="vm-vial" style="--c:#FFFFFF"></span><b>Ground</b><code>#FFFFFF</code><span>= engine sheet</span></li>
+          <li><span class="vm-vial" style="--c:#1E1E1E"></span><b>Ink</b><code>#1E1E1E</code><span>16.67 : 1</span></li>
+          <li><span class="vm-vial" style="--c:#5A6152"></span><b>Readout</b><code>#5A6152</code><span>6.43 : 1</span></li>
+          <li><span class="vm-vial" style="--c:#4B6A00"></span><b>Action</b><code>#4B6A00</code><span>6.25 : 1 · white on it 6.25</span></li>
+          <li><span class="vm-vial" style="--c:#EEF6D2"></span><b>Fill</b><code>#EEF6D2</code><span>ink on it 14.88 · action 5.58</span></li>
+          <li><span class="vm-vial" style="--c:#C8D0B8"></span><b>Graduation</b><code>#C8D0B8</code><span>ticks only, never text</span></li>
+        </ul>
+      </div>
+
+      <div class="vm-sheet-col">
+        <h3 class="vm-label">Type</h3>
+        <div class="vm-spec">
+          <p class="vm-hand vm-spec-big">Excalifont — names</p>
+          <p class="vm-spec-note">wordmark 44 · figure name 24 · tabs 20 · Input 20</p>
+        </div>
+        <div class="vm-spec">
+          <p class="vm-sans vm-spec-mid">Instrument Sans — readouts</p>
+          <p class="vm-spec-note">descriptions 15 · scale numerals 12 tabular · links 14/600</p>
+        </div>
+        <div class="vm-spec">
+          <p class="vm-mono vm-spec-mono">{"json": "JetBrains Mono"}</p>
+          <p class="vm-spec-note">Input body only · 13</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="vm-sheet-grid">
+      <div class="vm-sheet-col">
+        <h3 class="vm-label">Shapes</h3>
+        <div class="vm-shapes">
+          <figure class="vm-shape">
+            <span class="vm-shape-tab"><span class="vm-hand">Tab</span>
+              <svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg>
+            </span>
+            <figcaption>tab · meniscus</figcaption>
+          </figure>
+          <figure class="vm-shape"><a class="vm-tube" href="#" tabindex="-1">PNG <span aria-hidden="true">↓</span></a><figcaption>action · tube</figcaption></figure>
+          <figure class="vm-shape"><span class="vm-shape-edge" aria-hidden="true"></span><figcaption>edge · scale</figcaption></figure>
+          <figure class="vm-shape"><span class="vm-shape-div" aria-hidden="true"></span><figcaption>divider · rule</figcaption></figure>
+        </div>
+      </div>
+      <div class="vm-sheet-col">
+        <h3 class="vm-label">Tone</h3>
+        <p class="vm-tone">Each figure is unedited engine output. Its input is right under it.</p>
+        <p class="vm-tone"><span class="vm-tone-link">.excalidraw ↓</span> <span class="vm-readout">— opens in Excalidraw, still editable</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="vm-divider" aria-hidden="true"><span>0</span><span>100</span><span>200</span><span>300</span><span>mL</span></div>
+
+  <!-- ───────────── 2. Gallery slice ───────────── -->
+  <div class="vm-page">
+    <header class="vm-head">
+      <h1 class="vm-hand vm-wordmark">excalidrawer</h1>
+      <p class="vm-pos">Give it JSON or one sentence. It returns an .excalidraw file, an SVG and a PNG.</p>
+      <nav class="vm-links" aria-label="Project">
+        <a href="https://github.com/guohaonan-shy/excalidrawer">GitHub</a>
+        <a href="https://www.npmjs.com/package/excalidrawer">npm</a>
+      </nav>
+    </header>
+
+    <div class="vm-gallery">
+      <div class="vm-tabs" role="tablist" aria-label="Diagram types">
+        <button class="vm-tab" role="tab" id="vm-t-flowchart" aria-controls="vm-p-flowchart" aria-selected="true">Flowchart<svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+        <button class="vm-tab" role="tab" id="vm-t-architecture" aria-controls="vm-p-architecture" aria-selected="false" tabindex="-1">Architecture<svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+        <button class="vm-tab" role="tab" id="vm-t-sequence" aria-controls="vm-p-sequence" aria-selected="false" tabindex="-1">Sequence<svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+        <button class="vm-tab" role="tab" id="vm-t-timeline" aria-controls="vm-p-timeline" aria-selected="false" tabindex="-1">Timeline<svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+        <button class="vm-tab" role="tab" id="vm-t-comparison" aria-controls="vm-p-comparison" aria-selected="false" tabindex="-1">Comparison<svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+        <button class="vm-tab" role="tab" id="vm-t-tree" aria-controls="vm-p-tree" aria-selected="false" tabindex="-1">Tree <span class="vm-count">×3</span><svg class="vm-men" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true"><path class="vm-men-fill" d="M0 3 Q50 13 100 3 L100 16 L0 16Z"/><path class="vm-men-line" d="M0 3 Q50 13 100 3"/></svg></button>
+      </div>
+
+      <!-- Flowchart -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-flowchart" aria-labelledby="vm-t-flowchart" tabindex="0">
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img" href="assets/figures/flowchart.png" target="_blank" rel="noopener"><img src="assets/figures/flowchart.png" width="2520" height="540" alt="Flowchart — Decisions + branches"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Flowchart</h3><p class="vm-desc">Decisions + branches</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: flowchart</span></summary>
+<pre class="vm-mono"><code>{
+  "title": "Pull request to production",
+  "direction": "horizontal",
+  "nodes": [
+    { "id": "open",  "label": "PR opened", "type": "start" },
+    { "id": "ci",    "label": "CI + review" },
+    { "id": "ok",    "label": "Approved?", "type": "decision" },
+    { "id": "merge", "label": "Merge to main" },
+    { "id": "fix",   "label": "Request changes", "color": "red" },
+    { "id": "ship",  "label": "Deploy", "type": "end" }
+  ],
+  "edges": [
+    { "from": "open",  "to": "ci" },
+    { "from": "ci",    "to": "ok" },
+    { "from": "ok",    "to": "merge", "label": "yes" },
+    { "from": "ok",    "to": "fix",   "label": "no" },
+    { "from": "merge", "to": "ship" }
+  ]
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- Architecture -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-architecture" aria-labelledby="vm-t-architecture" tabindex="0" hidden>
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img vm-img-narrow" href="assets/figures/architecture.png" target="_blank" rel="noopener"><img src="assets/figures/architecture.png" width="1636" height="1608" alt="Architecture — Layered components + connections"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Architecture</h3><p class="vm-desc">Layered components + connections</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: architecture</span></summary>
+<pre class="vm-mono"><code>{
+  "title": "Web app architecture",
+  "sections": [
+    { "label": "Clients", "color": "blue",
+      "items": ["Web app", "iOS app", "Admin console"] },
+    { "label": "Edge", "color": "purple",
+      "items": ["CDN", "API gateway"] },
+    { "label": "Services", "color": "green",
+      "items": ["Auth", "Orders", "Payments", "Notifications"] },
+    …
+  ],
+  "connections": [
+    { "from": "Web app", "to": "CDN" },
+    { "from": "API gateway", "to": "Orders" },
+    …
+  ]
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- Sequence -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-sequence" aria-labelledby="vm-t-sequence" tabindex="0" hidden>
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img" href="assets/figures/sequence.png" target="_blank" rel="noopener"><img src="assets/figures/sequence.png" width="3940" height="1948" alt="Sequence — Messages between actors over time"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Sequence</h3><p class="vm-desc">Messages between actors over time</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">sugar (sequence recipe)</span></summary>
+<pre class="vm-mono"><code>{
+  "elements": [
+    { "type": "text", "id": "title",
+      "text": "Report audio — browser cache read / write" },
+    { "type": "box", "id": "a1", "label": "Upload pipeline", "color": "yellow" },
+    { "type": "box", "id": "a3", "label": "Audio source\n(getAudio)", "color": "blue" },
+    …
+    { "type": "arrow", "from": "a1", "to": "a6",
+      "label": "1. POST recording + Idempotency-Key" },
+    { "type": "arrow", "from": "a6", "to": "a1", "strokeStyle": "dashed",
+      "label": "2. 200 confirmed (failure: stop, cache untouched)" },
+    …
+  ]
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- Timeline -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-timeline" aria-labelledby="vm-t-timeline" tabindex="0" hidden>
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img" href="assets/figures/timeline.png" target="_blank" rel="noopener"><img src="assets/figures/timeline.png" width="2340" height="968" alt="Timeline — Milestones on an axis"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Timeline</h3><p class="vm-desc">Milestones on an axis</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: timeline</span></summary>
+<pre class="vm-mono"><code>{
+  "title": "2026 product roadmap",
+  "items": [
+    { "label": "Beta", "time": "Q1", "desc": "Invite-only, 200 teams" },
+    { "label": "Public launch", "time": "Q2", "desc": "Self-serve signup" },
+    …
+  ]
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- Comparison -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-comparison" aria-labelledby="vm-t-comparison" tabindex="0" hidden>
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img" href="assets/figures/comparison.png" target="_blank" rel="noopener"><img src="assets/figures/comparison.png" width="1920" height="820" alt="Comparison — A vs B, dimension by dimension"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Comparison</h3><p class="vm-desc">A vs B, dimension by dimension</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">sugar (comparison recipe)</span></summary>
+<pre class="vm-mono"><code>{
+  "elements": [
+    { "type": "text", "id": "title",
+      "text": "MySpeakingScore vs TOEFLAIR: coverage" },
+    { "type": "box", "id": "lh", "label": "MySpeakingScore", "color": "gray" },
+    { "type": "box", "id": "rh", "label": "TOEFLAIR", "color": "blue" },
+    { "type": "box", "id": "l1", "label": "Speaking: Listen &amp; Repeat, Interview" },
+    …
+  ]
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- Tree ×3 -->
+      <div class="vm-panel" role="tabpanel" id="vm-p-tree" aria-labelledby="vm-t-tree" tabindex="0" hidden>
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>01</span></div>
+          <div class="vm-body">
+            <a class="vm-img vm-img-narrow" href="assets/figures/tree-right.png" target="_blank" rel="noopener"><img src="assets/figures/tree-right.png" width="1436" height="1140" alt="Tree · left → right — Parent → children, split sideways"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Tree · left → right</h3><p class="vm-desc">Parent → children, split sideways</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: tree</span></summary>
+<pre class="vm-mono"><code>{
+  "title": "Skills",
+  "direction": "horizontal",
+  "levels": ["Root", "Category", "Skill"],
+  "root": { "label": "Skills", "children": [
+    { "label": "Design", "desc": "ui · visual · ux", "color": "blue",
+      "children": [{ "label": "polish", "desc": "align · space · rhythm" }, …] },
+    …
+  ] }
+}</code></pre>
+            </details>
+          </div>
+        </article>
+
+        <article class="vm-fig">
+          <div class="vm-scale" aria-hidden="true"><span>02</span></div>
+          <div class="vm-body">
+            <a class="vm-img" href="assets/figures/tree-down.png" target="_blank" rel="noopener"><img src="assets/figures/tree-down.png" width="2620" height="864" alt="Tree · top → down — Parent → children, split downward"></a>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Tree · top → down</h3><p class="vm-desc">Parent → children, split downward</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: tree</span></summary>
+<pre class="vm-mono"><code>{
+  "direction": "vertical",
+  "root": { "label": "…", "children": [ … ] }
+}</code></pre>
+            </details>
+          </div>
+        </article>
+
+        <article class="vm-fig vm-fig-tall">
+          <div class="vm-scale" aria-hidden="true"><span>03</span><em class="vm-level" data-level>level —</em></div>
+          <div class="vm-body">
+            <div class="vm-cap-wrap">
+              <a class="vm-img vm-capped" href="assets/figures/tree-stories.png" target="_blank" rel="noopener"><img src="assets/figures/tree-stories.png" width="2238" height="4898" alt="Tree · user-story map — 23 numbered stories in 6 groups"></a>
+              <p class="vm-fillnote"><span class="vm-fillnote-line" aria-hidden="true"></span><span data-fillnote>Showing the top of a tall figure. Scroll inside it, or open the PNG at full size.</span></p>
+            </div>
+            <div class="vm-cap">
+              <div><h3 class="vm-hand vm-name">Tree · user-story map</h3><p class="vm-desc">23 numbered stories in 6 groups</p></div>
+              <div class="vm-dl"><a class="vm-tube" href="#">.excalidraw <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">SVG <span aria-hidden="true">↓</span></a><a class="vm-tube" href="#">PNG <span aria-hidden="true">↓</span></a></div>
+            </div>
+            <details class="vm-input">
+              <summary><span class="vm-hand">Input</span><span class="vm-src">template: tree</span></summary>
+<pre class="vm-mono"><code>{
+  "direction": "vertical",
+  "numberLeaves": true,
+  "root": { "label": "…", "children": [
+    { "label": "…", "children": ["…", "…", …] },
+    …
+  ] }
+}</code></pre>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- load-error -->
+      <div class="vm-error" role="alert">
+        <div class="vm-scale vm-scale-empty" aria-hidden="true"><span>00</span></div>
+        <div>
+          <p class="vm-hand vm-error-title">Nothing to show: gallery.json didn’t load.</p>
+          <p class="vm-desc">This page only shows real engine output, so it shows nothing rather than stand-ins. The examples and their inputs are in the repo.</p>
+          <p><a class="vm-tube" href="https://github.com/guohaonan-shy/excalidrawer">Open the repo on GitHub <span aria-hidden="true">→</span></a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+
+.v-meniscus {
+  --ground: #FFFFFF;
+  --ink: #1E1E1E;
+  --readout: #5A6152;
+  --action: #4B6A00;
+  --on-action: #FFFFFF;
+  --fill: #EEF6D2;
+  --grad: #C8D0B8;
+  --hand: 'Excalifont', 'Virgil', 'Comic Sans MS', cursive;
+  --sans: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* graduation scale: minor tick every 8px, major every 40px */
+  --ticks-v:
+    linear-gradient(var(--grad), var(--grad)) right top / 1px 100% no-repeat,
+    repeating-linear-gradient(to bottom, var(--grad) 0 1px, transparent 1px 40px) right top / 14px 100% no-repeat,
+    repeating-linear-gradient(to bottom, var(--grad) 0 1px, transparent 1px 8px) right top / 7px 100% no-repeat;
+  display: block;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 28px 24px 40px;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.v-meniscus *, .v-meniscus *::before, .v-meniscus *::after { box-sizing: border-box; }
+.v-meniscus h1, .v-meniscus h2, .v-meniscus h3, .v-meniscus p, .v-meniscus ul, .v-meniscus figure, .v-meniscus pre { margin: 0; }
+.v-meniscus .vm-hand { font-family: var(--hand); font-weight: 400; }
+.v-meniscus .vm-sans { font-family: var(--sans); }
+.v-meniscus .vm-mono { font-family: var(--mono); }
+.v-meniscus .vm-readout { color: var(--readout); }
+.v-meniscus a { color: var(--action); }
+.v-meniscus a:focus-visible, .v-meniscus button:focus-visible, .v-meniscus summary:focus-visible, .v-meniscus [tabindex="0"]:focus-visible {
+  outline: 2px solid var(--action); outline-offset: 3px; border-radius: 2px;
+}
+
+/* ── language sheet ── */
+.v-meniscus .vm-sheet { display: grid; gap: 22px; }
+.v-meniscus .vm-sheet-head { display: grid; gap: 4px; }
+.v-meniscus .vm-sheet-title { font-size: 30px; line-height: 1.1; }
+.v-meniscus .vm-sheet-seed { color: var(--readout); font-size: 13px; max-width: 62ch; }
+.v-meniscus .vm-sheet-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; }
+.v-meniscus .vm-sheet-col { min-width: 0; }
+.v-meniscus .vm-label { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--readout); margin-bottom: 10px; }
+.v-meniscus .vm-swatches { list-style: none; padding: 0; display: grid; gap: 6px; }
+.v-meniscus .vm-swatches li { display: grid; grid-template-columns: 16px 82px 70px 1fr; align-items: center; gap: 8px; font-size: 13px; }
+.v-meniscus .vm-swatches b { font-weight: 600; }
+.v-meniscus .vm-swatches code { font-family: var(--sans); font-variant-numeric: tabular-nums; color: var(--ink); }
+.v-meniscus .vm-swatches span:last-child { color: var(--readout); font-variant-numeric: tabular-nums; }
+.v-meniscus .vm-vial { width: 14px; height: 22px; background: var(--c); border: 1.5px solid var(--ink); border-top: 0; border-radius: 0 0 8px 8px; }
+.v-meniscus .vm-spec { padding: 6px 0 8px; }
+.v-meniscus .vm-spec + .vm-spec { border-top: 1px solid var(--grad); }
+.v-meniscus .vm-spec-big { font-size: 26px; line-height: 1.2; }
+.v-meniscus .vm-spec-mid { font-size: 18px; font-weight: 500; }
+.v-meniscus .vm-spec-mono { font-size: 14px; }
+.v-meniscus .vm-spec-note { font-size: 12px; color: var(--readout); }
+.v-meniscus .vm-shapes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: end; }
+.v-meniscus .vm-shape { display: grid; gap: 8px; justify-items: start; }
+.v-meniscus .vm-shape figcaption { font-size: 12px; color: var(--readout); }
+.v-meniscus .vm-shape-tab { position: relative; display: inline-block; font-size: 20px; padding: 0 10px 16px; border-bottom: 1.5px solid var(--ink); }
+.v-meniscus .vm-shape-tab .vm-men { transform: none; }
+.v-meniscus .vm-shape-edge { width: 26px; height: 48px; background: var(--ticks-v); }
+.v-meniscus .vm-shape-div { width: 100%; height: 14px; border-top: 1.5px solid var(--ink);
+  background: repeating-linear-gradient(to right, var(--grad) 0 1px, transparent 1px 8px) left top / 100% 6px no-repeat,
+              repeating-linear-gradient(to right, var(--ink) 0 1.5px, transparent 1.5px 40px) left top / 100% 12px no-repeat; }
+.v-meniscus .vm-tone { font-size: 15px; margin-bottom: 8px; }
+.v-meniscus .vm-tone-link { color: var(--action); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+/* full-width graduated divider between sheet and page */
+.v-meniscus .vm-divider {
+  margin: 34px 0 30px; height: 30px; border-top: 1.5px solid var(--ink);
+  display: flex; justify-content: space-between; align-items: flex-end;
+  font-size: 11px; color: var(--readout); font-variant-numeric: tabular-nums;
+  background:
+    repeating-linear-gradient(to right, var(--ink) 0 1.5px, transparent 1.5px 25%) left top / calc(100% + 1.5px) 12px no-repeat,
+    repeating-linear-gradient(to right, var(--grad) 0 1px, transparent 1px 2.5%) left top / 100% 6px no-repeat;
+}
+
+/* ── page header ── */
+.v-meniscus .vm-head { display: grid; grid-template-columns: 1fr auto; column-gap: 20px; row-gap: 4px; align-items: baseline; margin-bottom: 26px; }
+.v-meniscus .vm-wordmark { font-size: 44px; line-height: 1.05; grid-column: 1; }
+.v-meniscus .vm-pos { grid-column: 1; grid-row: 2; color: var(--readout); font-size: 16px; max-width: 52ch; }
+.v-meniscus .vm-links { grid-column: 2; grid-row: 1; display: flex; gap: 18px; }
+.v-meniscus .vm-links a { font-weight: 600; font-size: 15px; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.v-meniscus .vm-links a:hover { background: var(--fill); }
+
+/* ── tabs: labels standing on a graduated rule; active = meniscus ── */
+.v-meniscus .vm-tabs {
+  display: flex; gap: 2px; overflow-x: auto; scrollbar-width: thin;
+  border-bottom: 1.5px solid var(--ink);
+  margin-bottom: 30px; padding-top: 2px;
+  background: repeating-linear-gradient(to right, var(--grad) 0 1px, transparent 1px 8px) left bottom / 100% 6px no-repeat;
+}
+.v-meniscus .vm-tab {
+  position: relative; flex: 0 0 auto;
+  appearance: none; border: 0; background: none; cursor: pointer;
+  font-family: var(--hand); font-size: 20px; color: var(--readout);
+  padding: 4px 14px 20px; line-height: 1.2;
+}
+.v-meniscus .vm-tab:hover { color: var(--ink); }
+.v-meniscus .vm-tab[aria-selected="true"] { color: var(--ink); }
+.v-meniscus .vm-count { font-family: var(--sans); font-size: 12px; color: var(--readout); vertical-align: 2px; }
+.v-meniscus .vm-men {
+  position: absolute; left: 4px; right: 4px; bottom: 0; width: calc(100% - 8px); height: 15px;
+  transform-origin: 50% 100%; transform: scaleY(0);
+  transition: transform .28s cubic-bezier(.3,.7,.3,1);
+  overflow: visible;
+}
+.v-meniscus .vm-tab[aria-selected="true"] .vm-men { transform: scaleY(1); }
+.v-meniscus .vm-men-fill { fill: var(--fill); }
+.v-meniscus .vm-men-line { fill: none; stroke: var(--action); stroke-width: 2.5px; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+
+/* ── figure blocks: borderless on the same white; a scale on the left is the only edge ── */
+.v-meniscus .vm-panel { display: grid; gap: 44px; }
+.v-meniscus .vm-panel[hidden] { display: none; }
+.v-meniscus .vm-fig { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 18px; }
+.v-meniscus .vm-scale { position: relative; background: var(--ticks-v); min-height: 100%; }
+.v-meniscus .vm-scale span { position: absolute; top: -2px; left: 0; font-size: 12px; font-weight: 600; color: var(--readout); font-variant-numeric: tabular-nums; background: var(--ground); padding-bottom: 2px; }
+.v-meniscus .vm-level { position: absolute; left: 0; font-style: normal; font-size: 11px; line-height: 1.2; color: var(--readout); writing-mode: vertical-rl; transform: rotate(180deg); background: var(--ground); padding: 4px 0; top: 32px; }
+.v-meniscus .vm-body { min-width: 0; display: grid; gap: 14px; }
+.v-meniscus .vm-img { display: block; }
+.v-meniscus .vm-img img { display: block; width: 100%; height: auto; }
+.v-meniscus .vm-img-narrow { max-width: 520px; }
+.v-meniscus .vm-img:hover { outline: 1px dashed var(--grad); outline-offset: 6px; }
+.v-meniscus .vm-cap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px 18px; border-top: 1px solid var(--grad); padding-top: 10px; }
+.v-meniscus .vm-name { font-size: 24px; line-height: 1.15; }
+.v-meniscus .vm-desc { color: var(--readout); font-size: 15px; }
+.v-meniscus .vm-dl { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* action shape: a test tube — flat mouth, round bottom */
+.v-meniscus .vm-tube {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--sans); font-size: 14px; font-weight: 600; line-height: 1;
+  color: var(--action); text-decoration: none;
+  border: 1.5px solid var(--action); border-radius: 2px 2px 14px 14px;
+  padding: 6px 12px 9px; background: var(--ground);
+  transition: background-color .15s, color .15s;
+}
+.v-meniscus .vm-tube:hover { background: var(--action); color: var(--on-action); }
+
+/* Input disclosure */
+.v-meniscus .vm-input { min-width: 0; }
+.v-meniscus .vm-input summary { list-style: none; cursor: pointer; display: inline-flex; align-items: baseline; gap: 12px; color: var(--action); }
+.v-meniscus .vm-input summary::-webkit-details-marker { display: none; }
+.v-meniscus .vm-input summary .vm-hand { font-size: 20px; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.v-meniscus .vm-input summary .vm-hand::before { content: "+"; display: inline-block; width: 1em; font-family: var(--sans); font-weight: 600; text-decoration: none; }
+.v-meniscus .vm-input[open] summary .vm-hand::before { content: "−"; }
+.v-meniscus .vm-src { font-family: var(--sans); font-size: 13px; color: var(--readout); }
+.v-meniscus .vm-input pre {
+  margin-top: 10px; padding: 12px 0 12px 22px; font-size: 13px; line-height: 1.55; color: var(--ink);
+  overflow: auto; max-height: 340px;
+  background:
+    linear-gradient(var(--action), var(--action)) left top / 2.5px 100% no-repeat,
+    repeating-linear-gradient(to bottom, var(--grad) 0 1px, transparent 1px 8px) 2.5px top / 6px 100% no-repeat;
+}
+.v-meniscus .vm-input pre code { font-family: inherit; }
+
+/* tall figure: capped vessel with a visible fill line */
+.v-meniscus .vm-capped { max-height: 520px; overflow-y: auto; overscroll-behavior: contain; }
+.v-meniscus .vm-fillnote { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--readout); margin-top: 6px; }
+.v-meniscus .vm-fillnote-line { flex: 0 0 48px; height: 0; border-top: 2.5px solid var(--action); }
+.v-meniscus .vm-cap-wrap { display: grid; }
+.v-meniscus .vm-cap-wrap .vm-capped { border-bottom: 2.5px solid var(--action); }
+
+/* ── states ── */
+.v-meniscus .vm-error { display: none; grid-template-columns: 30px minmax(0,1fr); gap: 18px; min-height: 240px; }
+.v-meniscus[data-state="load-error"] .vm-tabs,
+.v-meniscus[data-state="load-error"] .vm-panel { display: none; }
+.v-meniscus[data-state="load-error"] .vm-error { display: grid; }
+.v-meniscus .vm-error-title { font-size: 28px; line-height: 1.2; margin-bottom: 8px; }
+.v-meniscus .vm-error .vm-desc { max-width: 54ch; margin-bottom: 18px; }
+.v-meniscus .vm-scale-empty { border-bottom: 2.5px solid var(--action); }
+
+/* ── motion ── */
+html.reduce-motion .v-meniscus .vm-men,
+html.reduce-motion .v-meniscus .vm-tube { transition: none; }
+
+/* ── narrow ── */
+@media (max-width: 640px) {
+  .v-meniscus { padding: 20px 16px 32px; }
+  .v-meniscus .vm-sheet-grid { grid-template-columns: 1fr; gap: 20px; }
+  .v-meniscus .vm-shapes { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; }
+  .v-meniscus .vm-swatches li { grid-template-columns: 16px 76px 66px 1fr; font-size: 12px; }
+  .v-meniscus .vm-head { grid-template-columns: 1fr; }
+  .v-meniscus .vm-links { grid-column: 1; grid-row: 3; margin-top: 6px; }
+  .v-meniscus .vm-wordmark { font-size: 36px; }
+  .v-meniscus .vm-fig, .v-meniscus .vm-error { grid-template-columns: 18px minmax(0, 1fr); gap: 10px; }
+  .v-meniscus .vm-scale span { font-size: 11px; }
+  .v-meniscus .vm-level { display: none; }
+  .v-meniscus .vm-capped { max-height: 420px; }
+  .v-meniscus .vm-tab { font-size: 18px; padding: 4px 10px 18px; }
+  .v-meniscus .vm-input pre { font-size: 12px; }
+}
+</style>
+<script>
+(function () {
+  var root = document.querySelector('[data-variant="meniscus"]');
+  if (!root) return;
+  var tabs = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
+
+  function select(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      var p = root.querySelector('#' + t.getAttribute('aria-controls'));
+      if (p) p.hidden = !on;
+    });
+    if (focus) tab.focus();
+    measure();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t, false); });
+    t.addEventListener('keydown', function (e) {
+      var n = null;
+      if (e.key === 'ArrowRight') n = tabs[(i + 1) % tabs.length];
+      else if (e.key === 'ArrowLeft') n = tabs[(i - 1 + tabs.length) % tabs.length];
+      else if (e.key === 'Home') n = tabs[0];
+      else if (e.key === 'End') n = tabs[tabs.length - 1];
+      if (n) { e.preventDefault(); select(n, true); }
+    });
+  });
+
+  /* tall figure: write the real fill level (shown px / full px) */
+  function measure() {
+    var cap = root.querySelector('.vm-capped');
+    if (!cap || cap.offsetParent === null) return;
+    var img = cap.querySelector('img');
+    var full = Math.round(img.getBoundingClientRect().height);
+    var shown = Math.round(cap.clientHeight);
+    if (!full) return;
+    var lvl = root.querySelector('[data-level]');
+    var note = root.querySelector('[data-fillnote]');
+    if (lvl) lvl.textContent = 'level ' + shown + ' / ' + full + ' px';
+    if (note) note.textContent = 'Showing ' + shown + ' of ' + full + ' px. Scroll inside the figure, or open the PNG at full size.';
+  }
+  root.querySelectorAll('img').forEach(function (im) { im.addEventListener('load', measure); });
+  window.addEventListener('resize', measure);
+
+  /* shell-driven state: input-open expands the flowchart Input */
+  function syncState() {
+    var st = root.getAttribute('data-state');
+    var d = root.querySelector('#vm-p-flowchart details');
+    if (d) d.open = st === 'input-open';
+  }
+  new MutationObserver(syncState).observe(root, { attributes: true, attributeFilter: ['data-state'] });
+  syncState();
+})();
+</script>

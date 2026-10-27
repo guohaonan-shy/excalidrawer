@@ -1,0 +1,561 @@
+<section class="v-viewbox" data-variant="viewbox" data-state="default">
+
+  <!-- ===================== 1. Language sheet ===================== -->
+  <div class="vb-sheet" aria-label="Viewbox language sheet">
+    <div class="vb-sheet-head">
+      <h2 class="vb-hand vb-sheet-title">Viewbox</h2>
+      <p class="vb-print">Reading room · films clipped to a lit panel · the figure is the only light in the room</p>
+    </div>
+
+    <div class="vb-sheet-grid">
+      <div class="vb-sw-col">
+        <h3 class="vb-print vb-label">Palette · ratio vs room</h3>
+        <ul class="vb-swatches">
+          <li><span class="vb-chip" style="background:#0F151D"></span><b class="vb-hand">Room</b><span class="vb-print">#0F151D · ground · L* 6.6</span></li>
+          <li><span class="vb-chip" style="background:#18212C"></span><b class="vb-hand">Housing</b><span class="vb-print">#18212C · panel body</span></li>
+          <li><span class="vb-chip" style="background:#DCE3EC"></span><b class="vb-hand">Note</b><span class="vb-print">#DCE3EC · body · 14.18 room / 12.56 housing</span></li>
+          <li><span class="vb-chip" style="background:#9AA8B8"></span><b class="vb-hand">Overlay</b><span class="vb-print">#9AA8B8 · meta · 7.57 / 6.70</span></li>
+          <li><span class="vb-chip" style="background:#E7B54A"></span><b class="vb-hand">Switch</b><span class="vb-print">#E7B54A · actions only · 9.70 / 8.59 · room on it 9.70</span></li>
+          <li><span class="vb-chip vb-chip-lit"></span><b class="vb-hand">Lit</b><span class="vb-print">#FFFFFF plate · #E9EEF3 lit tab · room on tab 15.9</span></li>
+        </ul>
+      </div>
+
+      <div class="vb-type-col">
+        <h3 class="vb-print vb-label">Type</h3>
+        <div class="vb-spec">
+          <p class="vb-hand" style="font-size:30px;line-height:1.1">Grease pencil</p>
+          <p class="vb-print">Excalifont · what a person writes on the film · 40 / 22 / 18 / 16</p>
+        </div>
+        <div class="vb-spec">
+          <p class="vb-print" style="font-size:15px;letter-spacing:.08em;color:var(--vb-note)">PRINTED OVERLAY 2520 × 540</p>
+          <p class="vb-print">IBM Plex Sans Condensed · what the machine prints · 12 / 13 / 15</p>
+        </div>
+        <div class="vb-spec">
+          <p class="vb-mono" style="font-size:13px">{ "direction": "horizontal" }</p>
+          <p class="vb-print">JetBrains Mono · the input, verbatim · 12.5</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="vb-shapes">
+      <div class="vb-shape"><span class="vb-tab-demo">Sequence</span><span class="vb-tab-demo is-lit">Flowchart</span><span class="vb-print vb-cap">tab · unlit / lit</span></div>
+      <div class="vb-shape"><a class="vb-dl-link" href="#" onclick="return false">PNG</a><span class="vb-print vb-cap">action · amber, arrow-down rule</span></div>
+      <div class="vb-shape"><span class="vb-housing-demo"><span class="vb-clip"></span><span class="vb-plate-demo"></span></span><span class="vb-print vb-cap">housing · clip · plate</span></div>
+      <div class="vb-shape vb-shape-rail"><span class="vb-rail"></span><span class="vb-print vb-cap">divider · panel seam</span></div>
+    </div>
+
+    <div class="vb-tone">
+      <p class="vb-hand">Each diagram came out of the engine as-is. Its input is clipped underneath.</p>
+      <p><a class="vb-dl-link" href="#" onclick="return false">.excalidraw</a> <span class="vb-print">— the source file; opens and edits in Excalidraw</span></p>
+    </div>
+  </div>
+
+  <!-- ===================== 2. Gallery slice ===================== -->
+  <div class="vb-page">
+    <header class="vb-header">
+      <h1 class="vb-hand vb-title">excalidrawer</h1>
+      <p class="vb-hand vb-pos">Describe a diagram in JSON; get a hand-drawn Excalidraw file back. CLI, library or MCP.</p>
+      <nav class="vb-ext" aria-label="Project links">
+        <a class="vb-link" href="https://github.com/guohaonan-shy/excalidrawer">GitHub</a>
+        <a class="vb-link" href="https://www.npmjs.com/package/excalidrawer">npm</a>
+      </nav>
+    </header>
+
+    <div class="vb-gallery">
+      <div class="vb-tabs" role="tablist" aria-label="Diagram types">
+        <button class="vb-tab" role="tab" id="vb-t-flowchart" aria-controls="vb-p-flowchart" aria-selected="true" tabindex="0">Flowchart</button>
+        <button class="vb-tab" role="tab" id="vb-t-architecture" aria-controls="vb-p-architecture" aria-selected="false" tabindex="-1">Architecture</button>
+        <button class="vb-tab" role="tab" id="vb-t-sequence" aria-controls="vb-p-sequence" aria-selected="false" tabindex="-1">Sequence</button>
+        <button class="vb-tab" role="tab" id="vb-t-timeline" aria-controls="vb-p-timeline" aria-selected="false" tabindex="-1">Timeline</button>
+        <button class="vb-tab" role="tab" id="vb-t-comparison" aria-controls="vb-p-comparison" aria-selected="false" tabindex="-1">Comparison</button>
+        <button class="vb-tab" role="tab" id="vb-t-tree" aria-controls="vb-p-tree" aria-selected="false" tabindex="-1">Tree <span class="vb-count">3</span></button>
+      </div>
+
+      <!-- Flowchart -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-flowchart" aria-labelledby="vb-t-flowchart" tabindex="0">
+        <article class="vb-fig" data-fig="flowchart">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/flowchart.png" target="_blank" rel="noopener"><img src="assets/figures/flowchart.png" width="1260" height="270" alt="Flowchart: Decisions + branches"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>flowchart.png</span><span>2520 × 540 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div>
+              <h3 class="vb-hand vb-name">Flowchart</h3>
+              <p class="vb-hand vb-desc">Decisions + branches</p>
+            </div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-flowchart"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: flowchart</span></button>
+            <div class="vb-in-body" id="vb-in-flowchart" hidden>
+<pre class="vb-mono"><code>{
+  "title": "Pull request to production",
+  "direction": "horizontal",
+  "nodes": [
+    { "id": "open", "label": "PR opened", "type": "start" },
+    { "id": "ci", "label": "CI + review" },
+    { "id": "ok", "label": "Approved?", "type": "decision" },
+    { "id": "merge", "label": "Merge to main" },
+    { "id": "fix", "label": "Request changes", "color": "red" },
+    { "id": "ship", "label": "Deploy", "type": "end" }
+  ],
+  "edges": [
+    { "from": "open", "to": "ci" },
+    { "from": "ci", "to": "ok" },
+    { "from": "ok", "to": "merge", "label": "yes" },
+    { "from": "ok", "to": "fix", "label": "no" },
+    { "from": "merge", "to": "ship" }
+  ]
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Architecture -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-architecture" aria-labelledby="vb-t-architecture" tabindex="0" hidden>
+        <article class="vb-fig" data-fig="architecture">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/architecture.png" target="_blank" rel="noopener"><img src="assets/figures/architecture.png" width="818" height="804" alt="Architecture: Layered components + connections" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>architecture.png</span><span>1636 × 1608 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Architecture</h3><p class="vb-hand vb-desc">Layered components + connections</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-architecture"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: architecture</span></button>
+            <div class="vb-in-body" id="vb-in-architecture" hidden>
+<pre class="vb-mono"><code>{
+  "title": "Web app architecture",
+  "sections": [
+    { "label": "Clients", "color": "blue", "items": ["Web app", "iOS app", "Admin console"] },
+    { "label": "Edge", "color": "purple", "items": ["CDN", "API gateway"] },
+    { "label": "Services", "color": "green", "items": ["Auth", "Orders", "Payments", "Notifications"] },
+    …
+  ],
+  "connections": [ { "from": "Web app", "to": "CDN" }, … ]
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Sequence -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-sequence" aria-labelledby="vb-t-sequence" tabindex="0" hidden>
+        <article class="vb-fig" data-fig="sequence">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/sequence.png" target="_blank" rel="noopener"><img src="assets/figures/sequence.png" width="1970" height="974" alt="Sequence: Messages between actors over time" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>sequence.png</span><span>3940 × 1948 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Sequence</h3><p class="vb-hand vb-desc">Messages between actors over time</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-sequence"><span class="vb-hand">Input</span><span class="vb-print vb-src">sugar (sequence recipe)</span></button>
+            <div class="vb-in-body" id="vb-in-sequence" hidden>
+<pre class="vb-mono"><code>{
+  "elements": [
+    { "type": "text", "id": "title", "x": 40, "y": 20, "text": "OAuth sign-in" },
+    { "type": "box", "id": "user", "x": 40, "y": 80, "w": 160, "h": 56, "label": "User" },
+    { "type": "box", "id": "app", "x": 400, "y": 80, "w": 160, "h": 56, "label": "App" },
+    { "type": "arrow", "id": "m1", "x": 120, "y": 200, "points": [[0, 0], [360, 0]], "label": "Sign in" },
+    …
+  ]
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Timeline -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-timeline" aria-labelledby="vb-t-timeline" tabindex="0" hidden>
+        <article class="vb-fig" data-fig="timeline">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/timeline.png" target="_blank" rel="noopener"><img src="assets/figures/timeline.png" width="1170" height="484" alt="Timeline: Milestones on an axis" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>timeline.png</span><span>2340 × 968 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Timeline</h3><p class="vb-hand vb-desc">Milestones on an axis</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-timeline"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: timeline</span></button>
+            <div class="vb-in-body" id="vb-in-timeline" hidden>
+<pre class="vb-mono"><code>{
+  "title": "2026 product roadmap",
+  "items": [
+    { "label": "Beta", "time": "Q1", "desc": "Invite-only, 200 teams" },
+    { "label": "Public launch", "time": "Q2", "desc": "Self-serve signup" },
+    …
+  ]
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Comparison -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-comparison" aria-labelledby="vb-t-comparison" tabindex="0" hidden>
+        <article class="vb-fig" data-fig="comparison">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/comparison.png" target="_blank" rel="noopener"><img src="assets/figures/comparison.png" width="960" height="410" alt="Comparison: A vs B, dimension by dimension" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>comparison.png</span><span>1920 × 820 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Comparison</h3><p class="vb-hand vb-desc">A vs B, dimension by dimension</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-comparison"><span class="vb-hand">Input</span><span class="vb-print vb-src">sugar (comparison recipe)</span></button>
+            <div class="vb-in-body" id="vb-in-comparison" hidden>
+<pre class="vb-mono"><code>{
+  "elements": [
+    { "type": "box", "id": "a-head", "x": 40, "y": 70, "w": 380, "h": 56, "label": "REST" },
+    { "type": "box", "id": "b-head", "x": 520, "y": 70, "w": 380, "h": 56, "label": "GraphQL" },
+    { "type": "text", "id": "vs", "x": 450, "y": 84, "text": "VS" },
+    …
+  ]
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Tree (3 figures) -->
+      <div class="vb-panel" role="tabpanel" id="vb-p-tree" aria-labelledby="vb-t-tree" tabindex="0" hidden>
+        <article class="vb-fig" data-fig="tree-right">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/tree-right.png" target="_blank" rel="noopener"><img src="assets/figures/tree-right.png" width="718" height="570" alt="Tree · left → right: Parent → children, split sideways" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>tree-right.png · 1 of 3</span><span>1436 × 1140 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Tree · left → right</h3><p class="vb-hand vb-desc">Parent → children, split sideways</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-tree-right"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: tree</span></button>
+            <div class="vb-in-body" id="vb-in-tree-right" hidden>
+<pre class="vb-mono"><code>{
+  "direction": "horizontal",
+  "root": {
+    "label": "excalidrawer",
+    "children": [
+      { "label": "CLI", "children": ["render", "compute-layout", "generate"] },
+      { "label": "MCP server", "children": ["render_diagram", "compute_layout"] },
+      …
+    ]
+  }
+}</code></pre>
+            </div>
+          </div>
+        </article>
+
+        <article class="vb-fig" data-fig="tree-down">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <a class="vb-plate" href="assets/figures/tree-down.png" target="_blank" rel="noopener"><img src="assets/figures/tree-down.png" width="1310" height="432" alt="Tree · top → down: Parent → children, split downward" loading="lazy"></a>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>tree-down.png · 2 of 3</span><span>2620 × 864 · @2x</span></div>
+          </div>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Tree · top → down</h3><p class="vb-hand vb-desc">Parent → children, split downward</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-tree-down"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: tree</span></button>
+            <div class="vb-in-body" id="vb-in-tree-down" hidden>
+<pre class="vb-mono"><code>{
+  "direction": "vertical",
+  "root": {
+    "label": "Checkout",
+    "children": [
+      { "label": "Cart", "children": ["Add item", "Remove item"] },
+      { "label": "Payment", "children": ["Card", "Wallet"] },
+      …
+    ]
+  }
+}</code></pre>
+            </div>
+          </div>
+        </article>
+
+        <article class="vb-fig vb-fig-tall" data-fig="tree-stories">
+          <div class="vb-box">
+            <span class="vb-clip" aria-hidden="true"></span>
+            <div class="vb-plate vb-plate-scroll" tabindex="0" aria-label="Tree · user-story map, scrollable">
+              <a href="assets/figures/tree-stories.png" target="_blank" rel="noopener"><img src="assets/figures/tree-stories.png" width="1119" height="2449" alt="Tree · user-story map: 23 numbered stories in 6 groups" loading="lazy"></a>
+            </div>
+            <div class="vb-overlay vb-print" aria-hidden="true"><span>tree-stories.png · 3 of 3</span><span class="vb-scrollpos">2238 × 4898 · showing <i>0–21</i>%</span></div>
+          </div>
+          <p class="vb-hand vb-tallnote">Taller than the panel. Scroll inside it, or open the PNG at full size.</p>
+          <div class="vb-meta">
+            <div><h3 class="vb-hand vb-name">Tree · user-story map</h3><p class="vb-hand vb-desc">23 numbered stories in 6 groups</p></div>
+            <div class="vb-dls" aria-label="Downloads"><a class="vb-dl-link" href="#">.excalidraw</a><a class="vb-dl-link" href="#">SVG</a><a class="vb-dl-link" href="#">PNG</a></div>
+          </div>
+          <div class="vb-input">
+            <button class="vb-in-btn" aria-expanded="false" aria-controls="vb-in-tree-stories"><span class="vb-hand">Input</span><span class="vb-print vb-src">template: tree</span></button>
+            <div class="vb-in-body" id="vb-in-tree-stories" hidden>
+<pre class="vb-mono"><code>{
+  "direction": "horizontal",
+  "numberLeaves": true,
+  "root": {
+    "label": "Team wiki",
+    "children": [
+      { "label": "Write", "children": ["Create a page", "Edit with preview", …] },
+      { "label": "Find", "children": ["Search by title", …] },
+      …
+    ]
+  }
+}</code></pre>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- load-error -->
+    <div class="vb-error" role="alert">
+      <div class="vb-box vb-box-off">
+        <span class="vb-clip" aria-hidden="true"></span>
+        <div class="vb-plate-off">
+          <p class="vb-hand vb-err-title">Nothing on the light.</p>
+          <p class="vb-hand vb-err-body">gallery.json didn't load, so no figures got clipped up. The same diagrams and their inputs are in the repo:</p>
+          <p><a class="vb-link" href="https://github.com/guohaonan-shy/excalidrawer">github.com/guohaonan-shy/excalidrawer</a></p>
+        </div>
+        <div class="vb-overlay vb-print" aria-hidden="true"><span>gallery.json</span><span>not loaded</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap);
+
+.v-viewbox {
+  --vb-room: #0F151D;
+  --vb-housing: #18212C;
+  --vb-rim: #2C3846;
+  --vb-seam: #222D3A;
+  --vb-note: #DCE3EC;
+  --vb-overlay: #9AA8B8;
+  --vb-switch: #E7B54A;
+  --vb-lit-tab: #E9EEF3;
+  --vb-plate: #FFFFFF;
+  --vb-hand: 'Excalifont', 'Virgil', 'Comic Sans MS', cursive;
+  --vb-print: 'IBM Plex Sans Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --vb-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  background: var(--vb-room);
+  color: var(--vb-note);
+  font-family: var(--vb-print);
+  padding: 28px 24px 40px;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.v-viewbox *, .v-viewbox *::before, .v-viewbox *::after { box-sizing: border-box; }
+.v-viewbox p, .v-viewbox h1, .v-viewbox h2, .v-viewbox h3, .v-viewbox ul { margin: 0; padding: 0; }
+.v-viewbox .vb-hand { font-family: var(--vb-hand); font-weight: 400; }
+.v-viewbox .vb-print { font-family: var(--vb-print); font-size: 12.5px; color: var(--vb-overlay); letter-spacing: .02em; }
+.v-viewbox .vb-mono { font-family: var(--vb-mono); }
+
+/* ---------- language sheet ---------- */
+.v-viewbox .vb-sheet { border-bottom: 1px solid var(--vb-seam); padding-bottom: 26px; margin-bottom: 30px; }
+.v-viewbox .vb-sheet-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+.v-viewbox .vb-sheet-title { font-size: 26px; color: var(--vb-note); }
+.v-viewbox .vb-label { text-transform: uppercase; letter-spacing: .12em; font-size: 11.5px; font-weight: 600; margin-bottom: 10px; }
+.v-viewbox .vb-sheet-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; }
+.v-viewbox .vb-swatches { list-style: none; display: grid; gap: 7px; }
+.v-viewbox .vb-swatches li { display: grid; grid-template-columns: 30px 70px 1fr; align-items: center; gap: 10px; }
+.v-viewbox .vb-swatches b { font-size: 17px; color: var(--vb-note); }
+.v-viewbox .vb-chip { width: 30px; height: 22px; border-radius: 3px; border: 1px solid var(--vb-rim); display: block; }
+.v-viewbox .vb-chip-lit { background: linear-gradient(90deg, #FFFFFF 50%, #E9EEF3 50%); }
+.v-viewbox .vb-spec { padding: 8px 0 9px; border-top: 1px solid var(--vb-seam); }
+.v-viewbox .vb-spec:first-of-type { border-top: 0; padding-top: 0; }
+.v-viewbox .vb-spec p:first-child { margin-bottom: 3px; color: var(--vb-note); }
+
+.v-viewbox .vb-shapes { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 16px; margin-top: 20px; align-items: end; }
+.v-viewbox .vb-shape { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.v-viewbox .vb-cap { flex-basis: 100%; font-size: 11.5px; }
+.v-viewbox .vb-tab-demo { font-family: var(--vb-hand); font-size: 15px; padding: 5px 10px 4px; border: 1px solid var(--vb-rim); border-radius: 3px; background: var(--vb-housing); color: var(--vb-note); }
+.v-viewbox .vb-tab-demo.is-lit { background: var(--vb-lit-tab); color: var(--vb-room); border-color: var(--vb-lit-tab); }
+.v-viewbox .vb-housing-demo { position: relative; display: block; width: 92px; height: 50px; background: var(--vb-housing); border: 1px solid var(--vb-rim); border-radius: 6px; padding: 7px; }
+.v-viewbox .vb-plate-demo { display: block; width: 100%; height: 100%; background: var(--vb-plate); border-radius: 1px; }
+.v-viewbox .vb-housing-demo .vb-clip { top: -3px; width: 30px; }
+.v-viewbox .vb-rail { display: block; width: 100%; height: 9px; border-top: 1px solid var(--vb-rim); border-bottom: 1px solid #0A0F15; background: var(--vb-housing); border-radius: 1px; }
+.v-viewbox .vb-tone { margin-top: 20px; padding: 14px 16px; background: var(--vb-housing); border-radius: 6px; border: 1px solid var(--vb-seam); display: grid; gap: 8px; }
+.v-viewbox .vb-tone .vb-hand { font-size: 18px; }
+
+/* ---------- shared shapes ---------- */
+.v-viewbox .vb-clip { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); width: 64px; height: 9px; background: #3A4757; border: 1px solid #4A5868; border-radius: 2px; z-index: 2; }
+.v-viewbox a { color: inherit; }
+.v-viewbox .vb-link, .v-viewbox .vb-dl-link { color: var(--vb-switch); text-decoration: none; border-bottom: 1.5px solid currentColor; padding-bottom: 1px; }
+.v-viewbox .vb-link { font-family: var(--vb-hand); font-size: 18px; }
+.v-viewbox .vb-dl-link { font-family: var(--vb-print); font-weight: 600; font-size: 14px; letter-spacing: .03em; }
+.v-viewbox .vb-dl-link::before { content: "↓ "; font-weight: 400; }
+.v-viewbox .vb-link:hover, .v-viewbox .vb-dl-link:hover { border-bottom-width: 3px; }
+.v-viewbox a:focus-visible, .v-viewbox button:focus-visible, .v-viewbox [tabindex]:focus-visible { outline: 2px solid var(--vb-switch); outline-offset: 3px; border-radius: 3px; }
+
+/* ---------- page header ---------- */
+.v-viewbox .vb-header { display: grid; grid-template-columns: 1fr auto; gap: 4px 20px; align-items: end; margin-bottom: 22px; }
+.v-viewbox .vb-title { font-size: 40px; line-height: 1; color: var(--vb-note); grid-column: 1; }
+.v-viewbox .vb-pos { grid-column: 1; font-size: 18px; color: var(--vb-overlay); line-height: 1.35; }
+.v-viewbox .vb-ext { grid-column: 2; grid-row: 1 / span 2; display: flex; gap: 18px; align-self: center; }
+
+/* ---------- tabs ---------- */
+.v-viewbox .vb-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 14px; border-bottom: 1px solid var(--vb-seam); margin-bottom: 26px; }
+.v-viewbox .vb-tab { font-family: var(--vb-hand); font-size: 18px; color: var(--vb-note); background: var(--vb-housing); border: 1px solid var(--vb-rim); border-radius: 3px; padding: 6px 13px 5px; cursor: pointer; line-height: 1.2; }
+.v-viewbox .vb-tab:hover { border-color: var(--vb-overlay); }
+.v-viewbox .vb-tab[aria-selected="true"] { background: var(--vb-lit-tab); color: var(--vb-room); border-color: var(--vb-lit-tab); }
+.v-viewbox .vb-count { font-family: var(--vb-print); font-size: 12px; font-weight: 600; margin-left: 3px; padding: 0 5px; border: 1px solid currentColor; border-radius: 2px; vertical-align: 2px; }
+.v-viewbox .vb-panel[hidden] { display: none; }
+.v-viewbox .vb-panel { outline-offset: 6px; }
+
+/* ---------- figure block ---------- */
+.v-viewbox .vb-fig + .vb-fig { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--vb-seam); }
+.v-viewbox .vb-box { position: relative; background: var(--vb-housing); border: 1px solid var(--vb-rim); border-radius: 6px; padding: 14px 14px 0; }
+.v-viewbox .vb-plate { display: flex; justify-content: center; align-items: center; background: var(--vb-plate); border-radius: 1px; overflow: hidden; }
+.v-viewbox .vb-plate img { display: block; max-width: 100%; height: auto; max-height: 460px; width: auto; }
+.v-viewbox .vb-overlay { display: flex; justify-content: space-between; gap: 12px; padding: 7px 2px 8px; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; }
+.v-viewbox .vb-overlay i { font-style: normal; color: var(--vb-note); }
+.v-viewbox .vb-overlay span:first-child { text-transform: none; letter-spacing: .03em; }
+.v-viewbox .vb-plate-scroll { display: block; max-height: 440px; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #4A5868 var(--vb-housing); }
+.v-viewbox .vb-plate-scroll a { display: block; }
+.v-viewbox .vb-plate-scroll img { max-height: none; width: 100%; }
+.v-viewbox .vb-tallnote { font-size: 16px; color: var(--vb-overlay); margin-top: 8px; }
+
+.v-viewbox .vb-meta { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px 20px; flex-wrap: wrap; margin-top: 14px; }
+.v-viewbox .vb-name { font-size: 22px; color: var(--vb-note); line-height: 1.15; }
+.v-viewbox .vb-desc { font-size: 17px; color: var(--vb-overlay); }
+.v-viewbox .vb-dls { display: flex; gap: 16px; }
+
+.v-viewbox .vb-input { margin-top: 14px; border-top: 1px solid var(--vb-seam); }
+.v-viewbox .vb-in-btn { all: unset; cursor: pointer; display: flex; align-items: baseline; gap: 12px; padding: 10px 2px; width: 100%; color: var(--vb-note); }
+.v-viewbox .vb-in-btn .vb-hand { font-size: 18px; color: var(--vb-switch); }
+.v-viewbox .vb-in-btn .vb-hand::before { content: "+ "; display: inline-block; width: 1.1em; }
+.v-viewbox .vb-in-btn[aria-expanded="true"] .vb-hand::before { content: "− "; }
+.v-viewbox .vb-src { margin-left: auto; }
+.v-viewbox .vb-in-body pre { margin: 0; background: #0B1016; border: 1px solid var(--vb-seam); border-left: 3px solid var(--vb-rim); border-radius: 3px; padding: 14px 16px; font-size: 12.5px; line-height: 1.55; color: var(--vb-note); overflow-x: auto; white-space: pre; }
+.v-viewbox .vb-in-body[hidden] { display: none; }
+
+/* ---------- switch-on animation ---------- */
+.v-viewbox .vb-panel.is-striking .vb-plate { animation: viewbox-strike 300ms steps(1, end); }
+@keyframes viewbox-strike {
+  0% { opacity: .18; }
+  25% { opacity: .9; }
+  45% { opacity: .45; }
+  70% { opacity: 1; }
+  100% { opacity: 1; }
+}
+html.reduce-motion .v-viewbox .vb-panel.is-striking .vb-plate { animation: none; }
+
+/* ---------- states ---------- */
+.v-viewbox .vb-error { display: none; }
+.v-viewbox[data-state="load-error"] .vb-gallery { display: none; }
+.v-viewbox[data-state="load-error"] .vb-error { display: block; }
+.v-viewbox[data-state="input-open"] [data-fig="flowchart"] .vb-in-body { display: block; }
+.v-viewbox .vb-box-off { padding-bottom: 0; }
+.v-viewbox .vb-plate-off { background: #121A24; border: 1.5px dashed var(--vb-rim); border-radius: 1px; min-height: 230px; padding: 34px 28px; display: grid; align-content: center; gap: 12px; }
+.v-viewbox .vb-err-title { font-size: 28px; color: var(--vb-note); }
+.v-viewbox .vb-err-body { font-size: 18px; color: var(--vb-overlay); max-width: 52ch; line-height: 1.4; }
+
+/* ---------- narrow ---------- */
+@media (max-width: 640px) {
+  .v-viewbox { padding: 20px 16px 32px; }
+  .v-viewbox .vb-sheet-grid { grid-template-columns: 1fr; gap: 18px; }
+  .v-viewbox .vb-swatches li { grid-template-columns: 30px 64px 1fr; }
+  .v-viewbox .vb-shapes { grid-template-columns: 1fr 1fr; }
+  .v-viewbox .vb-header { grid-template-columns: 1fr; }
+  .v-viewbox .vb-ext { grid-column: 1; grid-row: auto; margin-top: 8px; }
+  .v-viewbox .vb-title { font-size: 34px; }
+  .v-viewbox .vb-tab { font-size: 16px; padding: 5px 10px 4px; }
+  .v-viewbox .vb-box { padding: 10px 10px 0; }
+  .v-viewbox .vb-overlay { flex-direction: column; gap: 2px; }
+  .v-viewbox .vb-plate-scroll { max-height: 380px; }
+  .v-viewbox .vb-src { margin-left: 0; }
+  .v-viewbox .vb-in-btn { flex-wrap: wrap; }
+}
+</style>
+<script>
+(function () {
+  var root = document.querySelector('[data-variant="viewbox"]');
+  if (!root) return;
+  var tabs = Array.prototype.slice.call(root.querySelectorAll('.vb-tab'));
+  var reduce = function () { return document.documentElement.classList.contains('reduce-motion'); };
+
+  function select(tab, focus, strike) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      var p = root.querySelector('#' + t.getAttribute('aria-controls'));
+      if (p) {
+        p.hidden = !on;
+        if (on && strike && !reduce()) {
+          p.classList.remove('is-striking'); void p.offsetWidth; p.classList.add('is-striking');
+        }
+      }
+    });
+    if (focus) tab.focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t, false, true); });
+    t.addEventListener('keydown', function (e) {
+      var n = null;
+      if (e.key === 'ArrowRight') n = tabs[(i + 1) % tabs.length];
+      else if (e.key === 'ArrowLeft') n = tabs[(i - 1 + tabs.length) % tabs.length];
+      else if (e.key === 'Home') n = tabs[0];
+      else if (e.key === 'End') n = tabs[tabs.length - 1];
+      if (n) { e.preventDefault(); select(n, true, true); }
+    });
+  });
+
+  function setInput(btn, open) {
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    var body = root.querySelector('#' + btn.getAttribute('aria-controls'));
+    if (body) body.hidden = !open;
+  }
+  root.querySelectorAll('.vb-in-btn').forEach(function (b) {
+    b.addEventListener('click', function () { setInput(b, b.getAttribute('aria-expanded') !== 'true'); });
+  });
+
+  /* scroll position read-out for the tall plate */
+  root.querySelectorAll('.vb-plate-scroll').forEach(function (s) {
+    var out = s.parentNode.querySelector('.vb-scrollpos i');
+    function upd() {
+      if (!out || !s.scrollHeight) return;
+      var lo = Math.round(s.scrollTop / s.scrollHeight * 100);
+      var hi = Math.min(100, Math.round((s.scrollTop + s.clientHeight) / s.scrollHeight * 100));
+      out.textContent = lo + '–' + hi;
+    }
+    s.addEventListener('scroll', upd, { passive: true });
+    var img = s.querySelector('img');
+    if (img) img.addEventListener('load', upd);
+    window.addEventListener('resize', upd);
+    setTimeout(upd, 0);
+  });
+
+  /* follow the shell's data-state */
+  var last = null;
+  function syncState() {
+    var st = root.getAttribute('data-state');
+    if (st === last) return;
+    last = st;
+    var fb = root.querySelector('[data-fig="flowchart"] .vb-in-btn');
+    if (st === 'input-open') {
+      select(tabs[0], false);
+      if (fb) setInput(fb, true);
+    } else if (st === 'default') {
+      select(tabs[0], false);
+      if (fb) setInput(fb, false);
+    }
+  }
+  new MutationObserver(syncState).observe(root, { attributes: true, attributeFilter: ['data-state'] });
+  syncState();
+})();
+</script>

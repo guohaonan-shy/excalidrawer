@@ -1,0 +1,552 @@
+<section class="v-fieldbook" data-variant="fieldbook" data-state="default">
+
+  <!-- 1 · Language sheet -->
+  <div class="fb-sheet" aria-label="Language sheet: fieldbook">
+    <p class="fb-sheet-kicker">Language sheet · fieldbook</p>
+    <div class="fb-sheet-grid">
+      <div class="fb-sheet-col">
+        <h4 class="fb-sheet-h">Palette</h4>
+        <ul class="fb-swatches">
+          <li><span class="fb-sw" style="background:#F2EEDC"></span><b>ground</b> <code>#F2EEDC</code><small>buff ledger paper</small></li>
+          <li><span class="fb-sw" style="background:#E4E2C6"></span><b>ruling</b> <code>#E4E2C6</code><small>quad grid, non-text</small></li>
+          <li><span class="fb-sw" style="background:#2A2D27"></span><b>graphite</b> <code>#2A2D27</code><small>12.0 on ground · 10.6 on ruling</small></li>
+          <li><span class="fb-sw" style="background:#5A6448"></span><b>printed</b> <code>#5A6448</code><small>5.38 on ground · 4.77 on ruling</small></li>
+          <li><span class="fb-sw" style="background:#B23A0E"></span><b>flag (accent)</b> <code>#B23A0E</code><small>5.15 on ground · white on it 5.99</small></li>
+          <li><span class="fb-sw" style="background:#F8F6EA"></span><b>slip</b> <code>#F8F6EA</code><small>JSON slip · graphite 12.9 · flag 5.52</small></li>
+        </ul>
+      </div>
+      <div class="fb-sheet-col">
+        <h4 class="fb-sheet-h">Type</h4>
+        <div class="fb-spec">
+          <p class="fb-spec-hand fb-spec-xl">excalidrawer <small>Excalifont 40 · title</small></p>
+          <p class="fb-spec-hand fb-spec-m">Flowchart, Decisions + branches <small>Excalifont 22 / 18 · tabs, names, notes</small></p>
+          <p class="fb-spec-mono">INPUT · flowchart.svg · {"type":"start"} <small>IBM Plex Mono 11–13 · printed form: labels, files, JSON</small></p>
+        </div>
+        <h4 class="fb-sheet-h">Shapes</h4>
+        <div class="fb-shapes">
+          <figure><span class="fb-shape-tab"><span class="fb-tab is-on">Tab</span><span class="fb-tab is-off">Tab</span></span><figcaption>column tab</figcaption></figure>
+          <figure><span><span class="fb-btn">file.svg</span></span><figcaption>action</figcaption></figure>
+          <figure><span><span class="fb-print fb-print--mini"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i></span></span><figcaption>tipped-in print</figcaption></figure>
+          <figure><span class="fb-shape-rule"><span class="fb-rule"></span></span><figcaption>double rule</figcaption></figure>
+        </div>
+      </div>
+    </div>
+    <div class="fb-tone">
+      <h4 class="fb-sheet-h">Tone</h4>
+      <p class="fb-tone-line fb-spec-hand">Diagrams from JSON, saved as files you can still edit.</p>
+      <p class="fb-tone-line"><span class="fb-btn">flowchart.excalidraw</span> <span class="fb-tone-note">— a download is named by the file it gives you.</span></p>
+    </div>
+  </div>
+
+  <!-- 2 · Gallery slice -->
+  <div class="fb-page">
+    <header class="fb-masthead">
+      <p class="fb-book" aria-hidden="true"><span>Level book</span><span>Sheet 1</span></p>
+      <h2 class="fb-title">excalidrawer</h2>
+      <p class="fb-lede">Diagrams from JSON or code, saved as Excalidraw files you can still edit. Every figure below is unretouched engine output.</p>
+      <nav class="fb-links" aria-label="Project links">
+        <a class="fb-btn" href="https://github.com/guohaonan-shy/excalidrawer">GitHub</a>
+        <a class="fb-btn" href="https://www.npmjs.com/package/excalidrawer">npm</a>
+      </nav>
+    </header>
+
+    <div class="fb-rule" role="presentation"></div>
+
+    <div class="fb-gallery">
+      <div class="fb-tabs" role="tablist" aria-label="Diagram types">
+        <button class="fb-tab" role="tab" id="fb-tab-flowchart" aria-controls="fb-panel-flowchart" aria-selected="true" tabindex="0">Flowchart</button>
+        <button class="fb-tab" role="tab" id="fb-tab-architecture" aria-controls="fb-panel-architecture" aria-selected="false" tabindex="-1">Architecture</button>
+        <button class="fb-tab" role="tab" id="fb-tab-sequence" aria-controls="fb-panel-sequence" aria-selected="false" tabindex="-1">Sequence</button>
+        <button class="fb-tab" role="tab" id="fb-tab-timeline" aria-controls="fb-panel-timeline" aria-selected="false" tabindex="-1">Timeline</button>
+        <button class="fb-tab" role="tab" id="fb-tab-comparison" aria-controls="fb-panel-comparison" aria-selected="false" tabindex="-1">Comparison</button>
+        <button class="fb-tab" role="tab" id="fb-tab-tree" aria-controls="fb-panel-tree" aria-selected="false" tabindex="-1">Tree<span class="fb-tab-count"> ×3</span></button>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-flowchart" aria-labelledby="fb-tab-flowchart" tabindex="0">
+      <article class="fb-entry" aria-labelledby="fb-n-flowchart">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-flowchart">Flowchart</h3>
+          <p class="fb-entry-desc">Decisions + branches</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 01</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/flowchart.png" target="_blank" rel="noopener" aria-label="Open Flowchart full size (PNG, opens in a new tab)"><img src="assets/figures/flowchart.png" alt="Flowchart — Decisions + branches" width="1260" height="270" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: flowchart</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: flowchart</b></p>
+            <pre><code>{
+  "title": "Pull request to production",
+  "direction": "horizontal",
+  "nodes": [
+    {
+      "id": "open",
+      "label": "PR opened",
+      "type": "start"
+    },
+    {
+      "id": "ci",
+      "label": "CI + review"
+    },
+    {
+      "id": "ok",
+      "label": "Approved?",
+      "type": "decision"
+    },
+    {
+      "id": "merge",
+      "label": "Merge to main"
+    },
+    {
+      "id": "fix",
+      "label": "Request changes",
+      "color": "red"
+    },
+    {
+      "id": "ship",
+      "label": "Deploy",
+      "type": "end"
+    }
+  ],
+  "edges": [
+    {
+      "from": "open",
+      "to": "ci"
+    },
+    {
+      "from": "ci",
+      "to": "ok"
+    },
+    {
+      "from": "ok",
+      "to": "merge",
+      "label": "yes"
+    },
+    {
+      "from": "ok",
+      "to": "fix",
+      "label": "no"
+    },
+    {
+      "from": "merge",
+      "to": "ship"
+    }
+  ]
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Flowchart">
+          <li><a class="fb-btn" href="#" download>flowchart.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>flowchart.svg</a></li>
+          <li><a class="fb-btn" href="#" download>flowchart.png</a></li>
+        </ul>
+      </article>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-architecture" aria-labelledby="fb-tab-architecture" tabindex="0" hidden>
+      <article class="fb-entry" aria-labelledby="fb-n-architecture">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-architecture">Architecture</h3>
+          <p class="fb-entry-desc">Layered components + connections</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 02</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/architecture.png" target="_blank" rel="noopener" aria-label="Open Architecture full size (PNG, opens in a new tab)"><img src="assets/figures/architecture.png" alt="Architecture — Layered components + connections" width="818" height="804" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: architecture</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: architecture</b></p>
+            <pre><code>{
+  "title": "Web app architecture",
+  "sections": [
+    { "label": "Clients", "color": "blue",
+      "items": ["Web app", "iOS app", "Admin console"] },
+    { "label": "Edge", "color": "purple",
+      "items": ["CDN", "API gateway"] },
+    …
+  ],
+  "connections": [ { "from": "Web app", "to": "CDN" }, … ]
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Architecture">
+          <li><a class="fb-btn" href="#" download>architecture.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>architecture.svg</a></li>
+          <li><a class="fb-btn" href="#" download>architecture.png</a></li>
+        </ul>
+      </article>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-sequence" aria-labelledby="fb-tab-sequence" tabindex="0" hidden>
+      <article class="fb-entry" aria-labelledby="fb-n-sequence">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-sequence">Sequence</h3>
+          <p class="fb-entry-desc">Messages between actors over time</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 03</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/sequence.png" target="_blank" rel="noopener" aria-label="Open Sequence full size (PNG, opens in a new tab)"><img src="assets/figures/sequence.png" alt="Sequence — Messages between actors over time" width="1970" height="974" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">sugar (sequence recipe)</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>sugar (sequence recipe)</b></p>
+            <pre><code>{
+  "elements": [
+    { "type": "box", "id": "a-browser", "label": "Browser", "x": 40, "y": 60 },
+    { "type": "line", "id": "life-browser", "x": 110, "y": 116, … },
+    { "type": "arrow", "id": "m1", "label": "GET /login", … },
+    …
+  ]
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Sequence">
+          <li><a class="fb-btn" href="#" download>sequence.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>sequence.svg</a></li>
+          <li><a class="fb-btn" href="#" download>sequence.png</a></li>
+        </ul>
+      </article>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-timeline" aria-labelledby="fb-tab-timeline" tabindex="0" hidden>
+      <article class="fb-entry" aria-labelledby="fb-n-timeline">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-timeline">Timeline</h3>
+          <p class="fb-entry-desc">Milestones on an axis</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 04</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/timeline.png" target="_blank" rel="noopener" aria-label="Open Timeline full size (PNG, opens in a new tab)"><img src="assets/figures/timeline.png" alt="Timeline — Milestones on an axis" width="1170" height="484" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: timeline</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: timeline</b></p>
+            <pre><code>{
+  "title": "2026 product roadmap",
+  "items": [
+    { "label": "Beta", "time": "Q1", "desc": "Invite-only, 200 teams" },
+    { "label": "Public launch", "time": "Q2", "desc": "Self-serve signup" },
+    …
+  ]
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Timeline">
+          <li><a class="fb-btn" href="#" download>timeline.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>timeline.svg</a></li>
+          <li><a class="fb-btn" href="#" download>timeline.png</a></li>
+        </ul>
+      </article>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-comparison" aria-labelledby="fb-tab-comparison" tabindex="0" hidden>
+      <article class="fb-entry" aria-labelledby="fb-n-comparison">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-comparison">Comparison</h3>
+          <p class="fb-entry-desc">A vs B, dimension by dimension</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 05</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/comparison.png" target="_blank" rel="noopener" aria-label="Open Comparison full size (PNG, opens in a new tab)"><img src="assets/figures/comparison.png" alt="Comparison — A vs B, dimension by dimension" width="960" height="410" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">sugar (comparison recipe)</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>sugar (comparison recipe)</b></p>
+            <pre><code>{
+  "elements": [
+    { "type": "text", "id": "left-h", "text": "Hand-drawn in the app", … },
+    { "type": "text", "id": "vs", "text": "VS", … },
+    { "type": "box", "id": "l1", "label": "Drag every box", "y": 120, "h": 64, … },
+    …
+  ]
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Comparison">
+          <li><a class="fb-btn" href="#" download>comparison.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>comparison.svg</a></li>
+          <li><a class="fb-btn" href="#" download>comparison.png</a></li>
+        </ul>
+      </article>
+      </div>
+      <div class="fb-panel" role="tabpanel" id="fb-panel-tree" aria-labelledby="fb-tab-tree" tabindex="0" hidden>
+      <article class="fb-entry" aria-labelledby="fb-n-tree-right">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-tree-right">Tree · left → right</h3>
+          <p class="fb-entry-desc">Parent → children, split sideways</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 06</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/tree-right.png" target="_blank" rel="noopener" aria-label="Open Tree · left → right full size (PNG, opens in a new tab)"><img src="assets/figures/tree-right.png" alt="Tree · left → right — Parent → children, split sideways" width="718" height="570" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: tree</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: tree</b></p>
+            <pre><code>{
+  "direction": "horizontal",
+  "root": { "label": "excalidrawer",
+    "children": [
+      { "label": "CLI", "children": ["render", "generate", …] },
+      …
+    ] }
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Tree · left → right">
+          <li><a class="fb-btn" href="#" download>tree-right.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>tree-right.svg</a></li>
+          <li><a class="fb-btn" href="#" download>tree-right.png</a></li>
+        </ul>
+      </article>
+      <article class="fb-entry" aria-labelledby="fb-n-tree-down">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-tree-down">Tree · top → down</h3>
+          <p class="fb-entry-desc">Parent → children, split downward</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 07</span>
+        </header>
+        <div class="fb-plate"><div class="fb-print"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><i class="fb-c fb-c-bl"></i><i class="fb-c fb-c-br"></i><a class="fb-print-link" href="assets/figures/tree-down.png" target="_blank" rel="noopener" aria-label="Open Tree · top → down full size (PNG, opens in a new tab)"><img src="assets/figures/tree-down.png" alt="Tree · top → down — Parent → children, split downward" width="1310" height="432" loading="lazy"></a></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: tree</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: tree</b></p>
+            <pre><code>{
+  "direction": "vertical",
+  "root": { "label": "Platform",
+    "children": [ { "label": "Web", "children": [ … ] }, … ] }
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Tree · top → down">
+          <li><a class="fb-btn" href="#" download>tree-down.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>tree-down.svg</a></li>
+          <li><a class="fb-btn" href="#" download>tree-down.png</a></li>
+        </ul>
+      </article>
+      <article class="fb-entry" aria-labelledby="fb-n-tree-stories">
+        <header class="fb-entry-head">
+          <h3 class="fb-entry-name" id="fb-n-tree-stories">Tree · user-story map</h3>
+          <p class="fb-entry-desc">23 numbered stories in 6 groups</p>
+          <span class="fb-entry-no" aria-hidden="true">No. 08</span>
+        </header>
+        <div class="fb-plate"><div class="fb-tall"><div class="fb-tall-frame" tabindex="0" role="region" aria-label="Tree · user-story map, scrollable — 1119 × 2449 px sheet"><div class="fb-print fb-print--full"><i class="fb-c fb-c-tl"></i><i class="fb-c fb-c-tr"></i><a class="fb-print-link" href="assets/figures/tree-stories.png" target="_blank" rel="noopener" aria-label="Open Tree · user-story map full size (PNG, opens in a new tab)"><img src="assets/figures/tree-stories.png" alt="Tree · user-story map — 23 numbered stories in 6 groups" width="1119" height="2449" loading="lazy"></a></div></div><p class="fb-tall-note">Tall sheet (2449 px). Scroll inside the frame, or open it full size.</p></div></div>
+        <details class="fb-input">
+          <summary><span class="fb-sum-label">Input</span><span class="fb-sum-src">template: tree</span></summary>
+          <div class="fb-input-body">
+            <p class="fb-src">source · <b>template: tree</b></p>
+            <pre><code>{
+  "title": "User-story map",
+  "direction": "horizontal",
+  "numberLeaves": true,
+  "root": { "label": "Gallery page",
+    "children": [ { "label": "Browse", "children": [ … ] }, … ] }
+}</code></pre>
+          </div>
+        </details>
+        <ul class="fb-dl" aria-label="Download Tree · user-story map">
+          <li><a class="fb-btn" href="#" download>tree-stories.excalidraw</a></li>
+          <li><a class="fb-btn" href="#" download>tree-stories.svg</a></li>
+          <li><a class="fb-btn" href="#" download>tree-stories.png</a></li>
+        </ul>
+      </article>
+      </div>
+    </div>
+
+    <div class="fb-error" role="alert">
+      <p class="fb-error-hand">The gallery didn't load.</p>
+      <p class="fb-error-print">gallery.json couldn't be read, so there are no figures to show here. The same figures, inputs and files are in the repository.</p>
+      <p><a class="fb-btn" href="https://github.com/guohaonan-shy/excalidrawer">github.com/guohaonan-shy/excalidrawer</a></p>
+    </div>
+  </div>
+</section>
+<style>
+@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap);
+.v-fieldbook {
+  --fb-ground: #F2EEDC;
+  --fb-ruling: #E4E2C6;
+  --fb-ink: #2A2D27;
+  --fb-printed: #5A6448;
+  --fb-flag: #B23A0E;
+  --fb-on-flag: #FFFFFF;
+  --fb-slip: #F8F6EA;
+  --fb-hand: 'Excalifont', 'Virgil', 'Comic Sans MS', cursive;
+  --fb-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  box-sizing: border-box;
+  color: var(--fb-ink);
+  background-color: var(--fb-ground);
+  background-image:
+    linear-gradient(var(--fb-ruling) 1px, transparent 1px),
+    linear-gradient(90deg, var(--fb-ruling) 1px, transparent 1px);
+  background-size: 16px 16px;
+  font-family: var(--fb-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 28px 32px 40px 56px;
+  position: relative;
+  max-width: 100%;
+  overflow: hidden;
+}
+/* field-book margin: double vertical rule on the left */
+.v-fieldbook::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 30px;
+  width: 4px; border-left: 1px solid var(--fb-printed); border-right: 1px solid var(--fb-printed);
+  opacity: .55;
+}
+.v-fieldbook *, .v-fieldbook *::before, .v-fieldbook *::after { box-sizing: border-box; }
+.v-fieldbook a { color: var(--fb-flag); }
+.v-fieldbook :focus-visible { outline: 2px solid var(--fb-ink); outline-offset: 3px; }
+
+/* ---------- shapes ---------- */
+.v-fieldbook .fb-rule { display: block; height: 5px; border-top: 1px solid var(--fb-printed); border-bottom: 1px solid var(--fb-printed); margin: 22px 0; }
+.v-fieldbook .fb-btn {
+  display: inline-block; font-family: var(--fb-mono); font-size: 12px; font-weight: 600; letter-spacing: .02em;
+  color: var(--fb-flag); text-decoration: none; background: transparent;
+  border: 1.5px solid var(--fb-flag); border-radius: 2px; padding: 5px 10px 4px; line-height: 1.3;
+}
+.v-fieldbook a.fb-btn:hover { background: var(--fb-flag); color: var(--fb-on-flag); }
+.v-fieldbook a.fb-btn:active { transform: translateY(1px); }
+.v-fieldbook .fb-tab {
+  font-family: var(--fb-hand); font-size: 19px; color: var(--fb-ink); background: transparent;
+  border: 0; border-right: 1px solid var(--fb-printed); padding: 8px 14px 12px; cursor: pointer; position: relative; line-height: 1.1;
+  display: inline-block;
+}
+.v-fieldbook .fb-tab:first-child { border-left: 1px solid var(--fb-printed); }
+.v-fieldbook .fb-tab[aria-selected="false"], .v-fieldbook .fb-tab.is-off { color: var(--fb-printed); }
+.v-fieldbook .fb-tab[aria-selected="false"]:hover { color: var(--fb-ink); }
+.v-fieldbook .fb-tab[aria-selected="true"], .v-fieldbook .fb-tab.is-on { background: var(--fb-slip); }
+.v-fieldbook .fb-tab[aria-selected="true"]::after, .v-fieldbook .fb-tab.is-on::after {
+  content: ""; position: absolute; left: 10px; right: 10px; bottom: 3px; height: 8px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M1 5 C 20 2, 35 7, 55 4 S 85 3, 99 5' fill='none' stroke='%232A2D27' stroke-width='2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+}
+.v-fieldbook .fb-tab-count { font-family: var(--fb-mono); font-size: 11px; }
+/* tipped-in print: white sheet held by photo corners */
+.v-fieldbook .fb-print {
+  position: relative; display: inline-block; max-width: 100%; background: #fff;
+  border: 1px solid #CFCBB4; padding: 0; vertical-align: top;
+}
+.v-fieldbook .fb-print img { display: block; max-width: 100%; height: auto; max-height: 520px; width: auto; }
+.v-fieldbook .fb-c { position: absolute; width: 18px; height: 18px; z-index: 1; pointer-events: none; }
+.v-fieldbook .fb-c-tl { top: -4px; left: -4px; background: linear-gradient(135deg, var(--fb-printed) 50%, transparent 50%); }
+.v-fieldbook .fb-c-tr { top: -4px; right: -4px; background: linear-gradient(225deg, var(--fb-printed) 50%, transparent 50%); }
+.v-fieldbook .fb-c-bl { bottom: -4px; left: -4px; background: linear-gradient(45deg, var(--fb-printed) 50%, transparent 50%); }
+.v-fieldbook .fb-c-br { bottom: -4px; right: -4px; background: linear-gradient(315deg, var(--fb-printed) 50%, transparent 50%); }
+
+/* ---------- language sheet ---------- */
+.v-fieldbook .fb-sheet { border: 1px solid var(--fb-printed); background: rgba(248,246,234,.92); padding: 14px 18px 16px; margin-bottom: 36px; }
+.v-fieldbook .fb-sheet-kicker { margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--fb-printed); border-bottom: 1px solid var(--fb-printed); padding-bottom: 6px; }
+.v-fieldbook .fb-sheet-grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 22px; }
+.v-fieldbook .fb-sheet-h { margin: 0 0 6px; font: 600 11px/1.4 var(--fb-mono); text-transform: uppercase; letter-spacing: .12em; color: var(--fb-printed); }
+.v-fieldbook .fb-swatches { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.v-fieldbook .fb-swatches li { display: grid; grid-template-columns: 26px auto 1fr; grid-template-rows: auto auto; column-gap: 8px; align-items: baseline; font-size: 12px; }
+.v-fieldbook .fb-sw { grid-row: span 2; width: 26px; height: 26px; border: 1px solid var(--fb-ink); align-self: center; }
+.v-fieldbook .fb-swatches code { font-family: var(--fb-mono); }
+.v-fieldbook .fb-swatches small { grid-column: 2 / span 2; color: var(--fb-printed); font-size: 11px; }
+.v-fieldbook .fb-spec p { margin: 0 0 6px; }
+.v-fieldbook .fb-spec small { display: block; font-family: var(--fb-mono); font-size: 11px; color: var(--fb-printed); }
+.v-fieldbook .fb-spec-hand { font-family: var(--fb-hand); }
+.v-fieldbook .fb-spec-xl { font-size: 40px; line-height: 1; }
+.v-fieldbook .fb-spec-m { font-size: 22px; line-height: 1.2; }
+.v-fieldbook .fb-spec-mono { font-size: 13px; }
+.v-fieldbook .fb-shapes { display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 6px 20px; margin-top: 4px; }
+.v-fieldbook .fb-shapes figure { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.v-fieldbook .fb-shapes figure > span { display: flex; align-items: center; min-height: 48px; }
+.v-fieldbook .fb-shapes figcaption { white-space: nowrap; font-size: 11px; color: var(--fb-printed); }
+.v-fieldbook .fb-shape-tab .fb-tab { font-size: 17px; cursor: default; }
+.v-fieldbook .fb-print--mini { width: 56px; height: 40px; }
+.v-fieldbook .fb-print--mini .fb-c { width: 12px; height: 12px; }
+.v-fieldbook .fb-shape-rule { width: 64px; }
+.v-fieldbook .fb-shape-rule .fb-rule { width: 100%; margin: 0; }
+.v-fieldbook .fb-tone { margin-top: 12px; border-top: 1px dashed var(--fb-printed); padding-top: 10px; }
+.v-fieldbook .fb-tone-line { margin: 0 0 6px; }
+.v-fieldbook .fb-tone-line.fb-spec-hand { font-size: 20px; }
+.v-fieldbook .fb-tone-note { color: var(--fb-printed); font-size: 12px; }
+
+/* ---------- gallery page ---------- */
+.v-fieldbook .fb-book { display: flex; justify-content: space-between; margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--fb-printed); }
+.v-fieldbook .fb-title { font-family: var(--fb-hand); font-weight: 400; font-size: 44px; line-height: 1.05; margin: 0 0 8px; }
+.v-fieldbook .fb-lede { font-family: var(--fb-hand); font-size: 20px; line-height: 1.35; margin: 0 0 14px; max-width: 34em; }
+.v-fieldbook .fb-links { display: flex; gap: 10px; }
+.v-fieldbook .fb-tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--fb-printed); margin-bottom: 22px; }
+.v-fieldbook .fb-panel:focus-visible { outline-offset: 6px; }
+.v-fieldbook .fb-panel:not([hidden]) { animation: fieldbook-in .22s ease-out; }
+@keyframes fieldbook-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.v-fieldbook .fb-entry + .fb-entry { margin-top: 30px; padding-top: 22px; border-top: 1px dashed var(--fb-printed); }
+.v-fieldbook .fb-entry-head { display: grid; grid-template-columns: 1fr auto; column-gap: 12px; align-items: baseline; margin-bottom: 12px; }
+.v-fieldbook .fb-entry-name { grid-column: 1; font-family: var(--fb-hand); font-weight: 400; font-size: 26px; margin: 0; line-height: 1.1; }
+.v-fieldbook .fb-entry-desc { grid-column: 1; font-family: var(--fb-hand); font-size: 18px; margin: 2px 0 0; color: var(--fb-printed); }
+.v-fieldbook .fb-entry-no { grid-column: 2; grid-row: 1; font-size: 11px; letter-spacing: .1em; color: var(--fb-printed); border: 1px solid var(--fb-printed); padding: 1px 6px; }
+.v-fieldbook .fb-plate { text-align: center; padding: 6px 4px; }
+.v-fieldbook .fb-print-link { display: block; }
+.v-fieldbook .fb-print-link:focus-visible { outline-offset: 5px; }
+/* tall sheet: fixed window with visible scroll + note */
+.v-fieldbook .fb-tall-frame { height: 440px; overflow-y: auto; overflow-x: hidden; border: 1px solid var(--fb-printed); background: var(--fb-slip); padding: 10px; scrollbar-color: var(--fb-printed) var(--fb-slip); }
+.v-fieldbook .fb-print--full { display: block; }
+.v-fieldbook .fb-print--full img { width: 100%; max-height: none; }
+.v-fieldbook .fb-tall-note { margin: 6px 0 0; font-size: 11px; color: var(--fb-printed); text-align: left; }
+.v-fieldbook .fb-input { margin-top: 14px; border-top: 1px solid var(--fb-printed); }
+.v-fieldbook .fb-input summary { cursor: pointer; list-style: none; display: flex; gap: 12px; align-items: baseline; padding: 8px 0; }
+.v-fieldbook .fb-input summary::-webkit-details-marker { display: none; }
+.v-fieldbook .fb-input summary::before { content: "+"; font-weight: 600; width: 1ch; }
+.v-fieldbook .fb-input[open] summary::before { content: "−"; }
+.v-fieldbook .fb-sum-label { font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: 12px; }
+.v-fieldbook .fb-sum-src { font-size: 12px; color: var(--fb-printed); }
+.v-fieldbook .fb-input-body { background: var(--fb-slip); border: 1px solid var(--fb-printed); border-left: 4px double var(--fb-printed); padding: 10px 14px; }
+.v-fieldbook .fb-src { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--fb-printed); }
+.v-fieldbook .fb-src b { color: var(--fb-ink); text-transform: none; letter-spacing: 0; }
+.v-fieldbook .fb-input pre { margin: 0; max-height: 300px; overflow: auto; font: 12.5px/1.5 var(--fb-mono); color: var(--fb-ink); white-space: pre; }
+.v-fieldbook .fb-dl { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; padding: 0; }
+
+/* ---------- states ---------- */
+.v-fieldbook .fb-error { display: none; }
+.v-fieldbook[data-state="load-error"] .fb-gallery { display: none; }
+.v-fieldbook[data-state="load-error"] .fb-error { display: block; border: 1px solid var(--fb-printed); border-left: 4px double var(--fb-printed); background: var(--fb-slip); padding: 16px 18px; }
+.v-fieldbook .fb-error-hand { font-family: var(--fb-hand); font-size: 26px; margin: 0 0 6px; }
+.v-fieldbook .fb-error-print { margin: 0 0 12px; max-width: 46em; }
+
+html.reduce-motion .v-fieldbook .fb-panel:not([hidden]) { animation: none; }
+html.reduce-motion .v-fieldbook a.fb-btn:active { transform: none; }
+
+@media (max-width: 560px) {
+  .v-fieldbook { padding: 20px 14px 28px 30px; }
+  .v-fieldbook::before { left: 14px; }
+  .v-fieldbook .fb-sheet-grid { grid-template-columns: 1fr; }
+  .v-fieldbook .fb-shapes { grid-template-columns: repeat(2, auto); }
+  .v-fieldbook .fb-title { font-size: 36px; }
+  .v-fieldbook .fb-tabs { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--fb-printed); border-bottom: 0; }
+  .v-fieldbook .fb-tabs .fb-tab { border: 0; border-bottom: 1px solid var(--fb-printed); border-right: 1px solid var(--fb-printed); font-size: 17px; padding: 8px 6px 12px; }
+  .v-fieldbook .fb-tabs .fb-tab:nth-child(3n) { border-right: 0; }
+  .v-fieldbook .fb-tall-frame { height: 360px; }
+  .v-fieldbook .fb-spec-xl { font-size: 32px; }
+}
+</style>
+<script>
+(function () {
+  var root = document.querySelector('[data-variant="fieldbook"]');
+  if (!root) return;
+  var tabs = Array.prototype.slice.call(root.querySelectorAll('.fb-gallery [role="tab"]'));
+  var panels = Array.prototype.slice.call(root.querySelectorAll('.fb-gallery [role="tabpanel"]'));
+  function select(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+    });
+    panels.forEach(function (p) { p.hidden = p.id !== tab.getAttribute('aria-controls'); });
+    if (focus) tab.focus();
+    syncState();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t, false); });
+    t.addEventListener('keydown', function (e) {
+      var n = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') n = 0;
+      else if (e.key === 'End') n = tabs.length - 1;
+      if (n !== null) { e.preventDefault(); select(tabs[n], true); }
+    });
+  });
+  // dead download links in the mock: keep the page where it is
+  root.querySelectorAll('.fb-dl a[href="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); });
+  });
+  function syncState() {
+    var st = root.getAttribute('data-state') || 'default';
+    var open = st === 'input-open';
+    var active = panels.filter(function (p) { return !p.hidden; })[0];
+    root.querySelectorAll('.fb-input').forEach(function (d) {
+      d.open = open && active && active.contains(d) && d === active.querySelector('.fb-input');
+    });
+  }
+  new MutationObserver(syncState).observe(root, { attributes: true, attributeFilter: ['data-state'] });
+  syncState();
+})();
+</script>

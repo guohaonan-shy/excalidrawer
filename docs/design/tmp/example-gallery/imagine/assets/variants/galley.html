@@ -1,0 +1,395 @@
+<section class="v-galley" data-variant="galley" data-state="default">
+
+  <!-- ============ 1. LANGUAGE SHEET ============ -->
+  <div class="v-galley-lang" aria-label="Language sheet: galley">
+    <p class="v-galley-slug">Language sheet · galley · seed +fGjVhm78zMwbrcJ → 355° carmine, “+” registration mark</p>
+
+    <div class="v-galley-lang-grid">
+      <div class="v-galley-lang-col">
+        <h3 class="v-galley-lang-h">Palette</h3>
+        <ul class="v-galley-swatches">
+          <li><span class="v-galley-chip" style="background:#DAD3C3"></span><span><b>ground</b> · chipboard</span><code>#DAD3C3</code></li>
+          <li><span class="v-galley-chip" style="background:#1F1C19"></span><span><b>ink</b> · body text</span><code>#1F1C19 · 11.4 on ground · 17.0 on sheet</code></li>
+          <li><span class="v-galley-chip" style="background:#544D44"></span><span><b>pencil</b> · secondary</span><code>#544D44 · 5.6 on ground · 8.3 on sheet</code></li>
+          <li><span class="v-galley-chip" style="background:#A3122D"></span><span><b>carmine</b> · actions only</span><code>#A3122D · 5.3 on ground · 7.8 on sheet · 6.9 on copy</code></li>
+          <li><span class="v-galley-chip v-galley-chip--white" style="background:#FFFFFF"></span><span><b>sheet</b> · figure paper</span><code>#FFFFFF · white on carmine 7.8</code></li>
+          <li><span class="v-galley-chip" style="background:#F4F0E6"></span><span><b>copy</b> · input paper</span><code>#F4F0E6 · ink 14.9 · pencil 7.3</code></li>
+        </ul>
+      </div>
+
+      <div class="v-galley-lang-col">
+        <h3 class="v-galley-lang-h">Type</h3>
+        <p class="v-galley-spec-hand1">Excalifont 40</p><p class="v-galley-spec-hand2" style="font-size:26px;margin-top:2px">Excalifont 26 · names</p>
+        <p class="v-galley-spec-note">40 project name · 26 figure names · 18 tabs</p>
+        <p class="v-galley-spec-hand2">Excalifont 19 — sentences, descriptions, links</p>
+        <p class="v-galley-spec-mono">IBM Plex Mono 12.5 — {"input": "json"}, slug lines</p>
+        <p class="v-galley-spec-note">Hand = what the engine's pen writes. Mono = what you type in.</p>
+
+        <h3 class="v-galley-lang-h">Shapes</h3>
+        <div class="v-galley-shapes">
+          <span class="v-galley-tab is-demo" aria-hidden="true"><i>01</i> Tab</span>
+          <a class="v-galley-act" href="#" tabindex="-1" aria-hidden="true">Download SVG</a>
+          <span class="v-galley-mini-frame" aria-hidden="true"><span></span></span>
+          <span class="v-galley-trim v-galley-trim--demo" aria-hidden="true"><em>trim</em></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="v-galley-tone">
+      <h3 class="v-galley-lang-h">Tone</h3>
+      <p class="v-galley-tone-sub">Eight proofs, pulled straight from the engine. Nothing retouched.</p>
+      <p class="v-galley-tone-link"><a class="v-galley-act" href="#" tabindex="-1">Take the .excalidraw</a> <span class="v-galley-mono-inline">— edit it in Excalidraw</span></p>
+    </div>
+  </div>
+
+  <div class="v-galley-trim" role="presentation"><em>cut here · page below</em></div>
+
+  <!-- ============ 2. GALLERY SLICE ============ -->
+  <div class="v-galley-page">
+    <header class="v-galley-head">
+      <h2 class="v-galley-title">excalidrawer</h2>
+      <p class="v-galley-pos">Write JSON or one sentence. Get a diagram you can still open in Excalidraw.</p>
+      <p class="v-galley-headlinks">
+        <a class="v-galley-act" href="https://github.com/guohaonan-shy/excalidrawer">GitHub</a>
+        <a class="v-galley-act" href="https://www.npmjs.com/package/excalidrawer">npm</a>
+        <span class="v-galley-mono-inline v-galley-count">8 proofs · fixed seed · engine output, not retouched</span>
+      </p>
+    </header>
+
+    <div class="v-galley-tabs" role="tablist" aria-label="Diagram types"></div>
+    <div class="v-galley-panels"></div>
+
+    <div class="v-galley-error" role="alert">
+      <p class="v-galley-slug">Proof failed · gallery.json · fetch error</p>
+      <div class="v-galley-frame">
+        <div class="v-galley-sheet v-galley-sheet--empty">
+          <p class="v-galley-err-h">No sheets to show.</p>
+          <p class="v-galley-err-p">gallery.json didn't load, so this page has nothing to print. The same figures and their inputs are in the repo.</p>
+          <p><a class="v-galley-act" href="https://github.com/guohaonan-shy/excalidrawer">Open the repo on GitHub</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap);
+
+.v-galley {
+  --g-ground: #DAD3C3;
+  --g-ink: #1F1C19;
+  --g-pencil: #544D44;
+  --g-carmine: #A3122D;
+  --g-sheet: #FFFFFF;
+  --g-copy: #F4F0E6;
+  --g-shadow: #BDB4A0;
+  --g-hand: 'Excalifont', 'Virgil', 'Comic Sans MS', cursive;
+  --g-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --g-wobble: 255px 12px 225px 10px / 10px 225px 12px 255px;
+  background: var(--g-ground);
+  color: var(--g-ink);
+  font-family: var(--g-hand);
+  padding: 28px 28px 36px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+.v-galley *, .v-galley *::before, .v-galley *::after { box-sizing: border-box; }
+.v-galley p, .v-galley h2, .v-galley h3, .v-galley ul { margin: 0; padding: 0; }
+
+/* ---------- shared bits ---------- */
+.v-galley .v-galley-slug {
+  font-family: var(--g-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--g-pencil);
+  margin-bottom: 8px;
+}
+.v-galley .v-galley-slug::before { content: "+ "; color: var(--g-ink); font-weight: 500; }
+.v-galley .v-galley-mono-inline { font-family: var(--g-mono); font-size: 12px; color: var(--g-pencil); }
+
+/* action: the proofreader's red pencil — only links/buttons wear carmine */
+.v-galley .v-galley-act {
+  font-family: var(--g-hand);
+  font-size: 19px;
+  color: var(--g-carmine);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  background: none; border: 0; padding: 2px 0; cursor: pointer;
+}
+.v-galley .v-galley-act:hover { text-decoration-thickness: 3px; }
+.v-galley a:focus-visible, .v-galley button:focus-visible, .v-galley summary:focus-visible, .v-galley [role="tab"]:focus-visible {
+  outline: 2px dashed var(--g-ink);
+  outline-offset: 3px;
+}
+
+/* trim line divider */
+.v-galley .v-galley-trim {
+  display: flex; align-items: center; gap: 10px;
+  margin: 26px 0;
+  font-family: var(--g-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--g-pencil);
+}
+.v-galley .v-galley-trim::before, .v-galley .v-galley-trim::after {
+  content: ""; flex: 1; border-top: 1.5px dashed var(--g-ink);
+}
+.v-galley .v-galley-trim em { font-style: normal; }
+
+/* proof frame: crop marks at four corners, white sheet with a flat offset (no blur, no glow) */
+.v-galley .v-galley-frame {
+  --c: var(--g-ink);
+  padding: 12px;
+  background:
+    linear-gradient(var(--c),var(--c)) left 12px top 0 / 1px 9px no-repeat,
+    linear-gradient(var(--c),var(--c)) left 0 top 12px / 9px 1px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 12px top 0 / 1px 9px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 0 top 12px / 9px 1px no-repeat,
+    linear-gradient(var(--c),var(--c)) left 12px bottom 0 / 1px 9px no-repeat,
+    linear-gradient(var(--c),var(--c)) left 0 bottom 12px / 9px 1px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 12px bottom 0 / 1px 9px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 0 bottom 12px / 9px 1px no-repeat;
+}
+.v-galley .v-galley-sheet {
+  background: var(--g-sheet);
+  box-shadow: 4px 4px 0 var(--g-shadow);
+  display: block;
+}
+.v-galley .v-galley-sheet img { display: block; width: 100%; height: auto; }
+.v-galley .v-galley-sheet--tall { max-height: 520px; overflow-y: auto; overscroll-behavior: contain; }
+.v-galley .v-galley-sheet--empty {
+  background: transparent; box-shadow: none;
+  border: 1.5px dashed var(--g-ink);
+  padding: 34px 28px;
+  min-height: 220px;
+}
+
+/* ---------- language sheet ---------- */
+.v-galley .v-galley-lang-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; }
+.v-galley .v-galley-lang-h {
+  font-family: var(--g-mono); font-weight: 500; font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--g-ink); border-bottom: 1px solid var(--g-ink); padding-bottom: 4px; margin: 10px 0 10px;
+}
+.v-galley .v-galley-swatches { list-style: none; display: grid; gap: 7px; }
+.v-galley .v-galley-swatches li { display: grid; grid-template-columns: 30px 1fr; column-gap: 10px; font-size: 17px; align-items: center; }
+.v-galley .v-galley-swatches b { font-weight: 400; }
+.v-galley .v-galley-swatches li > span:not(.v-galley-chip) { grid-column: 2; }
+.v-galley .v-galley-swatches code { grid-column: 2; font-family: var(--g-mono); font-size: 11px; color: var(--g-pencil); }
+.v-galley .v-galley-chip { grid-row: span 2; width: 30px; height: 30px; border: 1.5px solid var(--g-ink); border-radius: var(--g-wobble); }
+.v-galley .v-galley-spec-hand1 { font-size: 40px; line-height: 1.05; }
+.v-galley .v-galley-spec-hand2 { font-size: 19px; margin-top: 8px; }
+.v-galley .v-galley-spec-mono { font-family: var(--g-mono); font-size: 12.5px; margin-top: 6px; }
+.v-galley .v-galley-spec-note { font-family: var(--g-mono); font-size: 11px; color: var(--g-pencil); margin-top: 4px; }
+.v-galley .v-galley-shapes { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 20px; }
+.v-galley .v-galley-mini-frame { display: inline-block; width: 64px; height: 44px; }
+.v-galley .v-galley-mini-frame {
+  padding: 7px; --c: var(--g-ink);
+  background:
+    linear-gradient(var(--c),var(--c)) left 7px top 0 / 1px 5px no-repeat,
+    linear-gradient(var(--c),var(--c)) left 0 top 7px / 5px 1px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 7px bottom 0 / 1px 5px no-repeat,
+    linear-gradient(var(--c),var(--c)) right 0 bottom 7px / 5px 1px no-repeat;
+}
+.v-galley .v-galley-mini-frame span { display: block; width: 100%; height: 100%; background: #fff; box-shadow: 3px 3px 0 var(--g-shadow); }
+.v-galley .v-galley-trim--demo { margin: 0; flex: 1 1 120px; min-width: 120px; }
+.v-galley .v-galley-tone { margin-top: 6px; }
+.v-galley .v-galley-tone-sub { font-size: 21px; }
+.v-galley .v-galley-tone-link { margin-top: 4px; }
+
+/* ---------- page header ---------- */
+.v-galley .v-galley-title { font-family: var(--g-hand); font-weight: 400; font-size: 46px; line-height: 1; }
+.v-galley .v-galley-pos { font-size: 21px; margin-top: 10px; max-width: 36em; }
+.v-galley .v-galley-headlinks { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; margin-top: 10px; }
+
+/* ---------- tabs ---------- */
+.v-galley .v-galley-tabs {
+  display: flex; flex-wrap: wrap; gap: 6px 2px;
+  margin: 26px 0 18px;
+  border-bottom: 1.5px solid var(--g-ink);
+  padding-bottom: 8px;
+}
+.v-galley .v-galley-tab {
+  font-family: var(--g-hand); font-size: 18px; color: var(--g-ink);
+  background: transparent; border: 1.5px solid transparent;
+  border-radius: var(--g-wobble);
+  padding: 5px 8px 4px; gap: 4px; cursor: pointer;
+  display: inline-flex; align-items: baseline;
+}
+.v-galley .v-galley-tab i { font-family: var(--g-mono); font-style: normal; font-size: 11px; color: var(--g-pencil); }
+.v-galley .v-galley-tab:hover { border-color: var(--g-pencil); border-style: dashed; }
+.v-galley .v-galley-tab[aria-selected="true"], .v-galley .v-galley-tab.is-demo {
+  background: var(--g-sheet); border: 1.5px solid var(--g-ink); border-style: solid;
+  box-shadow: 3px 3px 0 var(--g-shadow);
+}
+
+/* ---------- figure blocks ---------- */
+.v-galley .v-galley-panel[hidden] { display: none; }
+.v-galley .v-galley-panel { animation: galley-in .18s ease-out; }
+@keyframes galley-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+html.reduce-motion .v-galley .v-galley-panel { animation: none; }
+
+.v-galley .v-galley-fig + .v-galley-fig { margin-top: 8px; }
+.v-galley .v-galley-fig + .v-galley-fig::before {
+  content: ""; display: block; border-top: 1.5px dashed var(--g-ink); margin: 26px 0 22px;
+}
+.v-galley .v-galley-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; align-items: baseline; margin-top: 14px; }
+.v-galley .v-galley-name { font-size: 27px; font-weight: 400; font-family: var(--g-hand); }
+.v-galley .v-galley-desc { font-size: 19px; color: var(--g-pencil); width: 100%; margin-top: -2px; }
+.v-galley .v-galley-tallnote { font-family: var(--g-mono); font-size: 11px; color: var(--g-pencil); margin-top: 8px; }
+
+.v-galley .v-galley-actions { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px; margin-top: 12px; }
+.v-galley .v-galley-actions .v-galley-dl-label { font-family: var(--g-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--g-pencil); }
+
+.v-galley details.v-galley-input { margin-top: 12px; }
+.v-galley details.v-galley-input > summary {
+  list-style: none; display: inline-flex; align-items: baseline; gap: 8px;
+  font-family: var(--g-hand); font-size: 19px; color: var(--g-carmine); cursor: pointer;
+  text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px;
+}
+.v-galley details.v-galley-input > summary::-webkit-details-marker { display: none; }
+.v-galley details.v-galley-input > summary::before {
+  content: "+"; font-family: var(--g-mono); font-size: 15px; display: inline-block; width: 12px; text-decoration: none;
+}
+.v-galley details.v-galley-input[open] > summary::before { content: "−"; }
+.v-galley .v-galley-copy {
+  margin-top: 10px; background: var(--g-copy);
+  border: 1.5px solid var(--g-ink); border-radius: 3px 9px 4px 11px / 11px 4px 9px 3px;
+  padding: 12px 14px;
+}
+.v-galley .v-galley-copy pre {
+  margin: 8px 0 0; font-family: var(--g-mono); font-size: 12.5px; line-height: 1.55; color: var(--g-ink);
+  max-height: 300px; overflow: auto; white-space: pre;
+}
+.v-galley .v-galley-copy .k { color: var(--g-pencil); }
+.v-galley .v-galley-copy .v-galley-slug { margin: 0; }
+
+/* ---------- states ---------- */
+.v-galley .v-galley-error { display: none; margin-top: 26px; }
+.v-galley[data-state="load-error"] .v-galley-tabs,
+.v-galley[data-state="load-error"] .v-galley-panels,
+.v-galley[data-state="load-error"] .v-galley-count { display: none; }
+.v-galley[data-state="load-error"] .v-galley-error { display: block; }
+.v-galley .v-galley-err-h { font-size: 30px; }
+.v-galley .v-galley-err-p { font-size: 19px; color: var(--g-pencil); margin: 8px 0 14px; max-width: 32em; }
+
+/* ---------- narrow ---------- */
+@media (max-width: 640px) {
+  .v-galley { padding: 20px 16px 28px; }
+  .v-galley .v-galley-lang-grid { grid-template-columns: 1fr; gap: 6px; }
+  .v-galley .v-galley-title { font-size: 38px; }
+  .v-galley .v-galley-spec-hand1 { font-size: 32px; }
+  .v-galley .v-galley-tab { font-size: 17px; padding: 5px 8px 4px; }
+  .v-galley .v-galley-frame { padding: 10px; }
+}
+</style>
+<script>
+(function () {
+  var root = document.querySelector('[data-variant="galley"]');
+  if (!root) return;
+
+  var FLOW = {"title":"Pull request to production","direction":"horizontal","nodes":[{"id":"open","label":"PR opened","type":"start"},{"id":"ci","label":"CI + review"},{"id":"ok","label":"Approved?","type":"decision"},{"id":"merge","label":"Merge to main"},{"id":"fix","label":"Request changes","color":"red"},{"id":"ship","label":"Deploy","type":"end"}],"edges":[{"from":"open","to":"ci"},{"from":"ci","to":"ok"},{"from":"ok","to":"merge","label":"yes"},{"from":"ok","to":"fix","label":"no"},{"from":"merge","to":"ship"}]};
+
+  var TYPES = [
+    { id: 'flowchart', label: 'Flowchart', figs: [
+      { slug: 'flowchart', name: 'Flowchart', desc: 'Decisions + branches', src: 'template: flowchart', w: 2520, h: 540, json: JSON.stringify(FLOW, null, 2) } ] },
+    { id: 'architecture', label: 'Architecture', figs: [
+      { slug: 'architecture', name: 'Architecture', desc: 'Layered components + connections', src: 'template: architecture', w: 1636, h: 1608,
+        json: '{\n  "title": "Web app architecture",\n  "sections": [\n    { "label": "Clients", "color": "blue", "items": ["Web app", "iOS app", "Admin console"] },\n    { "label": "Edge", "color": "purple", "items": ["CDN", "API gateway"] },\n    { "label": "Services", "color": "green", "items": ["Auth", "Orders", "Payments", "Notifications"] },\n    …\n  ],\n  "connections": [ … ]\n}' } ] },
+    { id: 'sequence', label: 'Sequence', figs: [
+      { slug: 'sequence', name: 'Sequence', desc: 'Messages between actors over time', src: 'sugar (sequence recipe)', w: 3940, h: 1948,
+        json: '[\n  { "shape": "rect", "id": "user", "at": [40, 80], "size": [160, 56], "fill": "bgBlue", "text": "User" },\n  { "shape": "rect", "id": "app", "at": [300, 80], "size": [160, 56], "fill": "bgGreen", "text": "App" },\n  { "shape": "text", "at": [120, 180], "size": [260, 18], "text": "POST /login", "fontSize": 14 },\n  …\n]' } ] },
+    { id: 'timeline', label: 'Timeline', figs: [
+      { slug: 'timeline', name: 'Timeline', desc: 'Milestones on an axis', src: 'template: timeline', w: 2340, h: 968,
+        json: '{\n  "title": "2026 product roadmap",\n  "items": [\n    { "label": "Beta", "time": "Q1", "desc": "Invite-only, 200 teams" },\n    { "label": "Public launch", "time": "Q2", "desc": "Self-serve signup" },\n    …\n  ]\n}' } ] },
+    { id: 'comparison', label: 'Comparison', figs: [
+      { slug: 'comparison', name: 'Comparison', desc: 'A vs B, dimension by dimension', src: 'sugar (comparison recipe)', w: 1920, h: 820,
+        json: '[\n  { "shape": "text", "at": [0, 24], "size": [960, 32], "text": "MySpeakingScore vs TOEFLAIR: coverage", "fontSize": 24 },\n  { "shape": "rect", "at": [20, 80], "size": [400, 60], "fill": "#f8f9fa", "stroke": "gray", "text": "MySpeakingScore" },\n  { "shape": "rect", "at": [540, 80], "size": [400, 60], "fill": "bgBlue", "stroke": "blue", "text": "TOEFLAIR", "textColor": "blue" },\n  …\n]' } ] },
+    { id: 'tree', label: 'Tree', figs: [
+      { slug: 'tree-right', name: 'Tree · left → right', desc: 'Parent → children, split sideways', src: 'template: tree', w: 1436, h: 1140,
+        json: '{\n  "direction": "horizontal",\n  "root": { "label": "excalidrawer", "children": [ … ] }\n}' },
+      { slug: 'tree-down', name: 'Tree · top → down', desc: 'Parent → children, split downward', src: 'template: tree', w: 2620, h: 864,
+        json: '{\n  "direction": "vertical",\n  "root": { "label": "…", "children": [ … ] }\n}' },
+      { slug: 'tree-stories', name: 'Tree · user-story map', desc: '23 numbered stories in 6 groups', src: 'template: tree', w: 2238, h: 4898, tall: true,
+        json: '{\n  "direction": "horizontal",\n  "numberLeaves": true,\n  "root": { "label": "…", "children": [ … 6 groups, 23 stories … ] }\n}' } ] }
+  ];
+
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function hl(json) { return esc(json).replace(/("[^"]*")(\s*:)/g, '<span class="k">$1</span>$2'); }
+
+  var tablist = root.querySelector('.v-galley-tabs');
+  var panels = root.querySelector('.v-galley-panels');
+  var n = 0;
+
+  TYPES.forEach(function (t, i) {
+    var tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'v-galley-tab';
+    tab.id = 'v-galley-tab-' + t.id;
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-controls', 'v-galley-panel-' + t.id);
+    tab.innerHTML = '<i>0' + (i + 1) + '</i>' + esc(t.label);
+    tablist.appendChild(tab);
+
+    var p = document.createElement('div');
+    p.className = 'v-galley-panel';
+    p.id = 'v-galley-panel-' + t.id;
+    p.setAttribute('role', 'tabpanel');
+    p.setAttribute('aria-labelledby', tab.id);
+    p.tabIndex = 0;
+    p.innerHTML = t.figs.map(function (f) {
+      n += 1;
+      var png = 'assets/figures/' + f.slug + '.png';
+      return '<article class="v-galley-fig">' +
+        '<p class="v-galley-slug">Proof 0' + n + '/08 · ' + esc(f.slug) + ' · ' + f.w + '×' + f.h + ' @2x</p>' +
+        '<div class="v-galley-frame"><a class="v-galley-sheet' + (f.tall ? ' v-galley-sheet--tall' : '') + '" href="' + png + '" target="_blank" rel="noopener" ' +
+          (f.tall ? 'tabindex="0" ' : '') + 'title="Open full-size PNG">' +
+          '<img src="' + png + '" width="' + f.w + '" height="' + f.h + '" loading="lazy" alt="' + esc(f.name + ' — ' + f.desc) + '"></a></div>' +
+        (f.tall ? '<p class="v-galley-tallnote">Tall sheet (' + f.w + '×' + f.h + '): scroll inside the frame, or click it for the full PNG.</p>' : '') +
+        '<div class="v-galley-meta"><h3 class="v-galley-name">' + esc(f.name) + '</h3><p class="v-galley-desc">' + esc(f.desc) + '</p></div>' +
+        '<details class="v-galley-input"><summary>Input</summary>' +
+          '<div class="v-galley-copy"><p class="v-galley-slug">Source · ' + esc(f.src) + '</p><pre>' + hl(f.json) + '</pre></div></details>' +
+        '<p class="v-galley-actions"><span class="v-galley-dl-label">Download</span>' +
+          '<a class="v-galley-act" href="#">.excalidraw</a><a class="v-galley-act" href="#">SVG</a><a class="v-galley-act" href="#">PNG</a></p>' +
+        '</article>';
+    }).join('');
+    panels.appendChild(p);
+  });
+
+  var tabs = Array.prototype.slice.call(tablist.querySelectorAll('[role="tab"]'));
+
+  function select(i, focus) {
+    tabs.forEach(function (tab, j) {
+      var on = i === j;
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.tabIndex = on ? 0 : -1;
+      document.getElementById(tab.getAttribute('aria-controls')).hidden = !on;
+    });
+    if (focus) tabs[i].focus();
+  }
+
+  tabs.forEach(function (tab, i) {
+    tab.addEventListener('click', function () { select(i, false); });
+    tab.addEventListener('keydown', function (e) {
+      var k = e.key, j = null;
+      if (k === 'ArrowRight' || k === 'ArrowDown') j = (i + 1) % tabs.length;
+      else if (k === 'ArrowLeft' || k === 'ArrowUp') j = (i - 1 + tabs.length) % tabs.length;
+      else if (k === 'Home') j = 0;
+      else if (k === 'End') j = tabs.length - 1;
+      if (j !== null) { e.preventDefault(); select(j, true); }
+    });
+  });
+
+  select(0, false);
+
+  function applyState() {
+    var s = root.getAttribute('data-state') || 'default';
+    var first = root.querySelector('#v-galley-panel-flowchart details.v-galley-input');
+    if (s === 'input-open' || s === 'default') {
+      select(0, false);
+      if (first) first.open = (s === 'input-open');
+    }
+  }
+  applyState();
+  new MutationObserver(applyState).observe(root, { attributes: true, attributeFilter: ['data-state'] });
+})();
+</script>
