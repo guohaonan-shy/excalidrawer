@@ -4,6 +4,25 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## Unreleased
+
+_plugin 0.1.1_
+
+### Fixed
+
+- **Codex and Cursor plugins now register the MCP server from their own
+  manifests.** `.codex-plugin/plugin.json` and `.cursor-plugin/plugin.json`
+  gain `mcpServers`, each pointing at a `mcp.json` beside the manifest with the
+  same `excalidrawer@^0.6.0` server the Claude Code manifest declares. Before,
+  they had no `mcpServers` and depended on implicit discovery: Cursor only
+  discovers `mcp.json`, so the root `.mcp.json` never reached it.
+- **Removed the root `.mcp.json`.** The Claude Code manifest already declares
+  the server inline. Because the plugin source is the repo root, the file also
+  loaded as this repo's project-level MCP, so sessions in the repo showed a
+  second `excalidrawer` server — one that never started, since
+  `npx -p excalidrawer` inside the `excalidrawer` package resolves the local
+  package and finds no bin.
+
 ## 0.6.0
 
 _engine 0.6.0 · plugin 0.1.0_
