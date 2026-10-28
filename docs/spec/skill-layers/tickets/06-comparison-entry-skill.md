@@ -25,13 +25,13 @@ recipe 里的内容逐段处置：自然语言的描述译成中文并进 `SKILL
 只改 `skills/comparison/` 和 `steps` 的组件参考（补缺）；不改别的入口 skill。
 
 ## 验收标准
-- [ ] `skills/comparison/` 下只有 `SKILL.md`
-- [ ] 正文是「问清楚 / 构图 / 出图 / 常见画坏法」四步，没有「前置条件：先读」那一句
-- [ ] 正文没有代码块（`text` 块除外）、没有 `render_diagram` / `compute_layout`、没有 sugar 字段名、没有几何数字
-- [ ] recipe 里每一段都有去处：自然语言在 `SKILL.md`，机制在 `steps` 某份组件参考里（PR 描述里附逐段去处表）
-- [ ] 起一个只读 `skills/` 的子代理，照这个入口 skill 画：一张两侧各 4 个维度的 A vs B 对比（至少一个维度的文字折成两行）。Layer A 无 warning，Layer B 五条全 PASS；PNG 作为交付证据，跟 `docs/gallery/` 同类型的图放一起比，构图不比它差
-- [ ] 子代理的过程里，它是在构图、出图两步才读 `steps` 的对应节，不是开场整份读
-- [ ] `npm test` 全绿
+- [x] `skills/comparison/` 下只有 `SKILL.md`
+- [x] 正文是「问清楚 / 构图 / 出图 / 常见画坏法」四步，没有「前置条件：先读」那一句
+- [x] 正文没有代码块（`text` 块除外）、没有 `render_diagram` / `compute_layout`、没有 sugar 字段名、没有几何数字
+- [x] recipe 里每一段都有去处：自然语言在 `SKILL.md`，机制在 `steps` 某份组件参考里（PR 描述里附逐段去处表）
+- [x] 起一个只读 `skills/` 的子代理，照这个入口 skill 画：一张两侧各 4 个维度的 A vs B 对比（至少一个维度的文字折成两行）。Layer A 无 warning，Layer B 五条全 PASS；PNG 作为交付证据，跟 `docs/gallery/` 同类型的图放一起比，构图不比它差
+- [x] 子代理的过程里，它是在构图、出图两步才读 `steps` 的对应节，不是开场整份读
+- [x] `npm test` 全绿
 
 ## 选中的存量回归
 - 无（只改 skill 文字；渲染测试不受影响）

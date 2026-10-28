@@ -91,7 +91,7 @@ compute_layout({ helper: "stack", args: {
 
 ### 对比图的一侧：标题在上，下面一列行卡
 
-comparison 的一侧是一个 `titleSide: "top"` 的 panel，body 是竖排 stack，列宽由 `w` 定（`w` 里包含 panel 自己的 `pad`，body 内宽 = `w - pad*2`）。两侧并排放进一个横排 stack，中间 `gap` 留给 VS。**两侧同一维度的行必须同 y 同 h**：先对每个维度用 [`equalize`](stack.md) 量出一对的高度，再把 `{ w: 内宽, h }` 写进两侧 body 的格子；行卡自己用 `text` 绑文字。
+comparison 的一侧是一个 `titleSide: "top"` 的 panel，body 是竖排 stack，列宽由 `w` 定（`w` 里包含 panel 自己的 `pad`，body 内宽 = `w - pad*2`，`pad` 默认 16）。两侧并排放进一个横排 stack，中间 `gap` 留给 VS。**两侧同一维度的行必须同 y 同 h**：先对每个维度用 [`equalize`](stack.md) 量出一对的高度，再把 `{ w: 内宽, h }` 写进两侧 body 的格子；行卡自己用 `text` 绑文字。
 
 ```js
 const hs = rows.map(([l, r]) => /* equalize 一对格子，见 stack.md */);
@@ -102,6 +102,10 @@ const side = (title, rows) => ({ panel: {
 compute_layout({ helper: "stack", args: { dir: "x", gap: 120, x: 40, y: 90, cells: [side(leftName, leftRows), side(rightName, rightRows)] } })
 ```
 
+画出来：结果里每个 panel 先画外壳 `rect`（`bgGray` / `bgBlue` 加同色描边），再画表头 `rect`（取 `title` 的位置尺寸，`text` 用 `title.text`），再画行卡：`body.children[i]` 的 `x, y, w, h` 就是卡的位置，**文字写在你自己画的 `rect` 的 `text` 上**（`equalize` 量高度时传进去的那一串，和画出来的是同一串）。VS 的 `x` 取左侧 panel 右边缘与右侧 panel 左边缘的中点（左 `x + w` 与右 `x` 的平均）减去它宽度的一半，`y` 取表头 `title.y + title.h / 2` 减去它高度的一半；中间的间隙不画任何东西。
+
+行卡里一行大约装多少字：368 宽、字号 15 到 16 约 35 个字符，所以 36 个字符的一句会把最后一个词挤到第三行；折行后最后一行只剩一个词时，缩短这句或自己换一处行，比如把 "horizontal needs sharding extensions" 改成 "horizontal via sharding extensions"。
+
 - 两侧行数不同：外层横排 stack 加 `equalize: true`，两个 panel 取同一个高度，行少的一侧尾部留白，不补格子，空着本身在说"这里没有"（要补的是 `—` / `None` 这样的文字行，不是空白）。
 - 每侧行数少（1–2 行、每行一个短语）时别嵌套：用单个面板（外壳透明 + 虚线，文字直接写在里面，行与行之间空一行 `\n\n`），盒子里再套两个盒子是装饰多过内容。
 - 两侧各是自己的清单、不是同一个维度时（`Fluency` 对 `Language Use`），也用单个面板：框住不是共同维度的行等于声明了一种不存在的对应。
@@ -109,13 +113,56 @@ compute_layout({ helper: "stack", args: { dir: "x", gap: 120, x: 40, y: 90, cell
 
 表头 → 正文的小箭头、VS、三列版式见下。
 
+### 两侧都用单面板：一次量齐高度
+
+单面板不分行，两侧各是一块文字，只有面板的边缘要左右对齐：把两侧的整块文字一起交给一次 [`equalize`](stack.md)（`minH` 给一个下限，避免两三行的面板太扁），用返回的 `h` 同时给两个面板。面板的高度永远从内容量出来，不手填一个整数：手填的 `h: 190` 会在两侧最后一行下面留一条死空白。
+
+```js
+const row = compute_layout({ helper: "equalize", args: { cells: [
+  { w: 360, text: leftBody,  fontSize: 15 },
+  { w: 360, text: rightBody, fontSize: 15 },
+], minH: 120 }}).result;
+// 两个面板：size: [360, row.h]，fill: "transparent"，dashed: true，text 绑定
+```
+
 ### 对比图的表头与 VS
 
-两侧表头是同 y 同 h 的 `rect`（单行名字，直接绑文字），表头填 `bg<Color>` 加本侧 `stroke` 和 `textColor`；表头往自己的正文放一个短箭头（[`connectors.md`](connectors.md)）。`VS` 是普通文字，放在间隙正中、表头行的垂直中点；不要在间隙里画圆形徽标，那会和卡片抢注意力。间隙 ≥ 100，徽标不能压到任何 rect（`SHAPE_OVERLAP`）。
+两侧表头是同 y 同 h 的 `rect`（单行名字，直接绑文字）：panel 的 `title` 区就是它（`titleSide: "top"`，两侧同样的字号），表头在外壳里面时，外壳填 `bg<Color>`，表头填同色系的中间色（`gray` / `blue` / `purple`，文字用默认墨色），这样表头才和外壳、行卡分得开；表头悬在外壳外面时，表头填 `bg<Color>` 加本侧 `stroke` 和 `textColor`。表头在外壳里面时不需要箭头；想让表头悬在外壳上方（像 gallery 里那张 coverage 图），就用竖排 stack 摆 `[表头, 正文外壳]`，中间留一段，再画一条短箭头从表头指向外壳（[`connectors.md`](connectors.md) 的「表头指向正文」）。
+
+`VS` 是普通文字，放在间隙正中、表头行的垂直中点；不要在间隙里画圆形徽标，那会和卡片抢注意力。间隙 ≥ 100，徽标不能压到任何 rect（`SHAPE_OVERLAP`）。
 
 ### 三列版式（中间一列写维度名）
 
 维度名很长、单元格很短时，每行三格：左值、中间维度名、右值。三格同 y 同 h：把三个格子一起交给 `equalize`，用返回的 `h` 建。格子里只写值（不带 `title`），所以都是普通绑定文字。
+
+列宽大约 340 / 200 / 340（左值 / 维度名 / 右值）。中间的维度名格不加底色（`fill: "transparent"`、`stroke: "transparent"`），或只用很浅的 `bgGray`，居中；两侧的值格照「配色」里行卡的颜色。
+
+### 一个格子里标题和正文字号不同
+
+行里偶尔要"维度名一个字号、内容另一个字号"的格子。绑定文字只有一种字号，这时用 stack 的 `{ title, body }` 格子（[`stack.md`](stack.md)）量出高度，把两侧的格子一起交给 `equalize`，再画一个不带文字的 `rect` 加两个独立的 `text`。独立文字不折行，自己用 `\n` 断行，一个 400 宽的列大约 40 个字符一行（字号 15）；Layer A 会用 `TEXT_OVERFLOW_X` 报出冲出去的。
+
+### 用户的选择 → 参数（comparison 入口 skill 的 clarify）
+
+| 用户选了 | 怎么画 |
+|---|---|
+| 对称双栏 + VS（推荐） | 两侧各一个 `titleSide: "top"` 的 panel，body 是竖排 stack，放进一个横排 stack，`gap` 取 120，两侧列宽相同；VS 画在间隙正中 |
+| 中间一列写维度名的三栏 | 每行三格，见上「三列版式」；表头仍是两侧各一个 |
+| 非对称（一侧拆子卡） | 竖排 stack 里嵌横排 stack（`equalize: true`），见 [`stack.md`](stack.md)；对面那侧的整宽卡一起量高；两侧列外宽相同 |
+| 中立 | 左侧 `blue`、右侧 `purple`，线条粗细一样 |
+| 有倾向 | 右侧（主张方）`blue` 加 `textColor: "blue"`，终态用 `green`；左侧（现状）`gray`；强调时获胜的一侧填中间色（不用 `bg*`） |
+
+配色表（"有倾向"的默认；中立时右侧换 `purple`，其余同理）：
+
+| 元素 | 左侧（现状 / 中立） | 右侧（主张） |
+|---|---|---|
+| 表头（在外壳里） | `gray` 填充 + `gray` 描边，默认墨色 | `blue`（中立时 `purple`）+ 同色描边，默认墨色 |
+| 表头（悬在外壳外） | `bgGray` 填充 + `gray` 描边，默认墨色 | `bgBlue` + `blue` 描边 + `textColor: "blue"` |
+| 行卡外壳 | `bgGray` + `gray` | `bgBlue` + `blue` |
+| 行卡 | `#ffffff` 填充 + `gray` 描边，默认墨色 | `#ffffff` + `blue` 描边 + `textColor: "blue"` |
+| 单面板 | `transparent` + `dashed` + `gray` 描边 | `transparent` + `dashed` + `blue` 描边 + `textColor: "blue"` |
+| VS / 标题 | 默认墨色；VS 用 `textColor: "gray"` | — |
+
+红色永远不给另一侧：见 [`semantics.md`](semantics.md) §6。
 
 ### 旧的写法：`titledBox` 和 `fitContainer`
 
