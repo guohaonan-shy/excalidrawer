@@ -25,7 +25,7 @@ Nine diagram types, each with its own agent skill. Click a figure for full size.
 <tr>
   <td align="center" width="33%"><a href="docs/gallery/tree-down.png"><img src="docs/gallery/tree-down.png" alt="Tree · top → down"></a><br><b>Tree · top → down</b><br><sub>Parent → children, split downward</sub></td>
   <td align="center" width="33%"><a href="docs/gallery/tree-stories.png"><img src="docs/gallery/tree-stories.png" alt="Tree · user-story map"></a><br><b>Tree · user-story map</b><br><sub>23 numbered stories in 6 groups</sub></td>
-  <td width="33%"></td>
+  <td align="center" width="33%"><a href="docs/gallery/state-machine.png"><img src="docs/gallery/state-machine.png" alt="State machine"></a><br><b>State machine</b><br><sub>States, transitions, self-loops, a composite state</sub></td>
 </tr>
 </table>
 

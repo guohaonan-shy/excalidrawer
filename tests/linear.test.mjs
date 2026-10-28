@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { arrow, line, orthogonalize, ARROWHEADS } from "../src/elements.mjs";
 import { toSvg } from "../src/export.mjs";
 import { desugar } from "../src/sugar.mjs";
+import { validate } from "../src/validate.mjs";
 
 // --- builders ---------------------------------------------------------------
 
@@ -150,4 +151,36 @@ test("sugar: invalid linear options are reported", () => {
     () => desugar([{ shape: "line", at: [0, 0], points: [[0, 0], [10, 0]], edges: "soft" }]),
     /edges must be one of/,
   );
+});
+
+// --- state-machine connectors (connectors.md "自环" / "双向转移") ----------------
+
+const absPoints = (a) => a.points.map(([dx, dy]) => [a.x + dx, a.y + dy]);
+
+test("sugar: a self-loop is from === to on one side with via — leaves and re-enters that edge, clears the box", () => {
+  const els = desugar([
+    { shape: "rect", id: "s", at: [100, 100], size: [140, 60], text: "Idle" },
+    { shape: "arrow", id: "loop", from: "s", to: "s", fromSide: "top", toSide: "top", fromT: 0.3, toT: 0.7,
+      via: "above", clearance: 30, arrowType: "elbow", text: "tick" },
+  ]);
+  const pts = absPoints(els.find((e) => e.id === "loop"));
+  const [start, end] = [pts[0], pts.at(-1)];
+  assert.deepEqual(start, [142, 100]);   // top edge at t = 0.3
+  assert.deepEqual(end, [198, 100]);     // top edge at t = 0.7
+  assert.ok(Math.min(...pts.map((p) => p[1])) <= 70, "the loop rises clearance above the edge");
+  assert.deepEqual(validate(els), []);
+});
+
+test("sugar: a two-way pair pinned to the same sides with opposite fromT / toT stays two parallel lines", () => {
+  const els = desugar([
+    { shape: "rect", id: "a", at: [0, 0], size: [140, 60], text: "A" },
+    { shape: "rect", id: "b", at: [300, 0], size: [140, 60], text: "B" },
+    { shape: "arrow", id: "go", from: "a", to: "b", fromSide: "right", toSide: "left", fromT: 0.3, toT: 0.3, arrowType: "elbow", text: "go" },
+    { shape: "arrow", id: "back", from: "b", to: "a", fromSide: "left", toSide: "right", fromT: 0.7, toT: 0.7, arrowType: "elbow", text: "back" },
+  ]);
+  const go = absPoints(els.find((e) => e.id === "go"));
+  const back = absPoints(els.find((e) => e.id === "back"));
+  assert.ok(go.every((p) => p[1] === 18), "go runs straight at 30% of the height");
+  assert.ok(back.every((p) => p[1] === 42), "back runs straight at 70% of the height");
+  assert.deepEqual(validate(els), []);
 });
