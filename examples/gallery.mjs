@@ -18,6 +18,7 @@ import {
 import { coverage } from "./comparison-figures.mjs";
 import { storiesEn, skills, skillsLR } from "./tree-figures.mjs";
 import { orderStates } from "./state-machine-figures.mjs";
+import { quarterlyRevenue, dailyActiveUsers } from "./chart-figures.mjs";
 
 const outDir = new URL("../docs/gallery/", import.meta.url).pathname;
 mkdirSync(outDir, { recursive: true });
@@ -143,6 +144,9 @@ const figures = {
   "tree-stories": () => tree(storiesEn),
 
   "state-machine": orderStates, // sugar, composed the way the state-machine entry skill describes
+
+  "chart-bar": quarterlyRevenue, // sugar, composed the way the chart entry skill describes
+  "chart-line": dailyActiveUsers,
 };
 
 for (const [name, build] of Object.entries(figures)) {

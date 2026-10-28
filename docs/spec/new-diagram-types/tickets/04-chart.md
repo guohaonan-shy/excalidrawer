@@ -22,14 +22,14 @@
 
 ## 验收标准
 
-- [ ] `"up"` 的竖轴 0–100、5 个 tick：值 0 的 tick 在起点上，值 100 的在起点上方一个轴长；值 40 的换算坐标在两者之间、比值 75 的低
-- [ ] `"x"`、`"y"` 的现有 axis 测试全部不改也通过
-- [ ] `compute_layout` 接受 `"up"`，结果与直接调用相同；不认识的方向照旧抛错
-- [ ] `chart` 入口 skill 通过入口 skill 约定测试
-- [ ] 两张示例 Layer A 零警告，柱子从基线往上长；图库脚本连跑两次 PNG 字节一致；重跑后别的图的 PNG 没变（timeline 尤其要看）
-- [ ] 照一个真实请求用新入口 skill 画一张，Layer A、Layer B 都过，PR 里附图
-- [ ] CHANGELOG 只在 Unreleased 下记一条
-- [ ] 不改 #12 的 issue 状态
+- [x] `"up"` 的竖轴 0–100、5 个 tick：值 0 的 tick 在起点上，值 100 的在起点上方一个轴长；值 40 的换算坐标在两者之间、比值 75 的低
+- [x] `"x"`、`"y"` 的现有 axis 测试全部不改也通过
+- [x] `compute_layout` 接受 `"up"`，结果与直接调用相同；不认识的方向照旧抛错
+- [x] `chart` 入口 skill 通过入口 skill 约定测试
+- [x] 两张示例 Layer A 零警告，柱子从基线往上长；图库脚本连跑两次 PNG 字节一致；重跑后别的图的 PNG 没变（timeline 尤其要看）
+- [x] 照一个真实请求用新入口 skill 画一张，Layer A、Layer B 都过，PR 里附图
+- [x] CHANGELOG 只在 Unreleased 下记一条
+- [x] 不改 #12 的 issue 状态
 
 ## 选中的存量回归
 

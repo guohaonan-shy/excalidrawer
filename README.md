@@ -27,6 +27,11 @@ Nine diagram types, each with its own agent skill. Click a figure for full size.
   <td align="center" width="33%"><a href="docs/gallery/tree-stories.png"><img src="docs/gallery/tree-stories.png" alt="Tree · user-story map"></a><br><b>Tree · user-story map</b><br><sub>23 numbered stories in 6 groups</sub></td>
   <td align="center" width="33%"><a href="docs/gallery/state-machine.png"><img src="docs/gallery/state-machine.png" alt="State machine"></a><br><b>State machine</b><br><sub>States, transitions, self-loops, a composite state</sub></td>
 </tr>
+<tr>
+  <td align="center" width="33%"><a href="docs/gallery/chart-bar.png"><img src="docs/gallery/chart-bar.png" alt="Bar chart"></a><br><b>Chart · bars</b><br><sub>Categories compared, grouped series, labelled values</sub></td>
+  <td align="center" width="33%"><a href="docs/gallery/chart-line.png"><img src="docs/gallery/chart-line.png" alt="Line chart"></a><br><b>Chart · lines</b><br><sub>A trend over time, one line per series</sub></td>
+  <td width="33%"></td>
+</tr>
 </table>
 
 *New in 0.5.14: the tree type, splitting left → right or top → down. Each parent
