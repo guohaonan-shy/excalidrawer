@@ -18,6 +18,7 @@ import {
 import { coverage } from "./comparison-figures.mjs";
 import { storiesEn, skills, skillsLR } from "./tree-figures.mjs";
 import { orderStates } from "./state-machine-figures.mjs";
+import { pyramidFigures } from "./pyramid-figures.mjs";
 
 const outDir = new URL("../docs/gallery/", import.meta.url).pathname;
 mkdirSync(outDir, { recursive: true });
@@ -143,6 +144,8 @@ const figures = {
   "tree-stories": () => tree(storiesEn),
 
   "state-machine": orderStates, // sugar, composed the way the state-machine entry skill describes
+
+  ...pyramidFigures, // pyramid + funnel, sugar, composed the way the pyramid entry skill describes
 };
 
 for (const [name, build] of Object.entries(figures)) {

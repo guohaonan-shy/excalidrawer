@@ -1,7 +1,7 @@
 import { defineTool } from "./schema.mjs";
 import {
   gridLayout, chain, swimlane, hubSpoke, edgePoint, routeU, labelAnchor,
-  fitContainer, titledBox, equalize, tree, stack, panel, axis, legend,
+  fitContainer, titledBox, equalize, tree, stack, panel, axis, legend, taper,
 } from "../layout.mjs";
 
 /**
@@ -25,6 +25,7 @@ const DISPATCH = {
   panel:       (a) => panel(a),
   axis:        (a) => axis(a),
   legend:      (a) => legend(a),
+  taper:       (a) => taper(a),
 };
 
 export const HELPERS = Object.keys(DISPATCH);
@@ -71,6 +72,11 @@ export const computeLayout = defineTool({
     "bounds?:{x,y,w,h}, corner?:'top-left'|'top-right'|'bottom-left'|'bottom-right', place?:'inside'|'outside', offset? } → " +
     "{kind:'legend',x,y,w,h,items:[{id?,text,sample:{x,y,w,h},label:{x,y,w,h,fontSize}}]} " +
     "(rows of a sample slot + a text slot; draw the sample as a filled rect, or a line from the slot's left-middle to right-middle; with `corner` + `bounds` the block places itself)\n" +
+    "  taper       — { layers:[string|{text,value?}] (top to bottom), width, narrow?:'top'|'bottom'='top' ('top' = pyramid, 'bottom' = funnel), minWidth?=0.3*width, " +
+    "layerH?=56, gap?=12, fontSize?=16, valueGap?=24, x?, y? } → " +
+    "{kind:'taper',narrow,x,y,w,h,cx,layers:[{index,text,value?,x,y,w,h,corners:[[x,y]×4 tl,tr,br,bl],textBox:{x,y,w,h,fontSize,text},valueAnchor?:{x,y}}],rates:[{from,to,ratio,text,anchor:{x,y}}]} " +
+    "(stacked trapezoids that narrow by the same step per layer — values never change the shape; draw each layer's corners as shape:'polygon', " +
+    "textBox as a centered text (its text is already wrapped; a layer whose label wraps grows taller), valueAnchor / rates[].anchor as left-middle of the number's text)\n" +
     "On bad input it returns { error }.",
   params: {
     helper: {

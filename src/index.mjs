@@ -9,6 +9,7 @@ export {
   diamondBox,
   arrow,
   line,
+  polygon,
   orthogonalize,
   ARROWHEADS,
   ARROW_TYPES,
@@ -45,6 +46,7 @@ export {
   panel,
   axis,
   legend,
+  taper,
 } from "./layout.mjs";
 
 // Serializer: sugar/raw elements → output formats (0.5.6+).

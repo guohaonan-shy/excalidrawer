@@ -23,6 +23,8 @@ export const renderDiagram = defineTool({
     "Escape hatch: { shape:'arrow', at:[x,y], points:[[dx,dy]...] }.\n" +
     "  line:    { shape:'line', ...same addressing as arrow, edges?:'sharp'|'round', strokeWidth?, strokeStyle? } " +
     "— a plain connector/divider with no arrowheads.\n" +
+    "  polygon: { shape:'polygon', id?, points:[[x,y]...] (absolute, >= 3), fill?, stroke?, dashed? } " +
+    "— a closed, filled polygon (for the trapezoids `compute_layout` `taper` returns); no `text`, lay a text shape over it.\n" +
     "Raw Excalidraw elements also pass through; missing base fields are filled in. " +
     "Use `compute_layout` for geometry (grids, chains, swimlanes, hub-and-spoke, " +
     "edge anchors, U-routing, label anchors). " +

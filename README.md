@@ -27,6 +27,10 @@ Nine diagram types, each with its own agent skill. Click a figure for full size.
   <td align="center" width="33%"><a href="docs/gallery/tree-stories.png"><img src="docs/gallery/tree-stories.png" alt="Tree · user-story map"></a><br><b>Tree · user-story map</b><br><sub>23 numbered stories in 6 groups</sub></td>
   <td align="center" width="33%"><a href="docs/gallery/state-machine.png"><img src="docs/gallery/state-machine.png" alt="State machine"></a><br><b>State machine</b><br><sub>States, transitions, self-loops, a composite state</sub></td>
 </tr>
+<tr>
+  <td align="center" width="33%"><a href="docs/gallery/pyramid.png"><img src="docs/gallery/pyramid.png" alt="Pyramid"></a><br><b>Pyramid</b><br><sub>Ranked layers, narrow at the top</sub></td>
+  <td align="center" width="33%"><a href="docs/gallery/funnel.png"><img src="docs/gallery/funnel.png" alt="Funnel"></a><br><b>Funnel</b><br><sub>Stage-by-stage drop-off with conversion</sub></td>
+</tr>
 </table>
 
 *New in 0.5.14: the tree type, splitting left → right or top → down. Each parent

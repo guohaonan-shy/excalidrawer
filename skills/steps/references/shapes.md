@@ -1,6 +1,6 @@
 # 形状与文字
 
-`rect` / `diamond` / `ellipse` / `text` 四种形状元素，是所有图的底。其他组件（stack、panel、axis、legend、tree）只返回坐标，坐标最后都要画成这里的形状。**选哪种形状、配什么颜色**见 [`semantics.md`](semantics.md)；本文件讲字段怎么填。
+`rect` / `diamond` / `ellipse` / `text` 四种形状元素，是所有图的底（另有一种只给梯形用的 `polygon`，见下面「多边形」）。其他组件（stack、panel、axis、legend、tree、taper）只返回坐标，坐标最后都要画成这里的形状。**选哪种形状、配什么颜色**见 [`semantics.md`](semantics.md)；本文件讲字段怎么填。
 
 ## 什么时候用
 
@@ -61,6 +61,23 @@
 ```
 
 内圈整个落在外圈里，Layer A 不报重叠。每个终止状态各接一个双圈，不共用。
+
+## 多边形
+
+`shape: "polygon"` 画一个闭合、填了色的多边形，**只为 [`taper`](taper.md) 的梯形层加**，不是通用的多边形绘图：
+
+```js
+{ shape: "polygon", id?: string,
+  points: [[x, y], ...],                 // 绝对坐标的顶点，至少 3 个，按顺序连；终点回到起点不用重复写
+  fill?: "blue" | "#rrggbb",             // 同形状的 fill；不写就是不填
+  stroke?: "blue" | "#rrggbb",           // 边框
+  dashed?: true }
+```
+
+- 没有 `at` / `size` / `text`：位置全在 `points` 里，层名另画一个 `shape: "text"` 压在上面。
+- 展开成一个闭合的线条元素（`.excalidraw` 里就是 Excalidraw 的多边形线），SVG / PNG 里带填充。其他 `line` / `arrow` 不管写什么颜色都不填。
+- Layer A 把它当成形状，范围取顶点的外接矩形：跟别的形状部分重叠会报 `SHAPE_OVERLAP`，连线穿过会报 `ARROW_CROSSES_SHAPE`；压在它上面的独立文字，按它的填充算对比度。
+- 点连不成面（全在一条水平或竖直线上）会报错。连线用 `from` / `to` 连它时，连的是外接矩形的边。
 
 ## 混用 sugar 和 raw
 

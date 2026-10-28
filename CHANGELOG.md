@@ -8,6 +8,17 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
 ### Added
 
+- **`pyramid` entry skill, `taper` component and a `polygon` shape.** One entry
+  skill draws both a pyramid (layers narrow toward the top) and a funnel (layers
+  narrow toward the bottom, a count per layer and the conversion between layers).
+  `taper({ layers, width, narrow })` — also a `compute_layout` helper — returns
+  each layer's four corners, a label box sized to the layer's narrowest edge
+  (a label that wraps makes the layer grow), and the anchors for values and
+  conversion rates; layer widths step down evenly and never follow the values.
+  The new sugar shape `{ shape: "polygon", points, fill }` is a closed, filled
+  line element (SVG / PNG keep the fill; other lines and arrows still export
+  unfilled); Layer A treats it as a shape over its bounding box. New README
+  figures `docs/gallery/pyramid.png` and `docs/gallery/funnel.png`.
 - **`state-machine` entry skill.** States and transitions with events and
   guards (`event [guard] / action`), the main path in one row, an initial dot
   and final double rings, back-edges, self-loops, two-way transitions and one

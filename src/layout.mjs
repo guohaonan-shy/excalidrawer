@@ -1909,3 +1909,180 @@ export function axis(opts = {}) {
     },
   };
 }
+
+// ---------------------------------------------------------------------------
+// taper
+// ---------------------------------------------------------------------------
+
+const TAPER_NARROW = ["top", "bottom"];
+// Vertical breathing room above and below a layer's label.
+const TAPER_PAD_Y = 8;
+
+/**
+ * Layers that narrow step by step — a pyramid (narrow at the top) or a funnel
+ * (narrow at the bottom). Returns coordinates only: each layer's four corners
+ * (draw them as sugar `polygon`), the box its label fits in (draw it as `text`),
+ * where its value goes on the right, and where the conversion rate between two
+ * layers goes.
+ *
+ * Shape. Layers are listed top to bottom, always, whichever way the figure
+ * narrows. The *wider* edge of each layer sits one `step` inside the wider edge
+ * of its neighbour toward the narrow end, so the width falls by the same step
+ * layer after layer; values never change it (a layer scaled by its value would be
+ * too thin to hold a name). Inside a layer the slanted sides keep the slope the
+ * figure's sides would have if the gap between layers were part of it, so the
+ * sides read as one straight line broken by the gaps. `step` is picked so the
+ * narrowest edge, for layers of their nominal height, is `minWidth`.
+ *
+ * Text. A label's box is as wide as the layer's narrowest edge minus the same
+ * horizontal inset bound text gets, and as tall as its wrapped lines. A label that
+ * does not fit on one line wraps; a layer that cannot hold the wrapped lines grows
+ * taller than `layerH`, and the layers below move down.
+ *
+ * @param {object} opts
+ * @param {Array<string|{text:string, value?:number|string}>} opts.layers - top to bottom; non-empty
+ * @param {number} opts.width - width of the widest edge of the whole figure
+ * @param {"top"|"bottom"} [opts.narrow="top"] - which end is narrow: "top" = pyramid, "bottom" = funnel
+ * @param {number} [opts.minWidth=0.3*width] - width of the narrowest edge; positive and below `width`
+ * @param {number} [opts.layerH=56] - nominal (minimum) layer height
+ * @param {number} [opts.gap=12] - vertical gap between layers
+ * @param {number} [opts.fontSize=16] - label font size
+ * @param {number} [opts.valueGap=24] - from the figure's right edge to the value / rate column
+ * @param {number} [opts.x=0] - left of the widest edge
+ * @param {number} [opts.y=0] - top of the first layer
+ *
+ * @returns {{ kind:"taper", narrow:string, x:number, y:number, w:number, h:number, cx:number,
+ *   layers: Array<{ index:number, text:string, value?:number|string,
+ *     x:number, y:number, w:number, h:number,
+ *     corners:[number,number][],
+ *     textBox:{x:number,y:number,w:number,h:number,fontSize:number,text:string},
+ *     valueAnchor?:{x:number,y:number} }>,
+ *   rates: Array<{ from:number, to:number, ratio:number, text:string, anchor:{x:number,y:number} }> }}
+ *   - `corners`: top-left, top-right, bottom-right, bottom-left — ready for a polygon's `points`.
+ *   - `textBox.text`: the label with "\n" at the wrap points; draw it as a `text` of that size.
+ *   - `valueAnchor` (only for layers with a `value`): the left-middle of the value's text, one column for all layers.
+ *   - `rates` (only where both values are numbers and the upper one is above 0): `ratio` = lower / upper,
+ *     `text` = its percentage ("40%", "12.5%"), `anchor` in the gap between the two layers, same column.
+ *
+ * @example
+ *   const f = taper({ narrow: "bottom", width: 560, layers: [
+ *     { text: "Visited", value: 1000 }, { text: "Signed up", value: 400 } ] });
+ *   // f.layers[0].corners → draw as { shape: "polygon", points: corners, fill }
+ *   // f.rates[0].text → "40%", at f.rates[0].anchor
+ */
+export function taper(opts = {}) {
+  const o = opts ?? {};
+  const { layers, width, narrow = "top" } = o;
+  const bad = (name, want, v) =>
+    new Error(`taper: \`${name}\` must be ${want}, got ${JSON.stringify(v) ?? String(v)}`);
+  const num = (name, def, kind = "any") => {
+    const v = o[name] ?? def;
+    const wrong =
+      !isNum(v) || (kind === "positive" && v <= 0) || (kind === "non-negative" && v < 0);
+    if (wrong) throw bad(name, kind === "any" ? "a number" : `a ${kind} number`, o[name]);
+    return v;
+  };
+
+  if (!Array.isArray(layers) || layers.length === 0) {
+    throw bad("layers", "a non-empty array of layer names or { text, value? }", layers);
+  }
+  const items = layers.map((l, i) => {
+    const item = typeof l === "string" ? { text: l } : l;
+    if (!item || typeof item !== "object" || typeof item.text !== "string" || item.text === "") {
+      throw bad(`layers[${i}]`, "a non-empty string or { text, value? } with a non-empty `text`", l);
+    }
+    const v = item.value;
+    if (v !== undefined && v !== null && !isNum(v) && typeof v !== "string") {
+      throw bad(`layers[${i}].value`, "a number or a string", v);
+    }
+    return { text: item.text, value: v ?? undefined };
+  });
+  if (!isNum(width) || width <= 0) throw bad("width", "a positive number", width);
+  if (!TAPER_NARROW.includes(narrow)) throw bad("narrow", '"top" or "bottom"', narrow);
+  const minWidth = num("minWidth", width * 0.3, "positive");
+  if (minWidth >= width) throw bad("minWidth", "a positive number below `width`", minWidth);
+  const layerH = num("layerH", 56, "positive");
+  const gap = num("gap", 12, "non-negative");
+  const fontSize = num("fontSize", 16, "positive");
+  const valueGap = num("valueGap", 24, "non-negative");
+  const x0 = num("x", 0);
+  const y0 = num("y", 0);
+
+  const n = items.length;
+  // The wider edge falls `step` per layer; across a layer of height h its sides
+  // close in by step * h / (h + gap) in total (the rest happens in the gap).
+  const step = (width - minWidth) / (n - 1 + layerH / (layerH + gap));
+  const cx = x0 + width / 2;
+  const column = x0 + width + valueGap;
+
+  let y = y0;
+  const out = items.map((item, i) => {
+    const wide = narrow === "bottom" ? width - i * step : width - (n - 1 - i) * step;
+    const narrowEdge = (h) => wide - (step * h) / (h + gap);
+
+    // Grow the layer until its wrapped label fits; the narrow edge shrinks a
+    // little as the layer grows, so settle it by iterating (h only ever rises).
+    let h = layerH;
+    let text = item.text;
+    for (let k = 0; k < 20; k++) {
+      const boxW = Math.max(1, narrowEdge(h) - BOUND_TEXT_PAD_X * 2);
+      text = wrapText(item.text, boxW, fontSize);
+      const need = Math.max(layerH, textHeight(text, fontSize, 0) + TAPER_PAD_Y * 2);
+      if (need <= h) break;
+      h = need;
+    }
+    const lo = narrowEdge(h);
+    const topW = narrow === "bottom" ? wide : lo;
+    const botW = narrow === "bottom" ? lo : wide;
+    const corners = [
+      [cx - topW / 2, y],
+      [cx + topW / 2, y],
+      [cx + botW / 2, y + h],
+      [cx - botW / 2, y + h],
+    ];
+    const textW = Math.max(1, lo - BOUND_TEXT_PAD_X * 2);
+    const textH = textHeight(text, fontSize, 0);
+    const layer = {
+      index: i,
+      text: item.text,
+      ...(item.value !== undefined ? { value: item.value } : {}),
+      x: cx - wide / 2,
+      y,
+      w: wide,
+      h,
+      corners,
+      textBox: { x: cx - textW / 2, y: y + (h - textH) / 2, w: textW, h: textH, fontSize, text },
+      ...(item.value !== undefined ? { valueAnchor: { x: column, y: y + h / 2 } } : {}),
+    };
+    y += h + gap;
+    return layer;
+  });
+
+  const rates = [];
+  for (let i = 0; i + 1 < n; i++) {
+    const a = out[i];
+    const b = out[i + 1];
+    if (!isNum(a.value) || !isNum(b.value) || a.value <= 0) continue;
+    const ratio = b.value / a.value;
+    rates.push({
+      from: i,
+      to: i + 1,
+      ratio,
+      text: `${Number((ratio * 100).toFixed(1))}%`,
+      anchor: { x: column, y: (a.y + a.h + b.y) / 2 },
+    });
+  }
+
+  const last = out[n - 1];
+  return {
+    kind: "taper",
+    narrow,
+    x: x0,
+    y: y0,
+    w: width,
+    h: last.y + last.h - y0,
+    cx,
+    layers: out,
+    rates,
+  };
+}
