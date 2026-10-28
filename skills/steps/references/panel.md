@@ -48,7 +48,7 @@ for (const c of p.body.children) els.push({ shape: "rect", at: [c.x, c.y], size:
 
 ### 分层带：architecture 的一层一条 panel（标题在左）
 
-整张图是一个竖排 stack，每层一个 `titleSide: "left"` 的 panel，body 是横排 stack；外层 `equalize: true` 让各层同宽（右边缘对齐）。**所有层的 `titleW` 写成同一个值**，否则每层按自己标题的自然宽度取，标题列宽窄不一，内容区的左边缘就错开了。body 加 `align: "center"`，标题折成两行的层里服务格子垂直居中，不贴在顶上。
+整张图是一个竖排 stack，每层一个 `titleSide: "left"` 的 panel，body 是横排 stack；外层 `equalize: true` 让各层同宽（右边缘对齐）。**所有层的 `titleW` 写成同一个值**，否则每层按自己标题的自然宽度取，标题列宽窄不一，内容区的左边缘就错开了。body 加 `align: "center"`，标题折成两行的层里服务格子垂直居中，不贴在顶上；同时加 `justify: "center"`，层被外层 `equalize` 拉宽后服务在带里居中铺开，不然服务全打包在左边、右边空一大块。画连线时外层 stack 的 `gap` 要放大到箭头装得下（不画连线的 18 不够，取 56 上下），否则箭头只剩一个头。
 
 ```js
 compute_layout({ helper: "stack", args: {
@@ -71,6 +71,8 @@ compute_layout({ helper: "stack", args: {
 | 辅助 | `bgGray` / `bgOrange` | `gray` / `orange` |
 
 标题 `title` 的 `fontSize` 取返回值里的 `title.fontSize`，不要另写。
+
+带连线的分层带：各层的服务照常在带里居中，**不要为了对齐把整层平移**（层的条目数不同时，平移会让一层偏右、另一层偏左，整张图失衡）。想让互相连接的服务跨层竖直对齐，先在不改变含义的前提下调这一层的服务次序，让它们尽量落在同一列；仍有错位时用连线的 `fromT` / `toT` 补，见 [`connectors.md`](connectors.md) 的「跨层」。
 
 ### 层里再分子泳道（标题在上）
 
@@ -129,3 +131,15 @@ fitContainer — { children:[{x,y,w,h}], padding?, minW?, minH? } → { x, y, w,
 - 一个框里有**标题 + 要点**时，别手填高度：手填的高度要么让最后一行贴着下边，要么悬在松散的空白里。用 `titledBox` 量出来；先画 `rect(box…)`，再画两个 `text`。
 - 一组已经摆好的节点外面要套一个外框：用 `fitContainer`，外框高度永远不手写。
 - 新的布局先考虑 panel / stack；这两个只在已经有一堆摆好的坐标、只差一个壳时用。
+
+## architecture 的提问选项对应哪种写法
+
+architecture 入口 skill 的「结构形态」问题，用户选了哪项，就用哪种写法：
+
+| 用户选 | 写法 |
+|---|---|
+| 经典分层 | 上面「分层带」：竖排 stack，每层一个 `titleSide: "left"` 的 panel，外层 `equalize: true` |
+| 分层加子分组 | 上面「层里再分子泳道」：整层的表头 panel 包一行 `equalize` 过的子泳道 panel |
+| 自由拓扑 | 不用 panel 分层带：按分组摆用 [`classic-layouts.md`](classic-layouts.md) 的 `gridLayout`，围着一个中心摆用 `hubSpoke`；连线按 id 连，见 [`connectors.md`](connectors.md) |
+
+「是否画连线」的三个选项（不画 / 关键流 / 完整连线）不对应参数：选了不画就不往元素数组里放任何箭头。
