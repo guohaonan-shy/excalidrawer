@@ -1,13 +1,13 @@
 ---
 name: steps
-description: Step skill for the excalidrawer entry skills (flowchart / timeline / architecture / sequence / comparison / tree). An entry skill calls it when it reaches a step and points at one section - "clarify" (how to ask), "组件" (which reference to read for each component - shapes, connectors, stack, panel, axis, legend, tree, classic layouts - plus the shared visual semantics), "出图" (MCP precheck + CLI fallback, file naming, label language, export formats, render call, the two-layer quality gate, iteration), "新增一种图类型" (the checklist for adding a diagram type). Not a standalone drawing entry - do not trigger it on a drawing request; the entry skill for that diagram type comes first. 步骤 skill / 出图 / 组件用法 / 命名 / 导出格式 / 质量关。
+description: Step skill for the excalidrawer entry skills (flowchart / timeline / architecture / sequence / comparison / tree / state-machine / pyramid / chart). An entry skill calls it when it reaches a step and points at one section - "clarify" (how to ask), "组件" (which reference to read for each component - shapes, connectors, stack, panel, axis, legend, tree, classic layouts - plus the shared visual semantics), "出图" (MCP precheck + CLI fallback, file naming, label language, export formats, render call, the two-layer quality gate, iteration), "新增一种图类型" (the checklist for adding a diagram type). Not a standalone drawing entry - do not trigger it on a drawing request; the entry skill for that diagram type comes first. 步骤 skill / 出图 / 组件用法 / 命名 / 导出格式 / 质量关。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
 # excalidrawer steps
 
 The entry skills (`flowchart` / `timeline` / `architecture` / `sequence` /
-`comparison` / `tree`) say what to ask, what a good diagram of their type looks
+`comparison` / `tree` / `state-machine` / `pyramid` / `chart`) say what to ask, what a good diagram of their type looks
 like, and how it goes wrong. Everything about *how to do a step* lives here, in
 four named sections. An entry skill calls this skill at the step it needs and
 names the section; read **that section only** and the references it points to,
@@ -17,8 +17,8 @@ not the whole file.
 |---|---|---|
 | [clarify](#clarify) | 行 33–55 | the "ask the user" step |
 | [组件](#组件) | 行 57–88 | the "compose the diagram" step - which component to use and how to fill its fields |
-| [出图](#出图) | 行 90–260 | the "render and deliver" step |
-| [新增一种图类型](#新增一种图类型) | 行 262–287 | writing a new entry skill |
+| [出图](#出图) | 行 90–263 | the "render and deliver" step |
+| [新增一种图类型](#新增一种图类型) | 行 265–290 | writing a new entry skill |
 
 To read one section, open this file with an offset at its first line and a limit of its length (the line numbers are checked by `tests/skills-steps.test.mjs`, which tells you the right ones if you change the file).
 
@@ -135,6 +135,9 @@ names — never `outputs/<timestamp>/` subfolders.
 | sequence | `./sequence-<name>.{excalidraw,svg,png}` |
 | comparison | `./comparison-<name>.{excalidraw,svg,png}` |
 | tree | `./tree-<name>.{excalidraw,svg,png}` |
+| state-machine | `./state-machine-<name>.{excalidraw,svg,png}` |
+| pyramid | `./pyramid-<name>.{excalidraw,svg,png}` |
+| chart | `./chart-<name>.{excalidraw,svg,png}` |
 | freeform | `./diagram-<name>.{excalidraw,svg,png}` |
 
 `<name>` is a short kebab-case derived from the request (e.g. `login-flow`,
