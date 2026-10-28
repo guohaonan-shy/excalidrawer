@@ -31,14 +31,14 @@
 7. 仓库里其他指向 `skills/shared` 或 `../shared/` 的地方（入口 skill、recipe 里的相对链接、`CLAUDE.md`、README）一起改成 `steps`，不留断链。
 
 ## 验收标准
-- [ ] `skills/shared/` 不存在，`skills/steps/SKILL.md` 的 `name` 是 `steps`，正文有「clarify」「组件」「出图」「新增一种图类型」四节
-- [ ] 导出格式参考和两层质量关的内容跟改名前逐字一致（diff 只有标题、节号）
-- [ ] `steps` 的参考里每个组件一份，`layout-components` 替换表的每一行都能在某份组件参考里找到对应写法
-- [ ] 标题字号只在语义参考里出现一次，值是 28
-- [ ] 6 个入口 skill 开头都是那一句统一的调用，没有 `../shared/` 残留：`grep -rn "shared/" skills CLAUDE.md README.md` 无输出
-- [ ] 仓库内所有指向 `skills/` 下文件的 markdown 相对链接都能解析到存在的文件
-- [ ] 照 flowchart 入口 skill（recipe 未改）+ `steps` 画 gallery 里的「Pull request to production」流程图，Layer A 无 warning
-- [ ] `npm test` 全绿
+- [x] `skills/shared/` 不存在，`skills/steps/SKILL.md` 的 `name` 是 `steps`，正文有「clarify」「组件」「出图」「新增一种图类型」四节
+- [x] 导出格式参考和两层质量关的内容跟改名前逐字一致（diff 只有标题、节号）
+- [x] `steps` 的参考里每个组件一份，`layout-components` 替换表的每一行都能在某份组件参考里找到对应写法
+- [x] 标题字号只在语义参考里出现一次，值是 28
+- [x] 6 个入口 skill 开头都是那一句统一的调用，没有 `../shared/` 残留：`grep -rn "shared/" skills CLAUDE.md README.md` 无输出
+- [x] 仓库内所有指向 `skills/` 下文件的 markdown 相对链接都能解析到存在的文件
+- [x] 照 flowchart 入口 skill（recipe 未改）+ `steps` 画 gallery 里的「Pull request to production」流程图，Layer A 无 warning
+- [x] `npm test` 全绿
 
 ## 选中的存量回归
 - `tests/tools.test.mjs`：`compute_layout` 的 helper 白名单与说明，`steps` 的组件参考要跟它对得上

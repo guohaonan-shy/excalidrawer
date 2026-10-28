@@ -6,22 +6,19 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 # excalidrawer tree
 
-## 前置条件（必做）
+## 前置条件
 
-先用 Read 工具读取 [`../shared/SKILL.md`](../shared/SKILL.md)
-——它定义了所有图表类型通用的 MCP 前置检查 / CLI fallback、视觉语义（什么意思用什么组件/线型/配色）、sugar schema、
-文件命名、输出语言、导出格式参考、迭代规则。**缺一不可**，本 skill 只补充树状图专属的
-clarify 问题与 layout recipe。
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。
 
 ## 1. Clarify（必）
 
-用 **AskUserQuestion** 问 load-bearing 问题；导出格式见 shared §6 的格式参考。
+用 **AskUserQuestion** 问 load-bearing 问题；导出格式见 `steps`『出图』的导出格式参考。
 
 1. **根 + 层级内容** — 自由文本。一个根，下面每层是什么（`场景 → 用户故事`、
    `类别 → skill`）。每个父节点 1–8 个孩子最佳；超过就再分一层。
    **用户已给出完整层级（如带标题分组的编号列表、缩进大纲）时跳过本问**——直接把
    标题当分组、条目当叶子。**标签默认译成英文**（编号保留），原文是中文不等于要中文；
-   用户明确要求时才保留原语言（见 shared §5）。
+   用户明确要求时才保留原语言（见 `steps`『出图』的命名与语言）。
 2. **分裂方向（必问）** — 父节点向孩子分裂是上下还是左右，这决定整张图的形状，
    内容本身推不出来，所以**即使用户给了完整层级也要问**；只有用户已明说方向
    （「横向」「从左到右」「组织架构图那样」）时才跳过。单选，带 preview，
@@ -57,5 +54,5 @@ sugar 的写法（节点 rect + 连接线 L4 arrow）、配色继承规则、宽
 
 **不要手算坐标**——先调 `compute_layout({ helper: "tree", args: { root, direction, … } })`，
 它保证父节点居中于自己的孩子、子树互不重叠、连线只走层间空隙。再按 recipe 把
-`nodes` / `segments` 一一映射成 sugar。渲染顺序与 render 调用见 shared §2 / §7：
-`output: "./tree-<name>"`，formats 见 shared §6。迭代见 recipe 末尾「Common pitfalls」与 shared §8。
+`nodes` / `segments` 一一映射成 sugar。渲染顺序见 `steps`『组件』，render 调用见『出图』：
+`output: "./tree-<name>"`，formats 见『出图』的导出格式参考。迭代见 recipe 末尾「Common pitfalls」与 `steps`『出图』的迭代。

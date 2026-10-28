@@ -6,16 +6,13 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 # excalidrawer comparison
 
-## 前置条件（必做）
+## 前置条件
 
-先用 Read 工具读取 [`../shared/SKILL.md`](../shared/SKILL.md)
-——它定义了所有图表类型通用的 MCP 前置检查 / CLI fallback、视觉语义（什么意思用什么组件/线型/配色）、sugar schema、
-文件命名、输出语言、导出格式参考、迭代规则。**缺一不可**，本 skill 只补充左右对比专属的
-clarify 问题与 layout recipe。
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。
 
 ## 1. Clarify（必）
 
-用 **AskUserQuestion** 问 load-bearing 问题；导出格式见 shared §6 的格式参考。
+用 **AskUserQuestion** 问 load-bearing 问题；导出格式见 `steps`『出图』的导出格式参考。
 **用户已给出两侧名称 + 完整维度列表时跳过结构性提问。**
 
 1. **两侧是什么 + 对比维度** — 自由文本。要的是「左侧名 / 右侧名」加一组**双侧都适用**的
@@ -39,7 +36,7 @@ clarify 问题与 layout recipe。
 ## 3. 拼 sugar + 渲染
 
 按 recipe 拼 sugar 数组（先 `compute_layout` 的 `equalize` 量出整行高度，再把这个
-高度传给该行的每个 rect）。渲染顺序与 render 调用见 shared §2 / §7：
+高度传给该行的每个 rect）。渲染顺序见 `steps`『组件』，render 调用见『出图』：
 `output: "./comparison-<name>"`，
-formats 见 shared §6。一图一个对比轴——换个轴就是新的一张图（`comparison-<pair>-<axis>`）。
-迭代见 recipe 末尾「Common pitfalls」与 shared §8。
+formats 见『出图』的导出格式参考。一图一个对比轴——换个轴就是新的一张图（`comparison-<pair>-<axis>`）。
+迭代见 recipe 末尾「Common pitfalls」与 `steps`『出图』的迭代。

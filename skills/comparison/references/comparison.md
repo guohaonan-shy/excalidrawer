@@ -2,8 +2,7 @@
 
 How to compose a left-vs-right comparison diagram with sugar. Read AFTER
 clarifying intent (SKILL.md §1). Component / style choices follow
-[`../../shared/references/semantics.md`](../../shared/references/semantics.md); sugar schema in
-[`../../shared/references/sugar.md`](../../shared/references/sugar.md).
+[`../../steps/references/semantics.md`](../../steps/references/semantics.md); the component references are listed in the "组件" table of [`../../steps/SKILL.md`](../../steps/SKILL.md).
 
 ## Modeling — dimensions first, not features first
 
@@ -283,7 +282,7 @@ Rules that keep it from looking broken:
 - **Default pairing is `gray` (neutral / status quo) vs `blue` (your side).**
   The colored side also gets `textColor` — colored text is what makes one
   column read as "the answer" without shouting. Two families plus ink, nothing
-  more (shared `references/semantics.md` §6: ≤ 4 colors per diagram; a comparison
+  more (`steps/references/semantics.md` §6: ≤ 4 colors per diagram; a comparison
   wants 2). `green` works too, but reads as "success/done" rather than "this
   one" — use it when the right side really is the end state (after / fixed).
 - **Never `red` for the other side.** `red` means *error* in this palette —

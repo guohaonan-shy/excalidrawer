@@ -2,8 +2,7 @@
 
 How to compose a tree diagram with sugar elements. Read this AFTER clarifying
 intent (SKILL.md §1). Component / style choices follow
-[`../../shared/references/semantics.md`](../../shared/references/semantics.md); sugar schema basics live in
-[`../../shared/references/sugar.md`](../../shared/references/sugar.md) —
+[`../../steps/references/semantics.md`](../../steps/references/semantics.md); the component references are listed in the "组件" table of [`../../steps/SKILL.md`](../../steps/SKILL.md) —
 this file only covers tree-specific composition.
 
 ## The rule: layout comes from `compute_layout` `tree`, never by hand
@@ -81,7 +80,7 @@ room for it (≈ caption width + 32). For `right`, put the caption above each
 **Numbered leaves**: if the source list is numbered, keep its numbers in the
 leaf labels (`"7. As a student on a slow network…"`) — readers cross-reference
 them. Source text in another language still becomes English labels unless the
-user asked otherwise (shared §5); the numbers stay the same.
+user asked otherwise (`steps`, "出图": naming and language); the numbers stay the same.
 
 ## Color: one hue per branch
 
@@ -142,6 +141,6 @@ already carry numbers. `arrowheads: true` puts heads on child branches
   strips. Use `right`.
 - **Keeping the source language by default.** A Chinese spec pasted in is
   not a request for Chinese labels; translate unless the user asked to keep
-  the wording (shared §5). When CJK labels *are* requested, width estimation
+  the wording (`steps`, "出图": naming and language). When CJK labels *are* requested, width estimation
   and font fallback are handled — just keep group labels short (≤ ~10 chars)
   so the middle column stays narrow.

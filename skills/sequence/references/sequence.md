@@ -2,8 +2,7 @@
 
 How to compose a sequence diagram with sugar. Read AFTER clarifying actors
 + messages + return-style (SKILL.md §1). Component / style choices follow
-[`../../shared/references/semantics.md`](../../shared/references/semantics.md); sugar schema in
-[`../../shared/references/sugar.md`](../../shared/references/sugar.md). This
+[`../../steps/references/semantics.md`](../../steps/references/semantics.md); the component references are listed in the "组件" table of [`../../steps/SKILL.md`](../../steps/SKILL.md). This
 file covers sequence layout and the one place it narrows semantics.md:
 **dashed = response** (§Response style).
 

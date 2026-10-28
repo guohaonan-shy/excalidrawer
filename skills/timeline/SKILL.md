@@ -6,16 +6,13 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 # excalidrawer timeline
 
-## 前置条件（必做）
+## 前置条件
 
-先用 Read 工具读取 [`../shared/SKILL.md`](../shared/SKILL.md)
-——它定义了所有图表类型通用的 MCP 前置检查 / CLI fallback、视觉语义（什么意思用什么组件/线型/配色）、sugar schema、
-文件命名、输出语言、导出格式参考、迭代规则。**缺一不可**，本 skill 只补充时间线专属的
-clarify 问题与 layout recipe。
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。
 
 ## 1. Clarify（必）
 
-用 **AskUserQuestion** 问 load-bearing 问题；导出格式见 shared §6 的格式参考。
+用 **AskUserQuestion** 问 load-bearing 问题；导出格式见 `steps`『出图』的导出格式参考。
 **用户已粘完整里程碑列表时跳过结构性提问。**
 
 1. **里程碑列表** — 自由文本，每条给 `time`（日期/季度/阶段）+ `label`（短标题）+ `desc`（可选一行）
@@ -28,5 +25,5 @@ clarify 问题与 layout recipe。
 
 ## 3. 拼 sugar + 渲染
 
-按 recipe 拼 sugar 数组（`chain` 排里程碑 x）。渲染顺序与 render 调用见 shared §2 / §7：
-`output: "./timeline-<name>"`，formats 见 shared §6。迭代见 recipe 末尾「Common pitfalls」与 shared §8。
+按 recipe 拼 sugar 数组（`chain` 排里程碑 x）。渲染顺序见 `steps`『组件』，render 调用见『出图』：
+`output: "./timeline-<name>"`，formats 见『出图』的导出格式参考。迭代见 recipe 末尾「Common pitfalls」与 `steps`『出图』的迭代。
