@@ -1,6 +1,6 @@
 {
   "name": "excalidrawer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence, comparison, tree, state machine, pyramid / funnel, bar / line chart. Generate hand-drawn-style diagrams and export to .excalidraw / SVG / PNG / WebP — no browser.",
   "author": {
     "name": "guohaonan-shy",
@@ -29,6 +29,7 @@
     "skills"
   ],
   "skills": "./skills/",
+  "mcpServers": "./.codex-plugin/mcp.json",
   "interface": {
     "displayName": "Excalidrawer",
     "shortDescription": "Code-first Excalidraw diagrams: flowchart, timeline, architecture, sequence, comparison, tree, state machine, pyramid / funnel, bar / line chart",
