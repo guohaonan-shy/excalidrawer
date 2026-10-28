@@ -20,13 +20,13 @@ architecture 现在有三种布局（经典分层、分层加子分组、自由�
 
 ## 验收标准
 
-- [ ] architecture 入口 skill 的构图列出第四种布局，写清它讲什么、什么时候选它、各组件在这里画出什么效果
-- [ ] 问清楚一步多了「调用关系还是数据流向」这一问，并写明什么情况下不问
-- [ ] architecture 入口 skill 仍通过入口 skill 约定测试
-- [ ] 示例全景含 5 段、一条贯穿横带，Layer A 零警告；图库脚本连跑两次 PNG 字节一致；重跑后别的图的 PNG 没变
-- [ ] 照一个真实请求（「画个数据栈全景」）用 architecture 入口 skill 画一张，选到全景布局，Layer A、Layer B 都过，PR 里附图
-- [ ] CHANGELOG 只在 Unreleased 下记一条
-- [ ] 不改 #12 的 issue 状态
+- [x] architecture 入口 skill 的构图列出第四种布局，写清它讲什么、什么时候选它、各组件在这里画出什么效果
+- [x] 问清楚一步多了「调用关系还是数据流向」这一问，并写明什么情况下不问
+- [x] architecture 入口 skill 仍通过入口 skill 约定测试
+- [x] 示例全景含 5 段、一条贯穿横带，Layer A 零警告；图库脚本连跑两次 PNG 字节一致；重跑后别的图的 PNG 没变
+- [x] 照一个真实请求（「画个数据栈全景」）用 architecture 入口 skill 画一张，选到全景布局，Layer A、Layer B 都过，PR 里附图
+- [x] CHANGELOG 只在 Unreleased 下记一条
+- [x] 不改 #12 的 issue 状态
 
 ## 选中的存量回归
 
