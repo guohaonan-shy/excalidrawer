@@ -38,6 +38,16 @@ _Avoid_: scale（scale 指数值到坐标的换算）
 超出量，组件给定的长度装不下内容时撑出的像素数，按轴分为 overflow 和 crossOverflow。
 _Avoid_: 越界, 溢出
 
+### Skill
+
+**入口 skill**：
+用户直接调用的 skill，一种图一个，用自然语言写这种图要问什么、长什么样、常见画坏法。
+_Avoid_: 类型 skill, recipe, per-type skill
+
+**步骤 skill**：
+入口 skill 走到某一步时调用的 skill，管这一步怎么做，比如出图、组件怎么用。
+_Avoid_: 共享 skill, shared base, lower layer, 底层
+
 ## 歧义词
 
 - **card**：recipe 里既指单个小格子（comparison 的行卡、timeline 的里程碑卡），也曾被用来指装子格的容器。装子格的容器一律叫 panel，card 只指小格子。
