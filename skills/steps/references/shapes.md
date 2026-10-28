@@ -47,6 +47,21 @@
 
 不是错误的节点不要用 `fill: "red"`：这套风格里红色读作"坏"，留给真正的错误。
 
+## 状态机的初始点和终止双圈
+
+两个都是 `ellipse`，墨色写 `#1e1e1e`（调色板里没有墨色这个键）：
+
+```js
+// 初始：实心小黑点，直径 22；作为主路径 stack 里的一个 { w: 22, h: 22 } 格子
+{ shape: "ellipse", id: "init", at: [x, y], size: [22, 22], fill: "#1e1e1e" }
+
+// 终止：外圈空心 34，里面一个实心 18，同心；外圈带 id，箭头连它
+{ shape: "ellipse", id: "final", at: [x, y], size: [34, 34], fill: "transparent" },
+{ shape: "ellipse", at: [x + 8, y + 8], size: [18, 18], fill: "#1e1e1e" }
+```
+
+内圈整个落在外圈里，Layer A 不报重叠。每个终止状态各接一个双圈，不共用。
+
 ## 混用 sugar 和 raw
 
 同一个数组里可以既有 sugar 元素（有 `shape` 字段），又有 raw Excalidraw 元素（没有 `shape`）。raw 元素原样通过，缺的基础字段补上——从 Excalidraw 导出里贴一段、或手调某一个元素时有用。

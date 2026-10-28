@@ -69,7 +69,7 @@ Read in this order:
 | component | read it when | reference |
 |---|---|---|
 | shapes & text | every diagram: `rect` / `diamond` / `ellipse` / `text`, colors, label wrapping, mixing raw elements | [`shapes.md`](references/shapes.md) |
-| connectors | any arrow or line: id-anchored routing, pinned sides, back-edges, label dodging, long-haul detours, `edgePoint` / `routeU` / `labelAnchor`, L4 manual form | [`connectors.md`](references/connectors.md) |
+| connectors | any arrow or line: id-anchored routing, pinned sides, back-edges, label dodging, long-haul detours, self-loops, two-way pairs, `edgePoint` / `routeU` / `labelAnchor`, L4 manual form | [`connectors.md`](references/connectors.md) |
 | stack | cells in a row or column whose container is sized from content; **`equalize`** (one height for a row of cells); lifeline length from a step column; a milestone's text rows | [`stack.md`](references/stack.md) |
 | panel | a container with a heading: layer bands, comparison sides, sub-lanes; the older `titledBox` / `fitContainer` | [`panel.md`](references/panel.md) |
 | axis | a marked line: a timeline spine, a chart axis, value → coordinate | [`axis.md`](references/axis.md) |

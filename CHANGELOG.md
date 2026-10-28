@@ -8,6 +8,13 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
 ### Added
 
+- **`state-machine` entry skill.** States and transitions with events and
+  guards (`event [guard] / action`), the main path in one row, an initial dot
+  and final double rings, back-edges, self-loops, two-way transitions and one
+  level of composite states (a panel). No new component: the step skill's
+  connectors reference gains two patterns, *self-loop* (`from` = `to`, one
+  side, `via`) and *two-way pair* (pinned sides, opposite `fromT` / `toT`).
+  New README figure `docs/gallery/state-machine.png`.
 - **Three new entry skills registered: `state-machine`, `pyramid`, `chart`.**
   The step skill's entry-skill lists and its output-naming table
   (`state-machine-<name>`, `pyramid-<name>`, `chart-<name>`) carry the three
