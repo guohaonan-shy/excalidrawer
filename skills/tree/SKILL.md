@@ -1,58 +1,99 @@
 ---
 name: tree
-description: Generate a hand-drawn-style Excalidraw tree diagram from code and export to .excalidraw / SVG / PNG / WebP — no browser. For hierarchies that grow from one root — taxonomies, org charts, user-story maps (root → scenario → story), mind-map-like outlines, category → item breakdowns, file/module trees. Left-to-right or top-down tidy layout; parents centered on their children, no crossing edges. Triggers on draw a tree / hierarchy diagram / org chart / taxonomy / breakdown. Flow detect → clarify root, levels & direction → read references/tree.md → compute_layout tree → compose sugar → render_diagram. 中文触发词：树状图 / 树形图 / 层级图 / 组织架构图 / 分类树 / 用户故事地图 / 拆解图 / 脑图式大纲。
+description: Generate a hand-drawn-style Excalidraw tree diagram from code and export to .excalidraw / SVG / PNG / WebP — no browser. For hierarchies that grow from one root — taxonomies, org charts, user-story maps (root → scenario → story), mind-map-like outlines, category → item breakdowns, file/module trees. Left-to-right or top-down tidy layout; parents centered on their children, no crossing edges. Triggers on draw a tree / hierarchy diagram / org chart / taxonomy / breakdown. 中文触发词：树状图 / 树形图 / 层级图 / 组织架构图 / 分类树 / 用户故事地图 / 拆解图 / 脑图式大纲。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
 # excalidrawer tree
 
-## 前置条件
+画树状图：一个根往下一层层拆开，读者能顺着从根找到任何一个叶子，并看出谁属于谁。下面四步走，走到「怎么做」那一步才去调 `steps`，开场不用整份读。
 
-调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。
+## 1. 问清楚
 
-## 1. Clarify（必）
+提问的通用规则（一轮问几题、什么时候用选择题）：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。导出格式不用问，从对话里推（见第 3 步）。
 
-用 **AskUserQuestion** 问 load-bearing 问题；导出格式见 `steps`『出图』的导出格式参考。
+要问三件事：
 
-1. **根 + 层级内容** — 自由文本。一个根，下面每层是什么（`场景 → 用户故事`、
-   `类别 → skill`）。每个父节点 1–8 个孩子最佳；超过就再分一层。
-   **用户已给出完整层级（如带标题分组的编号列表、缩进大纲）时跳过本问**——直接把
-   标题当分组、条目当叶子。**标签默认译成英文**（编号保留），原文是中文不等于要中文；
-   用户明确要求时才保留原语言（见 `steps`『出图』的命名与语言）。
-2. **分裂方向（必问）** — 父节点向孩子分裂是上下还是左右，这决定整张图的形状，
-   内容本身推不出来，所以**即使用户给了完整层级也要问**；只有用户已明说方向
-   （「横向」「从左到右」「组织架构图那样」）时才跳过。单选，带 preview，
-   按叶子长度把其中一项标 `(Recommended)` 并放第一位：
+1. **根和每一层的内容**：自由文本。一个根，下面每层是什么，比如「场景 → 用户故事」「类别 → skill」。每个父节点 1–8 个孩子最好看，超过就再分一层。**用户已经给出完整层级时跳过这一问**，比如带标题分组的编号列表、缩进的大纲：直接把标题当分组、条目当叶子。标签默认译成英文，编号保留；原文是中文不等于要中文，用户明确要求才保留原语言。
+2. **分裂方向（必问）**：父节点向孩子分裂是上下还是左右，决定整张图的形状，从内容本身推不出来，所以**即使用户给了完整层级也要问**；只有用户已经明说了方向（「横向」「从左到右」「像组织架构图那样」）才跳过。单选，每项带一张示意图，推荐项放第一位：
+   - 上下分裂（根在上）：孩子排在父节点下方一行，像组织架构图。叶子是短词、总数不超过 8 个时最好看。
+   - 左右分裂（根在左）：孩子排在父节点右侧一列，一行一个叶子。叶子是长句（用户故事、需求）或数量多时最好看。
 
-   ```js
-   {
-     question: "父节点和孩子怎么展开？",
-     header: "分裂方向",
-     multiSelect: false,
-     options: [
-       { label: "上下分裂（根在上）",
-         description: "孩子排在父节点下方一行，像组织架构图。叶子是短词、总数 ≤ 8 时最好看。",
-         preview: "        [ 根 ]\n          │\n   ┌──────┼──────┐\n [ A ]  [ B ]  [ C ]\n   │\n ┌─┴─┐\n[a1][a2]" },
-       { label: "左右分裂（根在左）",
-         description: "孩子排在父节点右侧一列，一行一个叶子。叶子是长句（用户故事、需求）或数量多时最好看。",
-         preview: "         ┌─ [ a1 ]\n   ┌─[ A ]┤\n   │     └─ [ a2 ]\n[根]┼─[ B ]── [ b1 ]\n   │\n   └─[ C ]── [ c1 ]" },
-     ],
-   }
+   叶子平均超过 15 个字，或叶子总数超过 8 个，推荐左右分裂；否则推荐上下分裂。两张示意图：
+
+   ```text
+           [ 根 ]
+             │
+      ┌──────┼──────┐
+    [ A ]  [ B ]  [ C ]
+      │
+    ┌─┴─┐
+   [a1][a2]
    ```
 
-   选「上下」→ `direction: "down"`；选「左右」→ `direction: "right"`。
-   叶子平均超过 ~15 个字或总叶子数 > 8 时推荐「左右」，否则推荐「上下」。
-3. **叶子编号 / 层级标注** — 多选：`叶子带编号`（原文有编号就保留） /
-   `每层标注层名`（如 Root / Category / Skill） / `都不要`
+   ```text
+            ┌─ [ a1 ]
+      ┌─[ A ]┤
+      │     └─ [ a2 ]
+   [根]┼─[ B ]── [ b1 ]
+      │
+      └─[ C ]── [ c1 ]
+   ```
 
-## 2. 读 recipe
+3. **叶子编号和层名标注**：多选。叶子带编号、每层标注层名（比如 Root / Category / Skill）、都不要。用户给的原文已经带编号时，编号那一项不用问，直接保留。
 
-`Read references/tree.md` —— 拿到 `compute_layout` `tree` 的入参、把结果映射成
-sugar 的写法（节点 rect + 连接线 L4 arrow）、配色继承规则、宽度选择、常见坑。
+用户选了哪一项，对应怎么画，第 2 步调 `steps` 时在 tree 那一份里有对照，这里不重复。
 
-## 3. 拼 sugar + 渲染
+## 2. 构图
 
-**不要手算坐标**——先调 `compute_layout({ helper: "tree", args: { root, direction, … } })`，
-它保证父节点居中于自己的孩子、子树互不重叠、连线只走层间空隙。再按 recipe 把
-`nodes` / `segments` 一一映射成 sugar。渲染顺序见 `steps`『组件』，render 调用见『出图』：
-`output: "./tree-<name>"`，formats 见『出图』的导出格式参考。迭代见 recipe 末尾「Common pitfalls」与 `steps`『出图』的迭代。
+**一张好的树状图**：根在最醒目的位置，每个父节点正好在自己那一组孩子的正中，同一个分支的节点读成一个色系，连线只走层与层之间的空隙、互不交叉。读者扫一眼能说出「有几大块、每块里有什么」。
+
+### 内容要分得开
+
+- 每个父节点 1–8 个孩子；一个分组有十来个叶子就会变成很高的一列，拆成两个分组，不要为了省空间跳过一层。
+- 三层最常见（根 → 分组 → 叶子）。层数再多，读者要在好几列之间来回找，先想想能不能合并相邻两层。
+- 叶子是原文的一句话时，保持原意，不缩写成关键词。原文有编号就留在标签里，读者会拿它和原文对照。
+- 分组标签保持短，几个词以内；叶子可以长，折成两三行没问题。
+
+### 两种布局
+
+**左右分裂**：根在左，孩子排在右侧一列，画布向下长。叶子是句子（用户故事、需求）时用它：最深的一层给一个宽列，文字折成两三行，画在文档里的 PNG 向下长是没问题的。
+
+**上下分裂**：根在上，孩子排在下方一行，像组织架构图。只在叶子是短词、总数不超过 8 个时用；叶子更多画布会非常宽，长句塞进窄框会折成又高又窄的条，两种情况都改用左右分裂。
+
+### 用到的组件，各画出什么
+
+- **tree**：整棵树的排布只能来自它，不要手摆。效果：每个父节点在自己孩子的中点，各子树互不重叠，一个叶子长高了，下面的东西自动跟着让开；同一组兄弟的框取同一个高度。也不要套用流程图那种整层居中的写法，整层居中会让父节点离自己的孩子很远。
+- **形状与文字**：每个节点一个圆角矩形，标签放在里面。节点带第二行说明（比如 `ui · visual · ux` 这样的小字）时，标题用正常字、说明用灰色的小字。
+- **连线**：默认是没有箭头的线，树的方向已经由根的位置表达，每条枝上加箭头只是噪声。只有边真的表示「流向」时才换成箭头。
+- **层名标注**（只在第 1 步选了每层标注层名时画）：上下分裂时放在树的左边，对着每一层；左右分裂时放在每一列的上方。树的起点要给它留出位置。
+- **标题**：一张图一个标题，点明这棵树是什么的什么视图；标题的字号和位置是全图共用的值，不在这里写，在 `steps` 的 semantics 那一份里。
+
+组件的参数和它们怎么配合，调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。只读用到的那几份：形状与文字、tree、semantics。树的连线是 tree 直接给出的现成线段，不用读连线那一份；只有边要画成箭头时才去读它。
+
+### 配色
+
+一个分支一个色系，整个分支读成一家人，不用图例就能看出「组」和「成员」的区别：
+
+| 节点 | 颜色 |
+|---|---|
+| 根 | 黄色实色，整张图的焦点 |
+| 第一层、带孩子的节点 | 各取一个实色，依次是蓝、绿、紫、红、橙、灰，相邻分支不同色 |
+| 它下面的所有节点 | 该分支的浅色底，加该分支的强调色描边 |
+| 第一层的叶子（扁平的树） | 蓝色的浅底加蓝色描边 |
+
+用户给某个节点指定了颜色，它保留，它的子树继承这个颜色。
+
+## 3. 出图
+
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』：文件命名（树状图是 `tree-<名字>`）、导出格式、两层质量关和迭代都在那里。两关都过才算画完。
+
+## 4. 常见画坏法
+
+- **每条枝上都带箭头**：满图是箭头，读起来很吵。回第 2 步，连线用没有箭头的线，只有边表示「流向」才用箭头。
+- **排完以后手动挪了一个节点**：它所有祖先的居中都被破坏，子树也可能压到邻居。回第 2 步，要改就改输入（顺序、每一层的宽度、间距），重新排一遍，不要手挪。
+- **为了省空间跳过一层**：一个分组堆了十几个叶子，变成又高又长的一列。回第 1 步，把它拆成两个分组。
+- **上下分裂配长句叶子**：句子被挤进窄框，折成又高又窄的条。回第 1 步，改用左右分裂。
+- **叶子很多还选了上下分裂**：画布横向铺得很宽，缩进文档里字就看不清。回第 1 步，改用左右分裂。
+- **默认保留了原文的语言**：用户贴来一份中文的需求，并不等于要中文标签；手绘字体只有拉丁字母，中文会混进另一种字体，图读起来不统一。回第 1 步，翻译成英文，编号保留；用户明确要求才保留原文。要保留中文时，分组标签保持短，中间那一列才不会很宽。
+- **整张图一个颜色，或同一分支里颜色乱跳**：分支的归属看不出来。回第 2 步的配色，一个分支一个色系。
