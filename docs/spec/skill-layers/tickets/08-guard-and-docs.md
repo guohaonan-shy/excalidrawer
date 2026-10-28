@@ -14,6 +14,12 @@
 3. **三种装法的验证**：按 README 的方式各装一次——Claude Code 插件、Codex 插件、`npx skills add` 整仓安装——每种装法下让 flowchart 入口 skill 走到「出图」一步，确认调到了 `steps`。调不到的，在 PR 描述里写明哪种装法、卡在哪，不为它另改写法。
 4. 全仓搜一遍 recipe、`references/<type>.md`、`shared` 的残留提法，改掉或确认是历史段落。
 
+> 人的决定（2026-10-28）：「第一题选 A，第二题选 B」。
+> - 第一题 A：步骤 skill 的「clarify」和 6 份入口 skill 统一成「用户的描述已经能列全这张图的全部内容（节点和分叉去向、里程碑、层与服务……）就不问，也不去读提问规则」；原先「必须是结构化清单才跳过」的说法改掉。
+> - 第二题 B：语义参考的「一张图不超过 4 种颜色」不改，时序图沿用「同类角色同色」。
+>
+> 另外这张工单一并做完前几张交回、归给收尾的几件（详情见共享笔记）：6 份入口 skill 每处「看它的『…』」后补「这一步只读这一节」（comparison 已有）；步骤 skill「出图」的 CLI 小节补三句：CLI 的 compute-layout 直接打印对象、没有 MCP 的 `.result` 外壳，只要 PNG 写 `-f png`、多种格式写 `-f png,excalidraw`；步骤 skill 开头的节表方便按节读（比如写每节的行号范围或在 SKILL.md 开头列节名）；入口 skill 的「导出格式从对话里推」与「出图」的「推不出来就问一句」措辞统一；stack 参考里时序图步骤列的宽度取法与角色间距的推法写清；`examples/comparison-figures.mjs` 文件头注释改成指向步骤 skill 的 panel 参考。
+
 ## 验收标准
 - [ ] 在任一入口 skill 正文里加一行 `y = 150`，`npm test` 红，报出这一行；删掉后全绿
 - [ ] 6 个入口 skill 现状下扫描测试全绿
@@ -21,6 +27,10 @@
 - [ ] `CLAUDE.md`、README 不再提 `skills/shared` 或「type recipe 在 `references/<type>.md`」
 - [ ] `CHANGELOG.md` 的改动只在 Unreleased 节下
 - [ ] 三种装法的验证结果写进 PR 描述（每种：调到 / 没调到 + 卡在哪）
+- [ ] 「用户已说全就不问、不读提问规则」在步骤 skill 的 clarify 和 6 份入口 skill 里是同一个说法（人的决定第一题）
+- [ ] 6 份入口 skill 每处调用步骤 skill 的地方都带「这一步只读这一节」
+- [ ] 步骤 skill「出图」的 CLI 小节写明 `.result` 外壳的差别和 `-f` 的写法
+- [ ] `examples/comparison-figures.mjs` 不再指向已删的 recipe
 - [ ] `npm test` 全绿
 
 ## 选中的存量回归
