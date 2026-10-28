@@ -1,6 +1,6 @@
 ---
 type: spec
-status: 实现中
+status: 完成
 tags: [diagram, skills, skill-layers]
 summary: 入口 skill 只用自然语言写图，出图和组件用法收进按步骤调用的步骤 skill
 related: ["[[2026-10-28-skill-layers-grill]]", "[[layout-components]]", "[[webp-output-format]]"]
