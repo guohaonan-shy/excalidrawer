@@ -428,11 +428,16 @@ function renderLinear(el) {
   if (!el.points || el.points.length < 2) return "";
 
   const pts = el.points.map(([dx, dy]) => [el.x + dx, el.y + dy]);
-  const { d, samples } = linearGeometry(el, pts);
+  const geometry = linearGeometry(el, pts);
+  const { samples } = geometry;
+  // Only a closed polygon line takes a fill; every other line and arrow stays
+  // unfilled whatever its backgroundColor says.
+  const closed = el.type === "line" && el.polygon === true;
+  const d = closed ? `${geometry.d} Z` : geometry.d;
 
   const attrs = svgAttrs({
     d,
-    fill: "none",
+    fill: closed && el.backgroundColor !== "transparent" ? el.backgroundColor : "none",
     stroke: el.strokeColor,
     "stroke-width": el.strokeWidth,
     "stroke-dasharray": strokeDashArray(el.strokeStyle),

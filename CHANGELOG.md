@@ -8,6 +8,27 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
 ### Added
 
+- **`pyramid` entry skill, `taper` component and a `polygon` shape.** One entry
+  skill draws both a pyramid (layers narrow toward the top) and a funnel (layers
+  narrow toward the bottom, a count per layer and the conversion between layers).
+  `taper({ layers, width, narrow })` — also a `compute_layout` helper — returns
+  each layer's four corners, a label box sized to the layer's narrowest edge
+  (a label that wraps makes the layer grow), and the anchors for values and
+  conversion rates; layer widths step down evenly and never follow the values.
+  The new sugar shape `{ shape: "polygon", points, fill }` is a closed, filled
+  line element (SVG / PNG keep the fill; other lines and arrows still export
+  unfilled); Layer A treats it as a shape over its bounding box. New README
+  figures `docs/gallery/pyramid.png` and `docs/gallery/funnel.png`.
+- **Data-stack overview: a fourth layout of the `architecture` skill.** For
+  "where does the data flow" rather than "who calls whom": one panel per stage
+  in a left-to-right row (data sources → ingest → storage → compute → consume),
+  the systems of a stage in a column, one thick arrow between neighbouring
+  stages and none between systems, and a band under the whole row, as wide as
+  the row, for what spans every stage (governance, monitoring, access).
+  `architecture` now asks one more question — calls or data flow — unless the
+  request already says it, and triggers on "data stack" / "high-level" / 数据全景.
+  No new entry skill or component; the output is still
+  `architecture-<name>`. New README figure `docs/gallery/high-level.png`.
 - **`chart` entry skill, and `axis` can grow upward.** Simple bar charts
   (vertical, or horizontal when the category names are long or there are more
   than 8; up to three series with a legend, values on the bar tops) and line

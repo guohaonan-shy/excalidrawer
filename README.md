@@ -28,6 +28,11 @@ Nine diagram types, each with its own agent skill. Click a figure for full size.
   <td align="center" width="33%"><a href="docs/gallery/state-machine.png"><img src="docs/gallery/state-machine.png" alt="State machine"></a><br><b>State machine</b><br><sub>States, transitions, self-loops, a composite state</sub></td>
 </tr>
 <tr>
+  <td align="center" width="33%"><a href="docs/gallery/pyramid.png"><img src="docs/gallery/pyramid.png" alt="Pyramid"></a><br><b>Pyramid</b><br><sub>Ranked layers, narrow at the top</sub></td>
+  <td align="center" width="33%"><a href="docs/gallery/funnel.png"><img src="docs/gallery/funnel.png" alt="Funnel"></a><br><b>Funnel</b><br><sub>Stage-by-stage drop-off with conversion</sub></td>
+  <td align="center" width="33%"><a href="docs/gallery/high-level.png"><img src="docs/gallery/high-level.png" alt="High-level data stack"></a><br><b>High-level data stack</b><br><sub>Where data flows, stage by stage (an Architecture layout)</sub></td>
+</tr>
+<tr>
   <td align="center" width="33%"><a href="docs/gallery/chart-bar.png"><img src="docs/gallery/chart-bar.png" alt="Bar chart"></a><br><b>Chart · bars</b><br><sub>Categories compared, grouped series, labelled values</sub></td>
   <td align="center" width="33%"><a href="docs/gallery/chart-line.png"><img src="docs/gallery/chart-line.png" alt="Line chart"></a><br><b>Chart · lines</b><br><sub>A trend over time, one line per series</sub></td>
   <td width="33%"></td>
