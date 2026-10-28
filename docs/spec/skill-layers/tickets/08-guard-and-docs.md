@@ -1,0 +1,27 @@
+# 08 — 防回退的扫描测试、文档与三种装法的验证
+
+**Blocked by**：02、03、04、05、06、07（6 个入口 skill 都改写完）
+**设计冻结**：不涉及 UI
+
+## 背景（你需要知道的）
+
+`skills/` 下分两层（术语见根目录 `GLOSSARY.md` 的「Skill」分组）：入口 skill（一种图一个，用户直接调用，只用自然语言写）和步骤 skill `steps`（入口 skill 走到某一步时调用，管出图和组件用法）。前面的工单已经把 6 个入口 skill 改写完。约定是：入口 skill 正文不许出现几何数字、工具名、sugar 字段、代码块。这张工单让这条约定由测试守住，并补齐文档。完整的决定在 `docs/spec/skill-layers/skill-layers.md`。
+
+## 要建什么
+
+1. **扫描测试**（`node --test`，放 `tests/` 下，照 `tests/tools.test.mjs` 的写法，用 `node:fs` 读 `skills/`，不 mock）：扫 `skills/` 下除 `steps/` 外每个入口 skill 的正文（frontmatter 之后）。出现代码块（`text` 块除外）、`render_diagram` / `compute_layout`、sugar 字段名、带 px 的数字或 `x =` / `y =` 这样的坐标写法，就红，报出文件、行号和命中的词。组件名不禁；内容上的数量（如「1–8 个孩子」）不禁。先写会红的用例（往一个临时入口 skill 正文里放一行 `y = 150`），再让它对现有 6 份全绿。
+2. **文档**：`CLAUDE.md` 的 `skills/` 一节改成两层与 `steps`（入口 skill 只有 `SKILL.md`、`steps` 的参考按组件分份、扫描测试守约定）；README 里讲 skill 结构和 `shared` 的段落同步；`CHANGELOG.md` 只在 Unreleased 节下记这次改动（版本号与 0.6.0 条目由发版时写）。
+3. **三种装法的验证**：按 README 的方式各装一次——Claude Code 插件、Codex 插件、`npx skills add` 整仓安装——每种装法下让 flowchart 入口 skill 走到「出图」一步，确认调到了 `steps`。调不到的，在 PR 描述里写明哪种装法、卡在哪，不为它另改写法。
+4. 全仓搜一遍 recipe、`references/<type>.md`、`shared` 的残留提法，改掉或确认是历史段落。
+
+## 验收标准
+- [ ] 在任一入口 skill 正文里加一行 `y = 150`，`npm test` 红，报出这一行；删掉后全绿
+- [ ] 6 个入口 skill 现状下扫描测试全绿
+- [ ] 标题字号在 `skills/` 里只出现在 `steps` 的语义参考一处
+- [ ] `CLAUDE.md`、README 不再提 `skills/shared` 或「type recipe 在 `references/<type>.md`」
+- [ ] `CHANGELOG.md` 的改动只在 Unreleased 节下
+- [ ] 三种装法的验证结果写进 PR 描述（每种：调到 / 没调到 + 卡在哪）
+- [ ] `npm test` 全绿
+
+## 选中的存量回归
+- `tests/tools.test.mjs`：同在 `tests/` 下读工具定义，新测试不能改动它的行为
