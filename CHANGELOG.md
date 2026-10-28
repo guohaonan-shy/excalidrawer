@@ -22,6 +22,13 @@ _plugin 0.1.1_
   second `excalidrawer` server — one that never started, since
   `npx -p excalidrawer` inside the `excalidrawer` package resolves the local
   package and finds no bin.
+- **The plugin MCP server starts inside an `excalidrawer` checkout.** All three
+  manifests now run `npx -y -p npm:excalidrawer@^0.6.0 -c excalidrawer-mcp`.
+  With the plain `excalidrawer@^0.6.0` spec, npx treated a cwd whose
+  `package.json` is `excalidrawer` at a matching version (this repo, or the
+  installed plugin directory) as already providing the package and failed with
+  `excalidrawer-mcp: command not found`; the `npm:` alias makes it fetch the
+  registry package instead.
 
 ## 0.6.0
 

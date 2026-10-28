@@ -9,7 +9,7 @@
   "mcpServers": {
     "excalidrawer": {
       "command": "npx",
-      "args": ["-y", "-p", "excalidrawer@^0.6.0", "-c", "excalidrawer-mcp"]
+      "args": ["-y", "-p", "npm:excalidrawer@^0.6.0", "-c", "excalidrawer-mcp"]
     }
   },
   "homepage": "https://github.com/guohaonan-shy/excalidrawer",
