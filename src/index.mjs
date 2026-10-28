@@ -58,5 +58,3 @@ export { validate } from "./validate.mjs";
 // Sugar translation: shorthand → raw elements (0.5.7+).
 export { desugar, SugarError } from "./sugar.mjs";
 
-// Built-in templates
-export { timeline, flowchart, architecture, sequence, tree } from "./templates/index.mjs";

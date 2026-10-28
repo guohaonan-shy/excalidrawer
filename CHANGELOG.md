@@ -4,7 +4,28 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
-## Unreleased
+## 0.6.0
+
+_engine 0.6.0 · plugin 0.1.0_
+
+The one breaking release planned for the 0.x line (see `docs/roadmap.md`):
+the template path is gone, and diagrams are composed from layout components by
+the entry skills. Plugin 0.1.0 re-pins its MCP server to `excalidrawer@^0.6.0`.
+
+### Removed (breaking)
+
+- **`excalidrawer generate -t <type>` and `excalidrawer types`.** Deprecated
+  since 0.5.7; both commands now exit with an error that points to `render`.
+  Compose the diagram with sugar or raw elements and render it — the entry
+  skills (`flowchart`, `timeline`, `architecture`, `sequence`, `tree`, …)
+  describe how.
+- **The built-in templates as package API.** The `excalidrawer/templates`
+  subpath export and the `timeline` / `flowchart` / `architecture` /
+  `sequence` / `tree` exports of the main entry are removed, and
+  `src/templates/` is gone. The `tree` *layout helper* stays (exported as
+  `treeLayout`, and as `tree` in `compute_layout`). Four of the old templates
+  live on in `examples/templates/`, only to draw the matching README figures;
+  they are not in the npm tarball.
 
 ### Added
 

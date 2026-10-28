@@ -1,7 +1,7 @@
 {
   "name": "excalidrawer",
-  "version": "0.0.6",
-  "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence, comparison, tree. Generate hand-drawn-style diagrams and export to .excalidraw / SVG / PNG — no browser.",
+  "version": "0.1.0",
+  "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence, comparison, tree, state machine, pyramid / funnel, bar / line chart. Generate hand-drawn-style diagrams and export to .excalidraw / SVG / PNG / WebP — no browser.",
   "author": {
     "name": "guohaonan-shy",
     "email": "guohaonan980421@gmail.com",
@@ -19,15 +19,20 @@
     "sequence",
     "comparison",
     "tree",
+    "state-machine",
+    "pyramid",
+    "funnel",
+    "chart",
     "svg",
     "png",
+    "webp",
     "skills"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Excalidrawer",
-    "shortDescription": "Code-first Excalidraw diagrams: flowchart, timeline, architecture, sequence, comparison, tree",
-    "longDescription": "Generate hand-drawn-style Excalidraw diagrams from code or natural-language intent and export to .excalidraw / SVG / PNG — no browser. Covers flowcharts, timelines, architecture diagrams, sequence diagrams, left-vs-right comparisons, and tidy trees via dedicated skills sharing one conventions base. Requires the excalidrawer-mcp server.",
+    "shortDescription": "Code-first Excalidraw diagrams: flowchart, timeline, architecture, sequence, comparison, tree, state machine, pyramid / funnel, bar / line chart",
+    "longDescription": "Generate hand-drawn-style Excalidraw diagrams from code or natural-language intent and export to .excalidraw / SVG / PNG / WebP — no browser. Covers flowcharts, timelines, architecture diagrams, sequence diagrams, left-vs-right comparisons, tidy trees, state machines, pyramids and funnels, and bar / line charts via dedicated entry skills sharing one step skill. Requires the excalidrawer-mcp server.",
     "developerName": "guohaonan-shy",
     "category": "Productivity",
     "capabilities": [

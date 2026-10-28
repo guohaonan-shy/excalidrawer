@@ -1,6 +1,6 @@
 {
   "name": "excalidrawer",
-  "version": "0.5.15",
+  "version": "0.6.0",
   "description": "Code-first Excalidraw diagram generation with SVG/PNG export, CLI and MCP server",
   "type": "module",
   "main": "./src/index.mjs",
@@ -9,8 +9,7 @@
     "excalidrawer-mcp": "src/mcp.mjs"
   },
   "exports": {
-    ".": "./src/index.mjs",
-    "./templates": "./src/templates/index.mjs"
+    ".": "./src/index.mjs"
   },
   "scripts": {
     "test": "node --test tests/*.test.mjs",

@@ -14,7 +14,8 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
-import { tree, excalidraw, toSvg, toPng, validate, autoRegisterCjkFont } from "../src/index.mjs";
+import { excalidraw, toSvg, toPng, validate, autoRegisterCjkFont } from "../src/index.mjs";
+import { tree } from "./templates/index.mjs";
 
 export const stories = {
   title: "报告页音频预取与共享缓存 · 用户故事",

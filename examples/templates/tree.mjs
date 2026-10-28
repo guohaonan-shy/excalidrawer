@@ -25,10 +25,10 @@
  *   - `color` on any node overrides the hue for it and its subtree
  */
 
-import { setSeed, box, rect, arrow, line, textEl, colors, excalidraw } from "../elements.mjs";
-import { toSvg, toPng } from "../export.mjs";
-import { estimateTextWidth } from "../text.mjs";
-import { tree as treeLayout } from "../layout.mjs";
+import { setSeed, box, rect, arrow, line, textEl, colors, excalidraw } from "../../src/elements.mjs";
+import { toSvg, toPng } from "../../src/export.mjs";
+import { estimateTextWidth } from "../../src/text.mjs";
+import { tree as treeLayout } from "../../src/layout.mjs";
 
 const PALETTE = {
   blue:   { fill: colors.blue,   tint: colors.bgBlue,   stroke: colors.strokeBlue },

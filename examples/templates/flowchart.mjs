@@ -20,9 +20,9 @@
  *   - Edges are drawn between layer positions
  */
 
-import { setSeed, box, diamondBox, arrow, textEl, rect, ellipse, colors, excalidraw } from "../elements.mjs";
-import { toSvg, toPng } from "../export.mjs";
-import { estimateTextWidth, wrapText, textHeight } from "../text.mjs";
+import { setSeed, box, diamondBox, arrow, textEl, rect, ellipse, colors, excalidraw } from "../../src/elements.mjs";
+import { toSvg, toPng } from "../../src/export.mjs";
+import { estimateTextWidth, wrapText, textHeight } from "../../src/text.mjs";
 
 const COLOR_CYCLE = [
   colors.blue,

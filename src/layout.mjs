@@ -8,7 +8,7 @@
 // Design intent:
 //   - Keep `excalidrawer` package as primitives + layout math + palette.
 //   - Diagram-kind opinions (flowchart layout, sequence rendering) live
-//     either in templates (built-in) or in skill-side recipes (downstream).
+//     in the entry skills (downstream), not in the package.
 //   - These helpers are the bridge: pure math, no styling decisions.
 // ============================================================================
 

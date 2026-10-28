@@ -10,9 +10,9 @@
  * }
  */
 
-import { setSeed, box, arrow, line, textEl, rect, colors, excalidraw } from "../elements.mjs";
-import { toSvg, toPng } from "../export.mjs";
-import { wrapText } from "../text.mjs";
+import { setSeed, box, arrow, line, textEl, rect, colors, excalidraw } from "../../src/elements.mjs";
+import { toSvg, toPng } from "../../src/export.mjs";
+import { wrapText } from "../../src/text.mjs";
 
 // Color rotation for items without explicit color
 const COLOR_CYCLE = [

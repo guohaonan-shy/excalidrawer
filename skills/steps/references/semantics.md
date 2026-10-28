@@ -100,8 +100,6 @@
 
 **默认颜色循环**（不指定时）：`yellow → blue → green → purple → red → orange`，跳过 `gray`（只在显式指定时用）。timeline 的 items、sequence 的 actors 默认按这个顺序上色。architecture 的 sections 不走默认循环：各层按 [`architecture` 入口 skill](../../architecture/SKILL.md) 的分层配色表上色（表现层蓝、网关 / 中间件紫、业务绿、数据黄、辅助灰或橙）。
 
-**模板 CLI**（`excalidrawer generate`）的节点级 `color` 字段同样接受这些关键字，也接受 `#rrggbb`，但十六进制会失去 palette 一致性，一般用关键字。
-
 ## 7. 从描述到参数：速查
 
 | 用户这么说 | 组件 + 参数 |

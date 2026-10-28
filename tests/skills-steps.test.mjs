@@ -213,11 +213,11 @@ test("CLAUDE.md and README.md describe the two layers: no skills/shared, no per-
   }
 });
 
-test("CHANGELOG.md: this change is recorded under Unreleased only", () => {
+test("CHANGELOG.md: the skill split is recorded in the 0.6.0 section", () => {
   const text = read(join(ROOT, "CHANGELOG.md"));
-  const unreleased = text.split(/^## /m).find((s) => s.startsWith("Unreleased"));
-  assert.ok(unreleased, "no Unreleased section");
-  assert.match(unreleased, /steps/);
-  assert.match(unreleased, /entry skill/i);
-  assert.ok(!/skills\/shared/.test(unreleased), "Unreleased still points at skills/shared");
+  const section = text.split(/^## /m).find((s) => s.startsWith("0.6.0"));
+  assert.ok(section, "no 0.6.0 section");
+  assert.match(section, /steps/);
+  assert.match(section, /entry skill/i);
+  assert.ok(!/skills\/shared/.test(section), "0.6.0 still points at skills/shared");
 });

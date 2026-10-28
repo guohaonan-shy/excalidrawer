@@ -24,10 +24,10 @@
  *   - Optional connections drawn between items across sections
  */
 
-import { setSeed, box, arrow, textEl, rect, colors, excalidraw } from "../elements.mjs";
-import { toSvg, toPng } from "../export.mjs";
-import { estimateTextWidth, wrapText, lineCount, textHeight } from "../text.mjs";
-import { readableOn } from "../layout.mjs";
+import { setSeed, box, arrow, textEl, rect, colors, excalidraw } from "../../src/elements.mjs";
+import { toSvg, toPng } from "../../src/export.mjs";
+import { estimateTextWidth, wrapText, lineCount, textHeight } from "../../src/text.mjs";
+import { readableOn } from "../../src/layout.mjs";
 
 // Map color name strings to actual color values
 const COLOR_MAP = {

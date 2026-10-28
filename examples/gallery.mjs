@@ -1,7 +1,7 @@
 /**
  * README gallery — one figure per diagram type, rendered into docs/gallery/.
  *
- * Deterministic (every template seeds itself), so re-running only changes the
+ * Deterministic (every template in ./templates/ seeds itself), so re-running only changes the
  * images when the engine changes. Regenerate before a release:
  *
  *   node examples/gallery.mjs
@@ -12,9 +12,9 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import {
-  flowchart, architecture, timeline, tree, equalize,
-  render, excalidraw, toPng, validate, autoRegisterCjkFont,
+  equalize, render, excalidraw, toPng, validate, autoRegisterCjkFont,
 } from "../src/index.mjs";
+import { flowchart, architecture, timeline, tree } from "./templates/index.mjs";
 import { coverage } from "./comparison-figures.mjs";
 import { storiesEn, skills, skillsLR } from "./tree-figures.mjs";
 import { orderStates } from "./state-machine-figures.mjs";
@@ -28,7 +28,7 @@ mkdirSync(outDir, { recursive: true });
 // Sequence: the browser-cache read/write flow from a real spec (report audio
 // prefetch & shared cache). Built from sugar the way the `sequence` entry skill
 // describes it — header row, dashed lifelines, phase bands, one labelled
-// message per row — rather than with the built-in template.
+// message per row — rather than with the old sequence template.
 function cacheSequence() {
   const actors = [
     ["up", "Upload pipeline", "yellow"],

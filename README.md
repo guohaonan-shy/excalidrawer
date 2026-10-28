@@ -39,8 +39,9 @@ Nine diagram types, each with its own agent skill. Click a figure for full size.
 </tr>
 </table>
 
-*New in 0.5.14: the tree type, splitting left → right or top → down. Each parent
-sits centered on its own children, and connectors never cross a box.*
+*New in 0.6.0: state machines, pyramids and funnels, bar and line charts, and a
+left-to-right data-stack overview as a fourth architecture layout — plus WebP
+output.*
 
 ## Why not just use Excalidraw directly?
 
@@ -317,15 +318,10 @@ Directions being explored, each tracked in its own design note under
 [`docs/`](docs/) (see [`docs/roadmap.md`](docs/roadmap.md) for the versioned
 engineering roadmap):
 
-- New diagram types (state machine, pyramid/funnel, bar/line charts,
-  high-level data-stack) + a public example gallery —
+- A public example gallery —
   [`docs/diagram-types.md`](docs/diagram-types.md)
-- WebP output + scenario-aware format selection —
-  [`docs/output-formats.md`](docs/output-formats.md)
 - Mermaid import — [`docs/mermaid-import.md`](docs/mermaid-import.md)
 - draw.io import — [`docs/drawio-import.md`](docs/drawio-import.md)
-- A shared component layer for composite layouts —
-  [`docs/component-layer.md`](docs/component-layer.md)
 - Hand-drawn-style icon primitives —
   [`docs/icon-library.md`](docs/icon-library.md)
 - Agent-runtime ecosystem integration (Pi, DeepSeek, Hermes) —

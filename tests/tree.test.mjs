@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { treeLayout, tree, validate, wrapText } from "../src/index.mjs";
+import { treeLayout, validate, wrapText } from "../src/index.mjs";
+import { tree } from "../examples/templates/index.mjs";
 import { getTool } from "../src/tools/index.mjs";
 
 const sample = {
