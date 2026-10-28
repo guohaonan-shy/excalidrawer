@@ -15,14 +15,14 @@
 
 ## 验收标准
 
-- [ ] 横排两框、按 id 连箭头、`text: "失败重跑"`：desugar 后标签框宽 ≥ 56，`validate` 不报 TEXT_OVERFLOW_X（新测试，先红后绿）
-- [ ] 竖排两框、按 id 连箭头、`text: "失败后重新排队"`：标签框整个在线的一侧，框宽 ≥ 文字估宽（98），所以居中的文字不越过线（新测试）
-- [ ] 英文标签 `"Retry fail"`：不报警，框宽等于文字估宽与 28 取大（回归测试）
-- [ ] L4（自己给 points）的箭头带中文 `text` 也按实际字宽定框（新测试或同一测试覆盖）
-- [ ] 照新写的 clearance 说明算上面「中间框高 140」那个例子，填 110 渲染后 Layer A 干净；填 50 报 ARROW_CROSSES_SHAPE（手工核，结果写进 PR 描述）
-- [ ] Layer B 第 1 条读得出孤词判 FAIL 和修法；条数仍是五条
-- [ ] CHANGELOG 的 Unreleased 下有这三条，没有新版本号
-- [ ] `npm test` 全过
+- [x] 横排两框、按 id 连箭头、`text: "失败重跑"`：desugar 后标签框宽 ≥ 56，`validate` 不报 TEXT_OVERFLOW_X（新测试，先红后绿）
+- [x] 竖排两框、按 id 连箭头、`text: "失败后重新排队"`：标签框整个在线的一侧，框宽 ≥ 文字估宽（98），所以居中的文字不越过线（新测试）
+- [x] 英文标签 `"Retry fail"`：不报警，框宽等于文字估宽与 28 取大（回归测试）
+- [x] L4（自己给 points）的箭头带中文 `text` 也按实际字宽定框（新测试或同一测试覆盖）
+- [x] 照新写的 clearance 说明算上面「中间框高 140」那个例子，填 110 渲染后 Layer A 干净；填 50 报 ARROW_CROSSES_SHAPE（手工核，结果写进 PR 描述）
+- [x] Layer B 第 1 条读得出孤词判 FAIL 和修法；条数仍是五条
+- [x] CHANGELOG 的 Unreleased 下有这三条，没有新版本号
+- [x] `npm test` 全过
 
 ## 选中的存量回归
 
