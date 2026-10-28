@@ -242,7 +242,7 @@ rubric — one explicit PASS/FAIL per line.** When `formats` produced no bitmap
 (only `svg` / `excalidraw`), also export a `png` just for this check (it can stay out of the
 files you report):
 
-1. **Labels** — every label sits centered and fully inside its shape; none clipped or touching a border.
+1. **Labels** — every label sits centered and fully inside its shape; none clipped or touching a border. A label that wraps so its last line is a single word also FAILS: shorten the sentence, or break it yourself with `\n` at a sensible place so the lines come out close in length.
 2. **Arrows** — each connects the correct two nodes, points the right way, and no line visually plows through an unrelated box or another line.
 3. **Spacing** — rows/columns are aligned; gaps are even; nothing is cramped or lost in whitespace.
 4. **Canvas** — nothing is cut off at the edges; the diagram is balanced, not crowded to one side.

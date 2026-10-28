@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { desugar, SugarError } from "../src/sugar.mjs";
+import { validate } from "../src/validate.mjs";
+import { estimateTextWidth } from "../src/text.mjs";
 
 // --- shape sugar -----------------------------------------------------------
 
@@ -288,4 +290,68 @@ test("arrow: bad fromSide throws SugarError", () => {
 
 test("arrow L4: points without at raises an issue", () => {
   assert.throws(() => desugar([{ shape: "arrow", id: "x", points: [[0, 0], [50, 0]] }]), /needs "at"/);
+});
+
+// --- arrow label box width follows the real text width ----------------------
+
+const rectPair = (b) => [
+  { shape: "rect", id: "a", at: [40, 40], size: [160, 60], text: "A" },
+  { shape: "rect", id: "b", at: b, size: [160, 60], text: "B" },
+];
+
+test("arrow label: CJK label box is as wide as its text, no TEXT_OVERFLOW_X", () => {
+  const raw = desugar([
+    ...rectPair([400, 40]),
+    { shape: "arrow", id: "e", from: "a", to: "b", text: "失败重跑" },
+  ]);
+  const label = raw.find((r) => r.id === "e-t");
+  assert.ok(label.width >= 56, `4 CJK chars @14px need >= 56px, got ${label.width}`);
+  assert.equal(validate(raw).filter((w) => w.code === "TEXT_OVERFLOW_X").length, 0);
+});
+
+test("arrow label: vertical segment keeps the whole box on one side of the line", () => {
+  const raw = desugar([
+    ...rectPair([40, 300]),
+    { shape: "arrow", id: "e", from: "a", to: "b", text: "失败后重新排队" },
+  ]);
+  const arrow = raw.find((r) => r.id === "e");
+  const label = raw.find((r) => r.id === "e-t");
+  assert.ok(label.width >= 98, `7 CJK chars @14px need >= 98px, got ${label.width}`);
+  const lineX = arrow.x + arrow.points[0][0];
+  assert.ok(arrow.points.every(([px]) => arrow.x + px === lineX), "line is vertical");
+  assert.ok(label.x >= lineX || label.x + label.width <= lineX, "box does not straddle the line");
+  // centered text spans box center +- 98/2 (7 CJK chars @14px); it must stay off the line
+  const cx = label.x + label.width / 2;
+  assert.ok(cx - 49 >= lineX || cx + 49 <= lineX, "centered text does not cross the line");
+  assert.equal(validate(raw).filter((w) => w.code === "TEXT_OVERFLOW_X").length, 0);
+});
+
+test("arrow label: English label width is the text estimate (floor 28), no warnings", () => {
+  const raw = desugar([
+    ...rectPair([400, 40]),
+    { shape: "arrow", id: "e", from: "a", to: "b", text: "Retry fail" },
+    { shape: "arrow", id: "f", at: [40, 200], points: [[0, 0], [200, 0]], text: "ok" },
+  ]);
+  const label = raw.find((r) => r.id === "e-t");
+  assert.equal(label.width, Math.max(28, estimateTextWidth("Retry fail", 14)));
+  assert.equal(raw.find((r) => r.id === "f-t").width, 28);
+  assert.equal(validate(raw).length, 0);
+});
+
+test("arrow label: multi-line label takes the widest line", () => {
+  const raw = desugar([
+    ...rectPair([400, 40]),
+    { shape: "arrow", id: "e", from: "a", to: "b", text: "短\n失败后重新排队" },
+  ]);
+  assert.ok(raw.find((r) => r.id === "e-t").width >= 98);
+});
+
+test("arrow L4: explicit points with a CJK label also size the box by text width", () => {
+  const raw = desugar([
+    { shape: "arrow", id: "x", at: [40, 40], points: [[0, 0], [300, 0]], text: "失败重跑" },
+    { shape: "line", id: "y", at: [40, 200], points: [[0, 0], [0, 200]], text: "失败后重新排队" },
+  ]);
+  assert.ok(raw.find((r) => r.id === "x-t").width >= 56);
+  assert.ok(raw.find((r) => r.id === "y-t").width >= 98);
+  assert.equal(validate(raw).filter((w) => w.code === "TEXT_OVERFLOW_X").length, 0);
 });
