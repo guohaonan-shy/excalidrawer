@@ -44,7 +44,7 @@ import {
   ARROWHEADS, ARROW_TYPES, STROKE_STYLES, LINE_EDGES, strokeWidths,
 } from "./elements.mjs";
 import { edgePoint, routeU, labelAnchor } from "./layout.mjs";
-import { fitBoundText } from "./text.mjs";
+import { fitBoundText, estimateTextWidth } from "./text.mjs";
 
 export class SugarError extends Error {
   constructor(issues) {
@@ -420,7 +420,8 @@ function anchorAtT(absPoints, t) {
  */
 function pushLabel(raw, arrowId, text, absPoints, labelT) {
   const a = labelT == null ? labelAnchor(absPoints) : anchorAtT(absPoints, labelT);
-  const w = Math.max(28, text.length * 9);
+  // Same ruler as node text, template edge labels and Layer A: widest line wins.
+  const w = Math.max(28, ...String(text).split("\n").map((l) => estimateTextWidth(l, 14)));
   const h = 18;
   let x;
   let y;

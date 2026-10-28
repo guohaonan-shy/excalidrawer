@@ -92,6 +92,30 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 - **Sequence diagrams size their step column from the message.** The steps
   reference now says how a message cell's width follows the distance it spans
   and how the actor spacing is derived from the longest message.
+- **`via` detours: the steps connectors reference says where `clearance` is
+  measured from.** From the one of the two connection points that is further
+  in the detour direction (the connection point on the `fromSide` / `toSide`
+  edge, not the box's outer edge); default 60; only the two ends are looked
+  at, so a box along the way that sticks out further needs its extra distance
+  added. A worked example (middle box 140 tall: `clearance: 50` crosses it,
+  `110` leaves 30) is included, and the `routeU` helper line points to it.
+- **Quality gate Layer B counts a lone last-line word as a FAIL.** In
+  `skills/steps/SKILL.md`, the Labels item now also fails a label that wraps
+  with a single word on its last line, and says how to fix it (shorten it, or
+  break the line yourself so the lines come out close in length). Still five
+  items.
+
+### Fixed
+
+- **Arrow and line `text` labels are sized by their real text width.** The
+  label box was `characters × 9` (min 28), which is too narrow for CJK (one
+  character is about the font size): `失败重跑` raised a false
+  `TEXT_OVERFLOW_X`, and beside a vertical segment, where the box sits on one
+  side of the line, the centered text spilled over onto the line. The box now
+  uses the same width estimate as node text, the flowchart template's edge
+  labels and the Layer A check (widest line when the label has `\n`, still at
+  least 28, font 14, height 18). Applies to arrows and lines addressed by id
+  and by explicit `points`; English labels stay about the same width.
 
 ## 0.5.15
 
