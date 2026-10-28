@@ -1,6 +1,6 @@
 ---
 type: spec
-status: 实现中
+status: 完成
 tags: [engine, skills, connector-and-gate-fixes]
 summary: 写清绕行 clearance 的量法、Layer B 加孤词一项、箭头标签按实际字宽估
 related: ["[[skill-layers]]", "[[layout-components]]"]
