@@ -156,8 +156,8 @@ or `%APPDATA%\Claude\claude_desktop_config.json` (Windows), then restart the app
 Only if you want the two MCP tools **without** the skills. The recommended
 Codex path is [the plugin](#agent-plugin-claude-code--codex-recommended), which
 brings the skills and this MCP server together — a bare `codex mcp add` gives
-you `render_diagram` / `compute_layout` but none of the recipes (palette
-conventions, back-edge routing, swimlane parameters, quality gates).
+you `render_diagram` / `compute_layout` but none of the skills' guidance (palette
+conventions, back-edge routing, layout components, quality gates).
 
 ```bash
 codex mcp add excalidrawer -- npx -y -p excalidrawer@latest -c excalidrawer-mcp
@@ -165,8 +165,8 @@ codex mcp add excalidrawer -- npx -y -p excalidrawer@latest -c excalidrawer-mcp
 
 ## Agent Skills
 
-The [`skills/`](skills/) directory holds one skill per diagram type plus a
-shared base they all read first. They ship as part of the agent plugin above —
+The [`skills/`](skills/) directory holds two layers: one **entry skill** per diagram type
+(the one you invoke), and a **step skill** `steps` they call when they reach a step. They ship as part of the agent plugin above —
 Claude Code and Codex both install them.
 
 | Skill | Use for | Trigger keywords |
@@ -177,14 +177,25 @@ Claude Code and Codex both install them.
 | `sequence` | Sequence diagrams, multi-actor interactions, call chains | sequence diagram, 时序图, interaction, handshake, OAuth |
 | `comparison` | Left-vs-right comparisons, A vs B, before/after, trade-offs | compare, A vs B, 对比图, side-by-side, before and after |
 | `tree` | Hierarchies from one root — taxonomies, org charts, user-story maps; left→right or top→down | tree, 树状图, hierarchy, org chart, 层级图, 分类树 |
-| `shared` | Common base — conventions, sugar schema, palette, output rules (read first, not invoked directly) | — |
+| `steps` | Step skill — how to ask, which component to use and how to fill it (one reference per component), output rules, quality gate (called by the entry skills, not invoked directly) | — |
 
-Each type skill declares a prerequisite — *read `../shared/SKILL.md`
-first* — so the cross-cutting rules live in one place instead of being copied
-into every type skill. Given a request, a type skill clarifies intent with a couple of
-`AskUserQuestion` prompts, reads its recipe under `references/`, composes sugar
-elements, then calls the MCP server's `render_diagram` tool to emit
-`.excalidraw` / `.svg` / `.png` / `.webp`.
+An entry skill is a single `SKILL.md` in plain language: what to ask, what a
+good diagram of that type looks like, and how it usually goes wrong. It holds
+no coordinates, sizes, tool calls or code (a test,
+[`tests/skills-entry.test.mjs`](tests/skills-entry.test.mjs), keeps it that
+way). When it reaches a step that needs mechanics, it calls `steps` (in Claude
+Code, the Skill tool with `excalidrawer:steps`; other hosts read
+`../steps/SKILL.md`) and names the one section to read - `clarify`, `组件`,
+`出图` - so the cross-cutting rules and each component's usage live in one place
+instead of being copied into every entry skill. Given a request, an entry skill
+asks a couple of `AskUserQuestion` prompts (skipping the ones about what to draw if your description already
+lists everything in the diagram), composes the diagram with the component
+references in [`skills/steps/references/`](skills/steps/references/), then calls
+the MCP server's `render_diagram` tool to emit `.excalidraw` / `.svg` / `.png` /
+`.webp`.
+
+To add a diagram type, follow the checklist in the `新增一种图类型` section of
+[`skills/steps/SKILL.md`](skills/steps/SKILL.md).
 
 > All skills call the `excalidrawer-mcp` server. The plugin install above ships
 > a manifest that registers it automatically; without the plugin, wire up the
@@ -231,9 +242,12 @@ writeFileSync("diagram.svg", outputs.svg);
 writeFileSync("diagram.png", outputs.png);
 ```
 
-The full sugar schema (shapes, arrows, layout helpers, `fill` / `stroke` /
-`textColor`) is documented in
-[`skills/shared/references/sugar.md`](skills/shared/references/sugar.md).
+The sugar schema is documented per component under
+[`skills/steps/references/`](skills/steps/references/): shapes and text
+(`fill` / `stroke` / `textColor`) in
+[`shapes.md`](skills/steps/references/shapes.md), arrows and lines in
+[`connectors.md`](skills/steps/references/connectors.md), and one file for each
+layout helper.
 
 ## API Reference
 
@@ -259,8 +273,8 @@ The full sugar schema (shapes, arrows, layout helpers, `fill` / `stroke` /
 | `legend` | Legend geometry — a sample slot and a text slot per row plus the block size, placeable in a corner of the diagram's bounds (inside or outside). Coordinates only; you draw the swatch or line. |
 | `contrastText`, `readableOn` | Pick a legible label color for a given fill (3:1 WCAG floor). |
 
-These back the `compute_layout` MCP tool — see
-[`skills/shared/references/sugar.md`](skills/shared/references/sugar.md) for usage.
+These back the `compute_layout` MCP tool — see the component references in
+[`skills/steps/references/`](skills/steps/references/) for usage.
 
 ### Output
 

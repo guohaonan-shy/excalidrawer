@@ -1,32 +1,73 @@
 ---
 name: timeline
-description: Generate a hand-drawn-style Excalidraw timeline from code and export to .excalidraw / SVG / PNG / WebP — no browser. For timelines, roadmaps, project milestones, release phases, Q1–Q4 plans. Triggers on draw a timeline / roadmap / milestones / project phases. Flow detect → clarify milestones & axis style → read references/timeline.md → compose sugar → render_diagram. 中文触发词：时间线 / 路线图 / roadmap / 里程碑 / 项目阶段 / 发布计划 / Q1Q2Q3Q4。
+description: Generate a hand-drawn-style Excalidraw timeline from code and export to .excalidraw / SVG / PNG / WebP — no browser. For timelines, roadmaps, project milestones, release phases, Q1–Q4 plans. Triggers on draw a timeline / roadmap / milestones / project phases. 中文触发词：时间线 / 路线图 / roadmap / 里程碑 / 项目阶段 / 发布计划 / Q1Q2Q3Q4。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
 # excalidrawer timeline
 
-## 前置条件（必做）
+时间线：一条轴上按先后串起几个里程碑，读者一眼看出顺序、每个节点在什么时候、是什么。四步走：问清楚 → 构图 → 出图 → 对照「常见画坏法」自查。
 
-先用 Read 工具读取 [`../shared/SKILL.md`](../shared/SKILL.md)
-——它定义了所有图表类型通用的 MCP 前置检查 / CLI fallback、视觉语义（什么意思用什么组件/线型/配色）、sugar schema、
-文件命名、输出语言、导出格式参考、迭代规则。**缺一不可**，本 skill 只补充时间线专属的
-clarify 问题与 layout recipe。
+## 1. 问清楚
 
-## 1. Clarify（必）
+用户的描述已经能列全这张图的全部内容（每个里程碑的时间和标题）就不问，也不去读提问规则。轴和圆点的样子是怎么画的选择，从内容推不出来，用户没说的仍要问，选项在下面。否则先看提问的通用规则（一轮问几题、什么时候用选择题）：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。这一步只读这一节。
 
-用 **AskUserQuestion** 问 load-bearing 问题；导出格式见 shared §6 的格式参考。
-**用户已粘完整里程碑列表时跳过结构性提问。**
+要问的两件事：
 
-1. **里程碑列表** — 自由文本，每条给 `time`（日期/季度/阶段）+ `label`（短标题）+ `desc`（可选一行）
-2. **轴 / 圆点风格** — 单选：`居中穿珠`（圆点居中、轴在珠处断开，最干净，**推荐**） / `lollipop`（圆点切于轴）
-- 可选追问：时间跨度不均时是否按真实跨度拉开 x 距离
+1. **里程碑列表**：自由文本。每条要有时间（日期、季度或阶段名）和一个短标题，一行描述可有可无。
+2. **轴和圆点的样子**：单选。
+   - 居中穿珠：圆点正坐在轴上，轴在圆点处断开，最干净，**推荐**。
+   - lollipop：圆点切在轴的一侧，轴是一整条。
 
-## 2. 读 recipe
+可选追问：各个时间点相隔很不均匀时（比如一月、三月、八月、九月），要不要按真实跨度把间距拉开。
 
-`Read references/timeline.md` —— 拿到坐标尺寸、两种轴风格的画法、label 三行排布、不均匀间距处理。
+导出格式不用先问：对话里读得出图要去哪就直接定，读不出来才在出图时问一句（规则在 `steps` 的『出图』里）。
 
-## 3. 拼 sugar + 渲染
+用户选了哪一项，对应怎么画，写在 `steps` 里 axis 那份参考中，这里不重复。
 
-按 recipe 拼 sugar 数组（`chain` 排里程碑 x）。渲染顺序与 render 调用见 shared §2 / §7：
-`output: "./timeline-<name>"`，formats 见 shared §6。迭代见 recipe 末尾「Common pitfalls」与 shared §8。
+## 2. 构图
+
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。这一步只读这一节，再读下面用到的组件各自那一份参考。
+
+**一张好的时间线**：
+
+- 一根横轴，时间从左向右流，末端带箭头。里程碑 3–8 个最舒展；再多就考虑拆成两张，或按阶段分组。
+- 每个里程碑由一个圆点和三行文字组成：时间、标题、描述。时间最先被看见，标题最醒目，描述是灰色小字，补一句说明，一行以内，约 20 个字封顶。
+- 文字块在轴的上下两侧交替出现，相邻两个不挤在同一侧，轴上方、下方看上去重量差不多。
+- 有标题，并且标题点明这张图的轴，比如「2026 product roadmap」。标题和上侧第一个文字块之间留出明显的空隙。
+
+**几种变体**：
+
+- 居中穿珠（默认）：适合大多数路线图、发布计划。圆点干净，轴线不穿过它。
+- lollipop：圆点贴在轴的一侧，朝向各自文字所在的那一侧；想要更“图示化”、更像棒棒糖的外观时用。
+- 间距按真实时间拉开：适合时间点本身不均匀、读者关心“隔了多久”的内容（如项目回顾）；等间距适合只关心先后顺序的路线图。
+
+**用到的组件，各自在这里画出什么效果**：
+
+- **axis**：整条时间轴。给出每个里程碑的位置、在圆点处断开的轴线段、以及文字应摆的一侧；按时间取值时位置按比例拉开。圆点由你按里程碑的颜色画在这些位置上。
+- **stack**：每个里程碑的三行文字竖着排成一块，以里程碑为中心；同一侧的各块等高，这样整排文字对齐、与轴的距离一致。
+- **形状与文字**：圆点和三行文字本身。
+- **legend**：描述里放不下的信息（比如“空心 = 计划中”）收进图例，而不是把描述写长。图例最多三行。
+
+**配色**：
+
+- 相邻的里程碑用不同的颜色，按蓝、绿、黄、紫、红、橙、灰的顺序轮换，超过一轮再从头来。
+- 每个里程碑的时间文字与它的圆点同色，成为视觉锚点；标题保持默认墨色，描述用灰色。
+- 黄色的时间文字压在白底上对比不够，遇到黄色里程碑，时间文字换成默认墨色（橙色也不够深）。
+
+## 3. 出图
+
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』。这一步只读这一节。文件名前缀是 timeline；导出格式、质量关、迭代都在那一节。
+
+## 4. 常见画坏法
+
+| 画坏了长什么样 | 为什么 | 回到哪一步改 |
+|---|---|---|
+| 同一侧的文字块高低不齐，整排参差 | 某一条描述特别长，撑高了自己那一块 | 构图：同一侧的文字块排成等高 |
+| 轴线穿过圆点，圆点像被一根线串烂了 | 用了一整条贯穿的箭头；箭头总是画在圆点上面 | 构图：用 axis 给出的分段，别手画一整条 |
+| 相邻两个里程碑的文字重叠 | 间距不够容纳标题和描述 | 构图：拉开间距；时间不均匀时按时间取值 |
+| 描述折成两行，压到邻居的文字 | 描述太长 | 问清楚或构图：缩短到一行；细节放进图例 |
+| 所有里程碑一个颜色，糊成一片 | 没有轮换配色 | 构图：按上面的顺序轮换 |
+| 标题紧贴着上侧第一个文字块 | 轴放得太靠上 | 构图：把轴往下放，给上侧文字块腾出高度 |
+| 黄色里程碑的时间文字看不清，出图时报对比度警告 | 黄字压白底对比不足 | 构图：该里程碑的时间文字改用默认墨色 |
+| 出图后质量关没过 | 以上任一条没排掉 | 按 `steps`『出图』里的两层质量关逐条修，再出一遍 |

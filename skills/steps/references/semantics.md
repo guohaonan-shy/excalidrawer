@@ -1,13 +1,13 @@
 # 视觉语义：意思 → 组件 + 参数
 
-[`sugar.md`](sugar.md) 回答"有哪些组件、参数怎么写"；本文件回答"**这个意思该选哪个组件、传什么参数**"。
+各组件的参考（[`SKILL.md`](../SKILL.md#组件) 的「组件」表列出：形状、连线、stack、panel……）回答"有哪些组件、参数怎么写"；本文件回答"**这个意思该选哪个组件、传什么参数**"，以及全图共用的值（§9）。
 输入是用户的自然语言和上下文（"A 异步通知 B"、"这一步是可选的"），输出是组件选择和样式参数。
 
-各图表 recipe 只写**和这里不同**的约定（比如 sequence 把"虚线"收窄成"响应"），其余一律按本文件。
+入口 skill 只写**和这里不同**的约定（比如 sequence 把"虚线"收窄成"响应"），其余一律按本文件。
 
 ## 0. 优先级与总原则
 
-**优先级（高 → 低）：** 用户明确要求 → recipe 的特殊约定 → 本文件的通用规则 → 组件默认值。
+**优先级（高 → 低）：** 用户明确要求 → 入口 skill 的特殊约定 → 本文件的通用规则 → 组件默认值。
 
 四条总原则，每张图都适用：
 
@@ -98,7 +98,7 @@
 - **一张图不超过 4 种颜色。** 超过会显得花。
 - **连线默认墨色。** 连线上色只在颜色承载含义时（按服务着色、区分异步调用）才用，否则会和节点颜色抢。
 
-**默认颜色循环**（不指定时）：`yellow → blue → green → purple → red → orange`，跳过 `gray`（只在显式指定时用）。timeline 的 items、sequence 的 actors、architecture 的 sections 默认按这个顺序上色。
+**默认颜色循环**（不指定时）：`yellow → blue → green → purple → red → orange`，跳过 `gray`（只在显式指定时用）。timeline 的 items、sequence 的 actors 默认按这个顺序上色。architecture 的 sections 不走默认循环：各层按 [`architecture` 入口 skill](../../architecture/SKILL.md) 的分层配色表上色（表现层蓝、网关 / 中间件紫、业务绿、数据黄、辅助灰或橙）。
 
 **模板 CLI**（`excalidrawer generate`）的节点级 `color` 字段同样接受这些关键字，也接受 `#rrggbb`，但十六进制会失去 palette 一致性，一般用关键字。
 
@@ -127,18 +127,23 @@
 
 ## 8. 图例
 
-用了自定义含义（不是请求/响应这类通用约定）时，在图的右下角或标题下方加图例：每行一个短样本线 + 一个 `text`。
+用了自定义含义（不是请求/响应这类通用约定）时，在图的右下角或标题下方加图例：每行一个短样本 + 一个 `text`。
 
-不要手算坐标。用 `compute_layout` 的 `legend`：给它每行的文字和图的范围，它返回每行的样本槽、文字槽和整块尺寸。样本画成什么由你按本文件的语义定。
-
-```js
-// compute_layout { helper: "legend", args: { items: [{ label: "planned (Q3)" }], bounds: { x: 0, y: 0, w: 800, h: 500 }, corner: "bottom-right" } }
-// → { items: [{ text, sample: { x, y, w, h }, label: { x, y, w, h, fontSize } }], ... }
-// 线型样本：从样本槽的左中画到右中
-{ shape: "line", at: [sample.x, sample.y + sample.h / 2], points: [[0, 0], [sample.w, 0]], strokeStyle: "dashed" },
-{ shape: "text", at: [label.x, label.y], size: [label.w, label.h], text: "planned (Q3)", fontSize: label.fontSize },
-```
-
-色块样本就用 `shape: "rect"` 填满样本槽。参数见 `sugar.md` 的 Geometry helpers。
+不要手算坐标，用 [`legend`](legend.md)：给它每行的文字和图的范围，它返回每行的 sample slot、label slot 和整块尺寸。样本画成什么由你按本文件的语义定：线型样本用对应的 `strokeStyle` / `strokeWidth` 画一小段线，色块样本填满 sample slot。怎么调、怎么画见 `legend.md`。
 
 图例 ≤ 3 行。需要更多行，说明这张图承载了太多种含义，先考虑拆图。
+
+## 9. 全图共用的值
+
+这些值每种图都一样，只在这里写一次；入口 skill 和各组件的参考不重复写。
+
+| 用在哪 | 值 |
+|---|---|
+| 标题字号 | 28，位置 y = 30，宽度取整张图的宽 |
+| 标题怎么画 | 一个 `text` 元素：`at: [内容左边缘, 30]`，`size: [整张图宽, 34]`，文字自动居中 |
+| 副标题（可选） | 字号 16，`stroke: "gray"`，y = 78 |
+| 正文（格子里的主文字） | 16，是形状、stack 的默认字号；格子很窄或一格行数多时降到 14，不再低 |
+| 次要文字（描述、图例、注释） | 13–14 |
+| 内容起点 | 有标题时，内容从 y ≈ 100 起（有副标题时 ≈ 150），别压住标题；上方要绕一条回边或标签时，起点再往下挪出那一块 |
+
+标题要点明这张图的轴：`"MySpeakingScore vs TOEFLAIR: coverage"` 比 `"MySpeakingScore vs TOEFLAIR"` 好。一张图一个标题、一个轴。

@@ -1,33 +1,76 @@
 ---
 name: sequence
-description: Generate a hand-drawn-style Excalidraw sequence diagram from code and export to .excalidraw / SVG / PNG / WebP — no browser. For sequence diagrams, multi-actor interactions, API call order, handshakes, OAuth / auth flows, request-response chains. Triggers on draw a sequence diagram / interaction flow / call order / handshake. Flow detect → clarify actors & messages & return-style → read references/sequence.md → compose sugar → render_diagram. 中文触发词：时序图 / 序列图 / 多角色交互 / API 调用顺序 / 握手 / OAuth 流程 / 请求响应。
+description: Generate a hand-drawn-style Excalidraw sequence diagram from code and export to .excalidraw / SVG / PNG / WebP — no browser. For sequence diagrams, multi-actor interactions, API call order, handshakes, OAuth / auth flows, request-response chains. Triggers on draw a sequence diagram / interaction flow / call order / handshake. 中文触发词：时序图 / 序列图 / 多角色交互 / API 调用顺序 / 握手 / OAuth 流程 / 请求响应。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
 # excalidrawer sequence
 
-## 前置条件（必做）
+时序图：几个参与者各自一条竖线，消息按先后从上往下排，读者一眼看出谁在什么时候对谁说了什么、谁回了话。四步走：问清楚 → 构图 → 出图 → 对照「常见画坏法」自查。
 
-先用 Read 工具读取 [`../shared/SKILL.md`](../shared/SKILL.md)
-——它定义了所有图表类型通用的 MCP 前置检查 / CLI fallback、视觉语义（什么意思用什么组件/线型/配色）、sugar schema、
-文件命名、输出语言、导出格式参考、迭代规则。**缺一不可**，本 skill 只补充时序图专属的
-clarify 问题与 layout recipe。
+## 1. 问清楚
 
-## 1. Clarify（必）
+用户的描述已经能列全这张图的全部内容（有哪些角色、每一步是谁对谁说了什么）就不问，也不去读提问规则。返回消息样式是怎么画的选择，从内容推不出来，用户没说的仍要问，选项在下面。否则先看提问的通用规则（一轮问几题、什么时候用选择题）：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。这一步只读这一节。
 
-用 **AskUserQuestion** 问 load-bearing 问题；导出格式见 shared §6 的格式参考。
-**用户已粘完整 actor + 步骤时跳过结构性提问。**
+要问的三件事：
 
-1. **参与角色 / 服务** — 自由文本（如 `User / Client / Auth Server`），按交互顺序定排列
-2. **核心交互序列** — 自由文本，能粘步骤更好
-3. **返回消息样式** — 单选：`按方向：左→右实线、右→左虚线`（默认） / `按语义：请求实线、响应虚线`（UML） / `全实线`
+1. **参与角色 / 服务**：自由文本，比如「用户 / 客户端 / 认证服务器」。它们从左到右的顺序按第一次开口的先后排。
+2. **核心交互序列**：自由文本，能直接贴出步骤更好。
+3. **返回消息样式**：单选。
+   - 按方向：向右的消息画实线，向左的画虚线，**默认**。
+   - 按语义（UML）：请求画实线，响应画虚线。
+   - 全实线：不区分请求和响应。
 
-## 2. 读 recipe
+导出格式不用先问：对话里读得出图要去哪就直接定，读不出来才在出图时问一句（规则在 `steps` 的『出图』里）。
 
-`Read references/sequence.md` —— 拿到坐标尺寸、actor row + lifeline 画法、message 箭头、
-返回样式三规则、跨 lifeline label 处理。
+用户选了哪一项，对应怎么画，写在 `steps` 里连线那份参考的「顺序图里的消息」中，这里不重复。
 
-## 3. 拼 sugar + 渲染
+## 2. 构图
 
-按 recipe 拼 sugar 数组（`chain` 排 actor x 与 step y）。渲染顺序与 render 调用见 shared §2 / §7：
-`output: "./sequence-<name>"`，formats 见 shared §6。迭代见 recipe 末尾「Common pitfalls」与 shared §8。
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。这一步只读这一节，再读下面用到的组件各自那一份参考。
+
+**一张好的时序图**：
+
+- 顶上一排角色表头，每个角色一格，名字写在里面；表头一样高，所有竖线从同一条基线往下放。
+- 每个角色一条细的灰色虚线竖线（生命线），从表头底下一直拉到最后一条消息之后，再多出一点尾巴。
+- 消息是两条竖线之间的一根水平箭头，文字写在箭头上；消息按发生先后自上而下，间距均匀。每条消息文字前带序号（「1. 登录请求」），用户之后说「改第 4 步」才对得上。
+- 响应用虚线，请求用实线，整张图只用一条规则。虚线在这里**只**表示响应；还要标异步，用颜色或在文字里写明，不要再引入第二种虚线。
+- 角色一多（四个以上）或消息文字长，竖线之间要放宽，让文字装得下，别冲进邻居的泳道。
+- 有标题，标题点明这张图讲的是哪条流程，比如「OAuth 授权码登录」。
+
+**几种变体**：
+
+- 简单往返（默认）：两三个角色、十来条以内的消息，一气呵成，不分段。
+- 分阶段：消息明显分成几个阶段（「写入」「读取」「失败处理」）时，在阶段之间放一条横贯所有竖线的灰色分段条，写上阶段名，读者先看阶段再看细节；竖线在分段条处断开，不从它上面划过。内容里有两个以上阶段就用，只有一段就别加。
+- 突出一部分消息：要强调「这次新增的」「出错路径」时，用颜色区分那几条消息，并加一小块图例说明颜色的意思；不要靠加粗或多种线型。强调色要选表头没用到的颜色（用户点名了颜色就照用户的，表头避开它），否则强调的消息和某个角色撞色。
+
+**用到的组件，各自在这里画出什么效果**：
+
+- **形状与文字**：角色表头、分段条、消息箭头。
+- **stack**：先把所有表头放进一次等高计算，得到统一的高度；再把全部步骤（含分段条）排成一列，得到每条消息的位置和这一列的总长，竖线按这个总长往下拉，步数多少都不会不够长。
+- **连线**：每条消息一根水平箭头，生命线是无方向的线；跨过中间角色的长消息，文字往发送方挪一点，躲开被它跨过的竖线；相邻两个角色之间的消息，文字居中即可。
+- **legend**：只在用了颜色或线型表达特殊含义时才放，三行以内。
+
+**配色**：
+
+- 表头按黄、蓝、紫、绿、橙、灰的顺序轮换，不同类的相邻角色颜色要有明显差别；红读作出错，不给表头，留给用户点名要强调的消息。角色超过四个时，同类的角色（比如两个内部模块、同属客户端的几个部分）同色，表示它们属于同一边，别一个角色一种颜色。
+- 箭头和竖线保持默认的墨色和灰色，让颜色留给表头和需要强调的消息。
+
+## 3. 出图
+
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』。这一步只读这一节。文件名前缀是 sequence；导出格式、质量关、迭代都在那一节。
+
+## 4. 常见画坏法
+
+| 画坏了长什么样 | 为什么 | 回到哪一步改 |
+|---|---|---|
+| 角色表头高低不一，竖线起点参差 | 某个角色的名字折成两行，只撑高了自己那一格 | 构图：所有表头先一起量一个统一的高度 |
+| 竖线是实心的粗条，盖住消息文字 | 用了细长的矩形当生命线 | 构图：改用灰色虚线 |
+| 分不清请求和响应，全是实线 | 没套用返回样式的规则 | 问清楚：确认样式；构图：整张图统一套一条 |
+| 虚线一会儿是响应、一会儿是异步 | 一种线型表达了两种意思 | 构图：异步改用颜色或文字标明 |
+| 长消息的文字落在中间某条竖线上，读不出是谁的 | 文字默认居中，正好压在被跨过的竖线上 | 构图：跨角色的消息把文字往发送方挪 |
+| 消息文字冲进相邻的角色泳道 | 角色挤得太近，装不下文字 | 构图：放宽竖线间距 |
+| 最后几条消息的箭头超出竖线末端 | 竖线按固定长度画，步数一多就不够 | 构图：竖线长度取自步骤列的总长 |
+| 阶段分明的内容挤成一长串，找不到哪段是哪段 | 没分段 | 构图：加分段条 |
+| 竖线从分段条上面划过去，像把条划破了 | 线总是画在形状之后，整根连续的线盖在分段条上 | 构图：竖线在每个分段条处断开 |
+| 出图后质量关没过 | 以上任一条没排掉 | 按 `steps`『出图』里的两层质量关逐条修，再出一遍 |

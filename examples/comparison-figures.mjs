@@ -1,6 +1,7 @@
 /**
- * Comparison figures — the three worked examples from the `comparison` skill
- * recipe (`skills/comparison/references/comparison.md`), as runnable code.
+ * Comparison figures — the three worked layouts of the `comparison` skill
+ * (row cards, single panel, asymmetric sub-cards; how each side is built is in
+ * `skills/steps/references/panel.md`), as runnable code.
  *
  * Each figure exercises a different rule, which is why these three are also the
  * eval fixtures in `docs/agent-eval.md`:
