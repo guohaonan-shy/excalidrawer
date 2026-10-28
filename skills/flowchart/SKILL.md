@@ -1,31 +1,95 @@
 ---
 name: flowchart
-description: Generate a hand-drawn-style Excalidraw flowchart from code and export to .excalidraw / SVG / PNG / WebP — no browser. For decision flows, process diagrams, branching logic, approval pipelines, yes/no trees, retry loops. Triggers on draw a flowchart / create a flow / visualize a process / decision tree. Flow detect → clarify branches & direction → read references/flowchart.md → compose sugar → render_diagram. 中文触发词：流程图 / 决策流 / 分支判断 / 审批流 / 业务流转 / pipeline / 画个流程。
+description: Generate a hand-drawn-style Excalidraw flowchart from code and export to .excalidraw / SVG / PNG / WebP — no browser. For decision flows, process diagrams, branching logic, approval pipelines, yes/no trees, retry loops. Triggers on draw a flowchart / create a flow / visualize a process / decision tree. 中文触发词：流程图 / 决策流 / 分支判断 / 审批流 / 业务流转 / pipeline / 画个流程。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
 # excalidrawer flowchart
 
-## 前置条件
+流程图讲一件事怎么一步步走，以及在哪里分叉。读者应该一眼顺着主线读到底，分叉、失败、重试都清楚，但不抢主线的位置。下面四步走：问清楚、构图、出图、对照常见画坏法检查。
 
-调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。
+## 1. 问清楚
 
-## 1. Clarify（必）
+提问的通用规则：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。
 
-用 **AskUserQuestion** 问 2–4 个 load-bearing 问题；导出格式见 `steps`『出图』的导出格式参考。
-**用户已粘完整 nodes + edges 时跳过。**
+用户已经贴出完整的节点和连线时，这一步跳过。否则问这几件事：
 
-1. **核心场景** — 自由文本（如「表单提交到落库」「Code review 到合并」）
-2. **判断 / 分叉点数量** — 单选：`0 个直线流程` / `1 个单一 yes-no` / `2-3 个多重判断` / `自己列`
-3. **方向** — 单选：`horizontal`（默认，节点多时舒展） / `vertical`（节点少时紧凑）
-- 可选追问：是否有失败 / 异常分支单独画终点；是否有 retry / back-edge 循环
+1. **核心场景**：自由文本，比如「表单提交到落库」「代码评审到合并」。
+2. **判断 / 分叉点有几个**：没有（一条直线流程）、一个是否判断、两三个判断、自己列。
+3. **方向**：横向或纵向。用户没偏好时按内容定：主线不超过五个节点，横向；六个以上，或几乎全是判断的树形，纵向。
 
-## 2. 读 recipe
+可选的追问：失败 / 异常的分支要不要单独画一个终点；有没有重试、退回上一步的循环。
 
-`Read references/flowchart.md` —— 拿到 layout 数值、节点形状/配色、4 类边的处理、常见坑。
+导出格式不用问，按去向直接定，规则在 `steps` 的『出图』里。
 
-## 3. 拼 sugar + 渲染
+## 2. 构图
 
-按 recipe 拼 sugar 数组（坐标用 `compute_layout` 的 `chain` 排线性节点）。
-渲染顺序见 `steps`『组件』，render 调用见『出图』：`output: "./flowchart-<name>"`，formats 见『出图』的导出格式参考。
-迭代见 recipe 末尾「Common pitfalls」与 `steps`『出图』的迭代。
+组件的用法：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。只读下面用到的那几份参考。
+
+### 一张好的流程图长什么样
+
+只有一条主线，节点按先后顺序排成一行（或一列），读者的视线不用拐弯。判断节点是分叉的地方：「是」继续沿主线走，「否」或异常从判断下方岔出去，岔出去的那几个节点另起一排，放在主线下面。重试、退回上一步的回边从主线不用的边走，不穿过任何节点。用户说了几个循环（比如某一步自己失败重跑、评审不通过后退回修改），就画几条回边，每条各自走主线不用的边。
+
+两种布局：
+
+```text
+横向（主线较短时）
+[ Start ] → [ Process ] → < Decision > → [ End ]
+                                ↓
+                            [ Fail Path ]
+
+纵向（主线较长，或几乎全是判断时）
+[ Start ]
+    ↓
+[ Process ]
+    ↓
+< Decision > → [ Fail Path ]
+    ↓
+[ End ]
+```
+
+图里的文字默认写英文，用户明确要别的语言才换（规则在 `steps` 的『出图』，构图前就要知道，因为它决定节点有多宽）。
+
+标题放在最上面，要点明这张图讲的是哪件事的流程；有副标题就放在标题下面。标题和副标题的位置、大小是所有图共用的，在 `steps` 的参考 semantics 里，这里不重复；第一个节点从标题下方空出来的位置开始，不要压住标题。
+
+### 用到的组件，各画出什么效果
+
+- **形状与文字**：每个节点是一个带文字的形状。起点、终点、普通步骤是圆角矩形；判断是菱形；出错的终点是红色的矩形。菱形能放文字的地方比外框小，所以比同一排的矩形大一圈。
+- **stack**：主线是一排 stack，每个节点的宽度跟着文字走，长标签不会挤出框外；岔出去的支线另起一个 stack，放在主线下方。同一排里的矩形节点高度一致，一排读起来整齐；带菱形的那一排让矩形和菱形在同一条中线上居中。支线节点尽量放在它所连的那个主线节点的正下方（或正上方），这样两者之间的连线是一条直线，不用拐弯。方向选纵向就是一列。
+- **连线**：所有节点之间的连线都是横平竖直的直角折线，拐弯处是圆角，不出现斜线或 S 形的弯。四种走法：
+  - 下一步：让它自动选边，直线或一个拐弯；
+  - 判断的分叉：「否」从菱形的下方出去，不和主线抢菱形左右两边；一个判断有三个以上分支时，把出口在下边上摊开；
+  - 回边 / 重试：从主线不用的边出、不用的边进，拐一个直角回到前面的节点；整张图都要横跨、直角还是会撞上别的节点时，才绕到整排节点的下方走一大圈；
+  - 汇聚：多条箭头进同一个节点时，把落点在边上摊开，不堆在一个点上。
+  - 具体怎么指定出入边、怎么摊开，看 `steps` 的参考 connectors。
+- **连线上的标签**：「是 / 否 / 通过 / 失败」这类短标签直接写在箭头上，相邻两个节点之间自动摆放就行；箭头很长、中点附近有别的框时，把标签往发送方或接收方挪开。
+- **panel**：只有当用户要把一组节点圈进一个带标题的外框（比如「审核阶段」）时才用，外框的大小从里面的节点算出来，不手填。
+- **可选与强调**：可选的、可以跳过的步骤，连线画成虚线；用户要求突出主路径时，才把主线连线加粗，不主动加。
+
+### 配色倾向
+
+主线用蓝色，终点用绿色，判断用黄色，红色只给真正出错的终点。连线保持默认墨色。一张图的颜色不超过四种，其余意思换形状或线型，不再加颜色。
+
+### 数量上的判断
+
+- 一张图的节点超过十来个，读者就找不到主线了，建议拆成两张，或把一段子流程折叠成一个节点。
+- 一个判断最多三四个分支，再多就该改成表格或拆图。
+
+## 3. 出图
+
+出图、命名、导出格式、两层质量关、迭代：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』。流程图的文件名用 flowchart-<name>。
+
+## 4. 常见画坏法
+
+| 画坏了长什么样 | 为什么 | 回到哪一步改 |
+|---|---|---|
+| 判断下面那一排分支高矮不齐，参差不平 | 长标签折行后只撑高它自己的框，别的框没动 | 构图：把这一排节点做成同高，再画 |
+| 回边的箭头和主线挤在同一条边上，或穿过中间的节点 | 回边让自动选边，自动选的恰好是主线占着的相对两条边 | 构图：回边明确指定走主线没用的边 |
+| 好几条箭头堆在同一个节点的同一个点上，分不清谁是谁 | 汇聚的落点没摊开 | 构图：连线，把落点摊开 |
+| 标签压在另一个节点上、落在被它横跨的线上，或压到了短箭头的箭头头 | 标签默认放在路径中点 | 构图：连线上的标签，往发送方或接收方挪 |
+| 标题压住了第一个节点 | 内容从标题所在的位置起排 | 构图：第一个节点从标题下方空出来的位置起 |
+| 折线拐弯的地方扭成一条蛇 | 连线没有用直角走法 | 构图：所有节点之间的连线统一用直角 |
+| 红色满图都是，读者以为到处在出错 | 拿红色当强调色 | 构图：配色，红色只留给出错的终点 |
+| 菱形里的字被挤出边框，或贴着边 | 菱形按文字量尺寸，装不下 | 构图：菱形单独给大一些的尺寸，别和矩形一起按文字量 |
+| 带标题的外框里最后一行贴着下边，或悬在很大的空白里 | 外框的高度是手填的 | 构图：外框的大小从内容算 |
+| 出图后质量关有警告，或看图有一条不过 | 前面某一步的几何没改对 | 出图：按警告和自检的结论改，回到对应的构图那一项 |

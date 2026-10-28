@@ -128,16 +128,25 @@ compute_layout({ helper: "stack", args: {
 
 ### 一行里不同宽度的节点：流程图主线
 
-流程图的主线是一个横排 stack：不写 `w` 就按各节点文字取自然宽度，`equalize: true` 让这一行等高，支线（判断分叉下面那一行）另起一个 stack，放在主线下方；`gap` 留够箭头和标签的位置（主线相邻节点之间大约 70）。竖排的流程图换 `dir: "y"`。给整行定一个固定宽度时，用 `size` + `justify: "space-between"`。
+流程图的主线是一个横排 stack：不写 `w` 就按各节点文字取自然宽度；`gap` 留够箭头和标签的位置（主线相邻节点之间大约 70）。支线（判断分叉下面那一行）另起一个 stack，放在主线下方。
+
+用户选的方向对应 `dir`：横向 → `"x"`，纵向 → `"y"`。纵向时 `gap` 取大约 50 就够放箭头，标题下方留出的位置见 [`semantics.md`](semantics.md) §9。
+
+**判断菱形不要写成文字格**：菱形能放文字的区域比外框小，按文字量出的高度装不下标签。把它写成已知尺寸的格子 `{ w: 170, h: 100 }`（`kind: "box"`），画成 `shape: "diamond"` 并自己绑文字。菱形比同一行的矩形高：
+
+- 这一行有菱形时**不要开 `equalize`**，它会把所有格子都拉到菱形那么高；改用 `align: "center"`，让矩形在行内垂直居中，和菱形共用一条中线。
+- 这一行没有菱形（比如支线上并排的几个步骤）时才开 `equalize: true`，让它们等高。
 
 ```js
 compute_layout({ helper: "stack", args: {
-  dir: "x", gap: 70, equalize: true, x: 40, y: 150,
-  cells: [{ text: "PR opened" }, { text: "CI + review" }, { text: "Approved?" }, { text: "Merge to main" }, { text: "Deploy" }],
+  dir: "x", gap: 70, align: "center", x: 40, y: 150,
+  cells: [{ text: "PR opened" }, { text: "CI + review" }, { w: 170, h: 100 }, { text: "Merge to main" }, { text: "Deploy" }],
 }})
 ```
 
-**判断菱形不要写成文字格**：菱形能放文字的区域比外框小，按文字量出的高度装不下标签。把它写成已知尺寸的格子 `{ w: 170, h: 100 }`（`kind: "box"`），画成 `shape: "diamond"` 并自己绑文字；它比同一行的矩形高，所以这一行不要开 `equalize`（矩形节点之间要齐平就分别放进一个 `equalize` 过的子 stack，或让 `align: "center"` 把它们在行内垂直居中）。
+支线节点要对齐到某个主线节点的正下方：stack 的结果只给每格的 `x, w`，自己算中心，支线格的 `x = 主线格.x + (主线格.w - 支线格.w) / 2`。支线放在主线下方时，支线 stack 的 `y` 取主线 `y + h` 再加一个行距（大约 80）。
+
+给整行定一个固定宽度时，用 `size` + `justify: "space-between"`。
 
 ### 在固定宽度里居中排一行
 
