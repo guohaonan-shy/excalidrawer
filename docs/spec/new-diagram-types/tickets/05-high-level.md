@@ -18,6 +18,8 @@ architecture 现在有三种布局（经典分层、分层加子分组、自由�
 
 示例：一个新的 high-level figures 模块出一张全景，README *What it makes* 加一格。
 
+> 人的决定（2026-10-28）：选 A —— 本 PR 里在 `skills/steps/references/panel.md` 末尾「architecture 的提问选项对应哪种写法」表加一行「全景」：整排怎么等高、各段怎么固定同宽、横带怎么和整排等宽，指向新加的全景示例。共享参考只在表末追加这一行。
+
 ## 验收标准
 
 - [x] architecture 入口 skill 的构图列出第四种布局，写清它讲什么、什么时候选它、各组件在这里画出什么效果
@@ -27,6 +29,7 @@ architecture 现在有三种布局（经典分层、分层加子分组、自由�
 - [x] 照一个真实请求（「画个数据栈全景」）用 architecture 入口 skill 画一张，选到全景布局，Layer A、Layer B 都过，PR 里附图
 - [x] CHANGELOG 只在 Unreleased 下记一条
 - [x] 不改 #12 的 issue 状态
+- [ ] panel 组件参考的「architecture 的提问选项对应哪种写法」表有「全景」一行，写清等高、同宽、横带等宽怎么取，指向全景示例；`tests/skills-steps.test.mjs` 仍过
 
 ## 选中的存量回归
 
