@@ -1,7 +1,7 @@
 /**
  * README gallery — one figure per diagram type, rendered into docs/gallery/.
  *
- * Deterministic (every template seeds itself), so re-running only changes the
+ * Deterministic (every template in ./templates/ seeds itself), so re-running only changes the
  * images when the engine changes. Regenerate before a release:
  *
  *   node examples/gallery.mjs
@@ -12,19 +12,23 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import {
-  flowchart, architecture, timeline, tree, equalize,
-  render, excalidraw, toPng, validate, autoRegisterCjkFont,
+  equalize, render, excalidraw, toPng, validate, autoRegisterCjkFont,
 } from "../src/index.mjs";
+import { flowchart, architecture, timeline, tree } from "./templates/index.mjs";
 import { coverage } from "./comparison-figures.mjs";
 import { storiesEn, skills, skillsLR } from "./tree-figures.mjs";
+import { orderStates } from "./state-machine-figures.mjs";
+import { pyramidFigures } from "./pyramid-figures.mjs";
+import { dataStack } from "./high-level-figures.mjs";
+import { quarterlyRevenue, dailyActiveUsers } from "./chart-figures.mjs";
 
 const outDir = new URL("../docs/gallery/", import.meta.url).pathname;
 mkdirSync(outDir, { recursive: true });
 
 // Sequence: the browser-cache read/write flow from a real spec (report audio
-// prefetch & shared cache). Built from sugar the way the `sequence` skill
-// recipe composes it — header row, dashed lifelines, phase bands, one labelled
-// message per row — rather than with the built-in template.
+// prefetch & shared cache). Built from sugar the way the `sequence` entry skill
+// describes it — header row, dashed lifelines, phase bands, one labelled
+// message per row — rather than with the old sequence template.
 function cacheSequence() {
   const actors = [
     ["up", "Upload pipeline", "yellow"],
@@ -123,7 +127,7 @@ const figures = {
     ],
   }),
 
-  sequence: cacheSequence, // sugar, composed the way the sequence skill recipe does
+  sequence: cacheSequence, // sugar, composed the way the sequence entry skill describes
 
   timeline: () => timeline({
     title: "2026 product roadmap",
@@ -140,6 +144,13 @@ const figures = {
   "tree-right": () => tree(skillsLR),
   "tree-down": () => tree(skills),
   "tree-stories": () => tree(storiesEn),
+
+  "state-machine": orderStates, // sugar, composed the way the state-machine entry skill describes
+
+  ...pyramidFigures, // pyramid + funnel, sugar, composed the way the pyramid entry skill describes
+  "high-level": dataStack, // sugar, the architecture skill's fourth layout (data flows left to right)
+  "chart-bar": quarterlyRevenue, // sugar, composed the way the chart entry skill describes
+  "chart-line": dailyActiveUsers,
 };
 
 for (const [name, build] of Object.entries(figures)) {

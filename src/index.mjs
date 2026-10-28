@@ -9,6 +9,7 @@ export {
   diamondBox,
   arrow,
   line,
+  polygon,
   orthogonalize,
   ARROWHEADS,
   ARROW_TYPES,
@@ -21,7 +22,7 @@ export {
   excalidraw,
 } from "./elements.mjs";
 
-export { toSvg, toPng, registerFonts, autoRegisterCjkFont } from "./export.mjs";
+export { toSvg, toPng, toWebp, registerFonts, autoRegisterCjkFont } from "./export.mjs";
 
 export { estimateTextWidth, wrapText, lineCount, textHeight, fitBoundText } from "./text.mjs";
 
@@ -41,6 +42,11 @@ export {
   contrastText,
   readableOn,
   triplet,
+  stack,
+  panel,
+  axis,
+  legend,
+  taper,
 } from "./layout.mjs";
 
 // Serializer: sugar/raw elements → output formats (0.5.6+).
@@ -52,5 +58,3 @@ export { validate } from "./validate.mjs";
 // Sugar translation: shorthand → raw elements (0.5.7+).
 export { desugar, SugarError } from "./sugar.mjs";
 
-// Built-in templates
-export { timeline, flowchart, architecture, sequence, tree } from "./templates/index.mjs";

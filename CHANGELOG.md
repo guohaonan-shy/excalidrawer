@@ -4,6 +4,187 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
+## 0.6.0
+
+_engine 0.6.0 · plugin 0.1.0_
+
+The one breaking release planned for the 0.x line (see `docs/roadmap.md`):
+the template path is gone, and diagrams are composed from layout components by
+the entry skills. Plugin 0.1.0 re-pins its MCP server to `excalidrawer@^0.6.0`.
+
+### Removed (breaking)
+
+- **`excalidrawer generate -t <type>` and `excalidrawer types`.** Deprecated
+  since 0.5.7; both commands now exit with an error that points to `render`.
+  Compose the diagram with sugar or raw elements and render it — the entry
+  skills (`flowchart`, `timeline`, `architecture`, `sequence`, `tree`, …)
+  describe how.
+- **The built-in templates as package API.** The `excalidrawer/templates`
+  subpath export and the `timeline` / `flowchart` / `architecture` /
+  `sequence` / `tree` exports of the main entry are removed, and
+  `src/templates/` is gone. The `tree` *layout helper* stays (exported as
+  `treeLayout`, and as `tree` in `compute_layout`). Four of the old templates
+  live on in `examples/templates/`, only to draw the matching README figures;
+  they are not in the npm tarball.
+
+### Added
+
+- **`pyramid` entry skill, `taper` component and a `polygon` shape.** One entry
+  skill draws both a pyramid (layers narrow toward the top) and a funnel (layers
+  narrow toward the bottom, a count per layer and the conversion between layers).
+  `taper({ layers, width, narrow })` — also a `compute_layout` helper — returns
+  each layer's four corners, a label box sized to the layer's narrowest edge
+  (a label that wraps makes the layer grow), and the anchors for values and
+  conversion rates; layer widths step down evenly and never follow the values.
+  The new sugar shape `{ shape: "polygon", points, fill }` is a closed, filled
+  line element (SVG / PNG keep the fill; other lines and arrows still export
+  unfilled); Layer A treats it as a shape over its bounding box. New README
+  figures `docs/gallery/pyramid.png` and `docs/gallery/funnel.png`.
+- **Data-stack overview: a fourth layout of the `architecture` skill.** For
+  "where does the data flow" rather than "who calls whom": one panel per stage
+  in a left-to-right row (data sources → ingest → storage → compute → consume),
+  the systems of a stage in a column, one thick arrow between neighbouring
+  stages and none between systems, and a band under the whole row, as wide as
+  the row, for what spans every stage (governance, monitoring, access).
+  `architecture` now asks one more question — calls or data flow — unless the
+  request already says it, and triggers on "data stack" / "high-level" / 数据全景.
+  No new entry skill or component; the output is still
+  `architecture-<name>`. New README figure `docs/gallery/high-level.png`.
+- **`chart` entry skill, and `axis` can grow upward.** Simple bar charts
+  (vertical, or horizontal when the category names are long or there are more
+  than 8; up to three series with a legend, values on the bar tops) and line
+  charts (a value axis that starts at a neat tick, a dot per point, the last
+  value written beside the line). `axis` takes `dir: "up"` next to `"x"` and
+  `"y"`: the value axis climbs from its start, marks and ticks follow, and the
+  `scale` formula stays `origin + (v - domain[0]) * pxPerUnit` with a negative
+  `pxPerUnit`. `"x"` and `"y"` behave exactly as before; `domain` is still
+  min ≤ max. No chart component: bars, lines, dots and grid come from the
+  axes' ticks and scale (`examples/chart-figures.mjs`). The step skill's
+  shapes reference gains *lines drawn behind shapes* (raw `line`, for grid
+  lines and the polyline). New README figures `docs/gallery/chart-bar.png` and
+  `chart-line.png`.
+- **`state-machine` entry skill.** States and transitions with events and
+  guards (`event [guard] / action`), the main path in one row, an initial dot
+  and final double rings, back-edges, self-loops, two-way transitions and one
+  level of composite states (a panel). No new component: the step skill's
+  connectors reference gains two patterns, *self-loop* (`from` = `to`, one
+  side, `via`) and *two-way pair* (pinned sides, opposite `fromT` / `toT`).
+  New README figure `docs/gallery/state-machine.png`.
+- **Three new entry skills registered: `state-machine`, `pyramid`, `chart`.**
+  The step skill's entry-skill lists and its output-naming table
+  (`state-machine-<name>`, `pyramid-<name>`, `chart-<name>`) carry the three
+  names ahead of the skills themselves, which land one by one in 0.6.0
+  (spec `new-diagram-types`). High-level data-flow overviews become
+  architecture's fourth layout instead of a skill of their own.
+- **Lossless WebP output.** `render()` accepts `webp` in `formats` and returns
+  `outputs.webp` as a Buffer; the new `toWebp(elements, scale)` export sits
+  next to `toPng` and shares its rasterization (fonts, white background,
+  `scale`) — only the final encode differs (lossless, via `@jsquash/webp`).
+  The MCP `render_diagram` tool and `excalidrawer render -f webp` write
+  `<output>.webp`. `webp` is opt-in: with no `formats` the output is still
+  excalidraw + svg + png. `generate` is unchanged.
+- **Export formats are a reference in the step skill.** The fixed
+  four-option "format" question is gone; the "出图" section of
+  `skills/steps/SKILL.md` now maps each format to where it fits, and the agent
+  picks from the conversation, asking about the destination only when it can't
+  tell.
+- **`stack` layout helper.** `stack({ dir, cells, … })` lays a group of cells
+  along one axis and sizes the container from their content — text cells wrap
+  to their width (or take their natural width, capped at `maxW`), titled cells
+  use the `titledBox` math, and a cell can be another `stack`. It returns every
+  cell's absolute position plus the container's `w` / `h`, so a long label no
+  longer pushes a cell out of a hand-sized lane. `equalize`, `justify` with a
+  fixed `size` (reporting `overflow` when the content doesn't fit) and `cross`
+  (a cell too wide for it grows the container and `crossOverflow` reports the
+  px, the same rule; a `{ panel }` without a `w` fills a column's inner width)
+  are supported. Exported from the package and available through
+  `compute_layout` / `compute-layout --helper stack`. Geometry only, like the
+  other layout helpers; none of them changed.
+- **`panel` layout helper.** `panel({ title, body, titleSide, … })` is a
+  container of a title area plus a `stack`: the title sits on top (full inner
+  width, wrapping makes it taller and pushes the body down) or in a left column
+  as tall as the panel, and the panel's size comes from the title and the body,
+  so an architecture layer band or one side of a comparison no longer needs
+  `cell.y + 80` or a hand-typed shell height. `w` fixes the width (the body's
+  `justify` spreads the rest), and a stack cell can be `{ panel: {…} }` — an
+  outer `equalize` re-flows each panel at the shared width or height. Exported
+  from the package and available through `compute_layout` (`helper: "panel"`).
+  A `w` narrower than the content grows the panel, and its `overflow` field
+  reports the px past `w` (0 otherwise), like `stack`.
+  Existing helpers and templates are unchanged.
+- **`axis` layout helper.** A marked line as coordinates: mark positions
+  (evenly `spacing` apart, or linear over a `domain` when marks carry a
+  `value`), the line as `segments` broken `gap` px around each mark (last one
+  flagged `arrow` with `arrow: "end"`), optional `ticks` on 1/2/5×10ⁿ steps (at most
+  1000 — more throws, raise `step` / lower `count`), label
+  anchors, and a `scale` that converts a value to a coordinate. Exported from
+  the package and available through `compute_layout` (`helper: "axis"`).
+  Existing helpers and templates are unchanged.
+- **`legend` layout helper.** Give it a few labels and it returns each row's
+  sample slot and text slot plus the block size, so the legend no longer needs
+  hand-placed coordinates (`[x, y+10]`, `[x+50, y]`). `dir: "x"` lays the items
+  on one row; with `bounds` and a `corner` it parks the block inside or just
+  outside a corner of the diagram. Coordinates only — the caller draws the
+  swatch or line. Exported from the package and available through the MCP
+  `compute_layout` tool (and the CLI `compute-layout`).
+
+### Changed
+
+- **Skills are two layers: entry skills in natural language, one step skill
+  `steps` for the mechanics.** Each of the six diagram skills (flowchart,
+  timeline, architecture, sequence, comparison, tree) is now a single
+  `SKILL.md`: what to ask, what a good diagram looks like (which components,
+  what each draws), common ways it goes wrong. The `references/<type>.md`
+  recipes are deleted, and with them the hand-copied coordinates, sizes and
+  tool calls; the geometry now comes from the stack / panel / axis / legend /
+  tree components. The shared base skill is renamed `steps` (`skills/steps/`): its `SKILL.md`
+  has the named sections an entry skill points at (`clarify`, `组件`, `出图`,
+  `新增一种图类型`), and the sugar field notes are split into one reference per
+  component under `skills/steps/references/`. An entry skill calls `steps` by
+  name (Claude Code: `excalidrawer:steps`; other hosts read
+  `../steps/SKILL.md`) at the step that needs it and reads only the named
+  section, instead of loading the whole base up front. When the user's
+  description already lists everything in the diagram, the entry skill skips
+  the questions and never reads the asking rules.
+- **The diagram title is one size everywhere.** Comparison and architecture
+  used 26; flowchart and timeline used 28. The size now lives once, in the
+  steps semantics reference, as 28.
+- **A test keeps entry skills in natural language.**
+  `tests/skills-entry.test.mjs` fails when an entry skill's body contains a
+  code block (ASCII `text` sketches excepted), `render_diagram` /
+  `compute_layout`, a sugar field name, a number with `px`, or a coordinate
+  such as `y = 150`, and prints the file, line and word. The entry skills are
+  whatever directories sit next to `steps/` with a `SKILL.md` (no hard-coded
+  list), so a newly added diagram type is covered by this test and by the
+  steps-wording checks without editing them.
+- **Sequence diagrams size their step column from the message.** The steps
+  reference now says how a message cell's width follows the distance it spans
+  and how the actor spacing is derived from the longest message.
+- **`via` detours: the steps connectors reference says where `clearance` is
+  measured from.** From the one of the two connection points that is further
+  in the detour direction (the connection point on the `fromSide` / `toSide`
+  edge, not the box's outer edge); default 60; only the two ends are looked
+  at, so a box along the way that sticks out further needs its extra distance
+  added. A worked example (middle box 140 tall: `clearance: 50` crosses it,
+  `110` leaves 30) is included, and the `routeU` helper line points to it.
+- **Quality gate Layer B counts a lone last-line word as a FAIL.** In
+  `skills/steps/SKILL.md`, the Labels item now also fails a label that wraps
+  with a single word on its last line, and says how to fix it (shorten it, or
+  break the line yourself so the lines come out close in length). Still five
+  items.
+
+### Fixed
+
+- **Arrow and line `text` labels are sized by their real text width.** The
+  label box was `characters × 9` (min 28), which is too narrow for CJK (one
+  character is about the font size): `失败重跑` raised a false
+  `TEXT_OVERFLOW_X`, and beside a vertical segment, where the box sits on one
+  side of the line, the centered text spilled over onto the line. The box now
+  uses the same width estimate as node text, the flowchart template's edge
+  labels and the Layer A check (widest line when the label has `\n`, still at
+  least 28, font 14, height 18). Applies to arrows and lines addressed by id
+  and by explicit `points`; English labels stay about the same width.
+
 ## 0.5.15
 
 _engine 0.5.15 · plugin 0.0.6_

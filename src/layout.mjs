@@ -8,7 +8,7 @@
 // Design intent:
 //   - Keep `excalidrawer` package as primitives + layout math + palette.
 //   - Diagram-kind opinions (flowchart layout, sequence rendering) live
-//     either in templates (built-in) or in skill-side recipes (downstream).
+//     in the entry skills (downstream), not in the package.
 //   - These helpers are the bridge: pure math, no styling decisions.
 // ============================================================================
 
@@ -1031,5 +1031,1069 @@ export function tree(root, opts = {}) {
     bounds: isRight
       ? { x: originX, y: originY, w: depthEnd - originX, h: breadthEnd - originY }
       : { x: originX, y: originY, w: breadthEnd - originX, h: depthEnd - originY },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// stack
+// ---------------------------------------------------------------------------
+
+/**
+ * Lay a group of cells out along one direction and size the container from
+ * what is in them — the main-axis half of the job `equalize` does for the
+ * cross axis. Hand it the cells' content; get back every cell's absolute
+ * position and the container's size, so no `laneH` / `shellH` is ever typed by
+ * hand and a long label can't push a cell out of its container.
+ *
+ * Pure geometry: no elements, no colors. Draw each child as a rect (or a rect
+ * with bound text) at the returned coordinates.
+ *
+ * Cells (a plain object each, `id` is copied through to the result):
+ *   - `{ text, w?, fontSize? }`  — bound-text box; height from wrapping `text` to `w`
+ *                                  (`fitBoundText`, same as `equalize`). Without `w`:
+ *                                  natural width + 10 per side, capped at `maxW`.
+ *   - `{ title, body?, w?, titleFontSize?, bodyFontSize?, padding?, gap? }`
+ *                                — titled box (`titledBox` math; title and body are
+ *                                  wrapped to the inner width first).
+ *   - `{ w, h }`                 — a cell whose size is already known.
+ *   - `{ stack: {…} }`           — a nested stack (same options, no x/y).
+ *   - `{ panel: {…} }`           — a nested `panel` (title area + a stack; no x/y). With
+ *                                  `equalize` it re-flows at the shared width / height.
+ *
+ * @param {object} opts
+ * @param {"x"|"y"} opts.dir          - main axis: "x" lays cells in a row, "y" in a column
+ * @param {Array<object>} opts.cells  - non-empty
+ * @param {number} [opts.gap=16]      - space between neighbours along the main axis
+ * @param {number} [opts.pad=0]       - inset on all four sides of the container
+ * @param {"start"|"center"|"end"} [opts.align="start"] - cross-axis alignment
+ * @param {number} [opts.size]        - fixed main-axis length of the container (incl. pad)
+ * @param {"start"|"center"|"end"|"space-between"} [opts.justify="start"] - main-axis
+ *   distribution when `size` leaves spare room
+ * @param {number} [opts.cross]       - fixed cross-axis length (incl. pad). In a column,
+ *   cells without a width (and panels without a `w`) fill `cross - pad*2`; a cell too wide
+ *   for it grows the container, and `crossOverflow` says by how many px.
+ * @param {boolean} [opts.equalize=false] - every cell takes the largest cross-axis size
+ *   (row: same height; column: same width); text is re-measured, nested stacks re-flow
+ * @param {number} [opts.maxW=200]    - width cap for text / titled cells without `w`
+ * @param {number} [opts.fontSize=16] - default font size of text cells
+ * @param {number} [opts.x=0]
+ * @param {number} [opts.y=0]
+ *
+ * @returns {{ kind:"stack", x:number, y:number, w:number, h:number,
+ *             overflow:number, crossOverflow:number, children:Array<object> }}
+ *   `children` mirrors `cells`; each carries `kind` ("text" | "titled" | "box" |
+ *   "stack" | "panel") and absolute `x, y, w, h`. `overflow` is how many px the content ran
+ *   past `size` (the container grows to fit instead of failing); 0 otherwise.
+ *   `crossOverflow` is the same for `cross`: how many px the widest cell ran past it.
+ *
+ * @example
+ *   const lane = stack({
+ *     dir: "x", pad: 12, gap: 16, equalize: true,
+ *     cells: [{ text: "Order Service" }, { text: "Payment reconciliation and settlement worker (async, retries)" }],
+ *   });
+ *   // lane.h fits the tallest label; draw lane.children[i] as rects at their x, y, w, h
+ */
+export function stack(opts = {}) {
+  return layoutStack(opts, "");
+}
+
+// Cell keys that hold a nested container. Each maps to
+// `(spec, where, force, fill) => result at origin (0, 0)`, where `force` is null or
+// `{ axis: "x"|"y", len }` — a length the container must take on that axis — and
+// `fill` is the width a width-less cell takes in a column with a fixed `cross` (or null).
+const NESTED_LAYOUTS = {
+  stack: (spec, where, force /* , fill: only panels take it */) => {
+    let s = spec;
+    if (force && s && typeof s === "object") {
+      s = force.axis === s.dir ? { ...s, size: force.len } : { ...s, cross: force.len };
+    }
+    return layoutStack(s && typeof s === "object" ? { ...s, x: 0, y: 0 } : s, where);
+  },
+  panel: (spec, where, force, fill) =>
+    layoutPanel(spec && typeof spec === "object" ? { ...spec, x: 0, y: 0 } : spec, where, force, fill),
+};
+
+const isNum = (n) => typeof n === "number" && Number.isFinite(n);
+
+/** Shift a result tree: every object carrying numeric `x` and `y` moves by (dx, dy). */
+function translate(node, dx, dy) {
+  if (Array.isArray(node)) {
+    for (const n of node) translate(n, dx, dy);
+  } else if (node && typeof node === "object") {
+    if (isNum(node.x) && isNum(node.y)) {
+      node.x += dx;
+      node.y += dy;
+    }
+    for (const v of Object.values(node)) if (v && typeof v === "object") translate(v, dx, dy);
+  }
+}
+
+function widestLine(text, fontSize) {
+  return Math.max(...text.split("\n").map((l) => estimateTextWidth(l, fontSize)));
+}
+
+function layoutStack(spec, where) {
+  const err = (msg) => new Error(`stack: ${where}${msg}`);
+  if (!spec || typeof spec !== "object" || Array.isArray(spec)) throw err("expected an options object");
+  const { dir, cells } = spec;
+  if (dir === undefined || dir === null) throw err('`dir` is required ("x" or "y")');
+  if (dir !== "x" && dir !== "y") throw err(`\`dir\` must be "x" or "y", got ${JSON.stringify(dir)}`);
+  if (!Array.isArray(cells) || cells.length === 0) throw err("`cells` must be a non-empty array");
+
+  const num = (name, def, positive = false) => {
+    const v = spec[name] ?? def;
+    if (v === undefined) return undefined;
+    if (!isNum(v) || (positive ? v <= 0 : v < 0)) {
+      throw err(`\`${name}\` must be a ${positive ? "positive" : "non-negative"} number, got ${JSON.stringify(v)}`);
+    }
+    return v;
+  };
+  const oneOf = (name, def, allowed) => {
+    const v = spec[name] ?? def;
+    if (!allowed.includes(v)) throw err(`\`${name}\` must be one of ${allowed.join(" | ")}, got ${JSON.stringify(v)}`);
+    return v;
+  };
+  const gap = num("gap", 16);
+  const pad = num("pad", 0);
+  const size = num("size", undefined, true);
+  const cross = num("cross", undefined, true);
+  const maxW = num("maxW", 200, true);
+  const fontSize = num("fontSize", 16, true);
+  const align = oneOf("align", "start", ["start", "center", "end"]);
+  const justify = oneOf("justify", "start", ["start", "center", "end", "space-between"]);
+  const x0 = spec.x ?? 0;
+  const y0 = spec.y ?? 0;
+  if (!isNum(x0)) throw err(`\`x\` must be a number, got ${JSON.stringify(spec.x)}`);
+  if (!isNum(y0)) throw err(`\`y\` must be a number, got ${JSON.stringify(spec.y)}`);
+  // A switch takes true or false only: the string "false" is truthy, and would silently turn it on.
+  const eq = spec.equalize ?? false;
+  if (typeof eq !== "boolean") throw err(`\`equalize\` must be true or false, got ${JSON.stringify(eq)}`);
+
+  const ctx = { dir, where, maxW, fontSize };
+  const crossIsW = dir === "y";
+  const inner = cross === undefined ? null : cross - pad * 2;
+  const fill = crossIsW ? inner : null;
+  const crossOf = (m) => (crossIsW ? m.w : m.h);
+  const mainOf = (m) => (crossIsW ? m.h : m.w);
+
+  let items = cells.map((c, i) => measureCell(c, i, ctx, { fill, force: null }));
+  if (eq) {
+    const target = Math.max(...items.map(crossOf));
+    items = items.map((m, i) =>
+      crossOf(m) === target ? m : measureCell(cells[i], i, ctx, { fill, force: target }),
+    );
+  }
+
+  // Cross axis: a fixed `cross` that cannot hold the widest cell lets the container
+  // grow and reports the excess in `crossOverflow` — the same rule as `size` / `overflow`.
+  const need = Math.max(...items.map(crossOf)) + pad * 2;
+  const C = cross === undefined ? need : Math.max(cross, need);
+  const crossOverflow = cross === undefined ? 0 : Math.max(0, need - cross);
+  const innerCross = C - pad * 2;
+  const content = items.reduce((s, m) => s + mainOf(m), 0) + gap * (items.length - 1);
+  const natural = pad * 2 + content;
+
+  // Main axis: with a fixed `size` that fits, spare room is distributed by
+  // `justify`; one that doesn't fit lets the container grow and reports the excess.
+  const S = size === undefined ? natural : Math.max(size, natural);
+  const overflow = size === undefined ? 0 : Math.max(0, natural - size);
+  const spare = S - natural;
+  let main = pad;
+  let step = gap;
+  if (spare > 0) {
+    if (justify === "center") main += spare / 2;
+    else if (justify === "end") main += spare;
+    else if (justify === "space-between" && items.length > 1) step += spare / (items.length - 1);
+  }
+
+  const children = items.map((m) => {
+    const c = crossOf(m);
+    const off = pad + (align === "center" ? (innerCross - c) / 2 : align === "end" ? innerCross - c : 0);
+    translate(m.result, x0 + (crossIsW ? off : main), y0 + (crossIsW ? main : off));
+    main += mainOf(m) + step;
+    return m.result;
+  });
+
+  return {
+    kind: "stack",
+    ...(spec.id !== undefined ? { id: spec.id } : {}),
+    x: x0,
+    y: y0,
+    w: crossIsW ? C : S,
+    h: crossIsW ? S : C,
+    overflow,
+    crossOverflow,
+    children,
+  };
+}
+
+/**
+ * Measure one cell at the origin. `force` (a length) overrides the cell's
+ * cross-axis size (equalize); `fill` is the default width of a width-less
+ * cell in a column with a fixed `cross`.
+ */
+function measureCell(cell, i, ctx, { fill, force }) {
+  const { dir, where, maxW } = ctx;
+  const crossIsW = dir === "y";
+  const bad = (msg) => new Error(`stack: ${where}cells[${i}] ${msg}`);
+  const UNKNOWN = "needs text, title, h, stack or panel";
+  if (!cell || typeof cell !== "object" || Array.isArray(cell)) throw bad(UNKNOWN);
+  const id = cell.id;
+  const mk = (kind, rest) => ({ kind, ...(id !== undefined ? { id } : {}), ...rest });
+
+  const nestedKey = Object.keys(NESTED_LAYOUTS).find((k) => cell[k] !== undefined);
+  if (nestedKey) {
+    const r = NESTED_LAYOUTS[nestedKey](
+      cell[nestedKey],
+      `${where}cells[${i}].${nestedKey}: `,
+      force == null ? null : { axis: crossIsW ? "x" : "y", len: force },
+      fill,
+    );
+    if (id !== undefined) r.id = id;
+    return { w: r.w, h: r.h, result: r };
+  }
+
+  const isTitled = typeof cell.title === "string";
+  const isText = typeof cell.text === "string";
+  if (isTitled || isText) {
+    if (cell.w !== undefined && !(isNum(cell.w) && cell.w > 0)) {
+      throw bad(`\`w\` must be a positive number, got ${JSON.stringify(cell.w)}`);
+    }
+    if (cell.fontSize !== undefined && !(isNum(cell.fontSize) && cell.fontSize > 0)) {
+      throw bad(`\`fontSize\` must be a positive number, got ${JSON.stringify(cell.fontSize)}`);
+    }
+    if (isTitled) {
+      for (const k of ["titleFontSize", "bodyFontSize"]) {
+        if (cell[k] !== undefined && !(isNum(cell[k]) && cell[k] > 0)) {
+          throw bad(`\`${k}\` must be a positive number, got ${JSON.stringify(cell[k])}`);
+        }
+      }
+      for (const k of ["padding", "gap"]) {
+        if (cell[k] !== undefined && !(isNum(cell[k]) && cell[k] >= 0)) {
+          throw bad(`\`${k}\` must be a non-negative number, got ${JSON.stringify(cell[k])}`);
+        }
+      }
+      if (cell.body !== undefined && cell.body !== null && typeof cell.body !== "string") {
+        throw bad(`\`body\` must be text, got ${JSON.stringify(cell.body)}`);
+      }
+    }
+  } else if (cell.w !== undefined || cell.h !== undefined) {
+    if (!(isNum(cell.w) && cell.w > 0 && isNum(cell.h) && cell.h > 0)) {
+      throw bad("needs a positive numeric `w` and `h`");
+    }
+  } else {
+    throw bad(UNKNOWN);
+  }
+
+  const wForced = crossIsW ? force : null;
+  const hForced = crossIsW ? null : force;
+  const pickW = (natural) => wForced ?? cell.w ?? (crossIsW ? fill : null) ?? natural();
+
+  if (isTitled) {
+    const tfs = cell.titleFontSize ?? 18;
+    const bfs = cell.bodyFontSize ?? 15;
+    const padding = cell.padding ?? 16;
+    const body = cell.body ?? "";
+    const w = pickW(() =>
+      Math.min(maxW, Math.max(widestLine(cell.title, tfs), body ? widestLine(body, bfs) : 0) + padding * 2),
+    );
+    const innerW = Math.max(1, w - padding * 2);
+    const title = wrapText(cell.title, innerW, tfs);
+    const wrappedBody = wrapText(body, innerW, bfs);
+    const t = titledBox({ ...cell, x: 0, y: 0, w, title, body: wrappedBody });
+    const h = Math.max(hForced ?? 0, t.box.h);
+    return {
+      w,
+      h,
+      result: mk("titled", {
+        x: 0, y: 0, w, h,
+        title: { ...t.title, text: title },
+        body: { ...t.body, text: wrappedBody },
+      }),
+    };
+  }
+
+  if (isText) {
+    const fs = cell.fontSize ?? ctx.fontSize;
+    const w = pickW(() => Math.min(maxW, widestLine(cell.text, fs) + BOUND_TEXT_PAD_X * 2));
+    const h = Math.max(hForced ?? 0, fitBoundText(cell.text, w, 0, fs).height);
+    return { w, h, result: mk("text", { x: 0, y: 0, w, h, fontSize: fs }) };
+  }
+
+  const w = wForced ?? cell.w;
+  const h = hForced ?? cell.h;
+  return { w, h, result: mk("box", { x: 0, y: 0, w, h }) };
+}
+
+// ---------------------------------------------------------------------------
+// panel
+// ---------------------------------------------------------------------------
+
+// A title that sizes itself (no `titleW`, no `w`) takes its natural width,
+// capped here — the same cap `stack` puts on a text cell (`maxW` default).
+const PANEL_TITLE_MAX_W = 200;
+
+/**
+ * A container of "title area + one stack of cells": the content area is a
+ * `stack`, and the panel sizes itself from the title and that stack, so the
+ * `cell.y + 80` / `shellH = …` arithmetic (and the overflow when a label gets
+ * long) goes away. Think architecture's layer band (title column on the left,
+ * items in a row) or one side of a comparison (title on top, row cards below).
+ *
+ * Pure geometry, like `stack`: the title area is a rectangle you may draw as a
+ * header rect with bound text, or just write the text into. The title is
+ * wrapped the way a bound-text box wraps it, so `title.h` is the height of a
+ * header rect that holds it.
+ *
+ *   - `titleSide: "top"`  — the title area spans the panel's inner width and sits
+ *     above the body, `gap` away. A title that wraps makes the area taller and
+ *     moves the body down. With no `w`, the inner width is the wider of the body
+ *     and the title's natural width (capped at 200).
+ *   - `titleSide: "left"` — the title is a column on the left, as tall as the
+ *     inner height, so a header rect can fill the whole row; the body is `gap` to
+ *     its right. The column is `titleW` wide, or the title's natural width
+ *     (+10 per side, capped at 200).
+ *
+ * With `w`, the content area takes the remaining width: a row body distributes
+ * its spare room by its `justify`, a column body's width-less cells fill it.
+ * A `w` smaller than the content lets the panel grow, and `overflow` reports by how
+ * many px it grew past `w` (0 when it fits or there is no `w`). As a cell of a `stack`
+ * (`{ panel: {…} }`) in a column with a fixed `cross`, a panel without a `w` takes the
+ * column's inner width (and reports `overflow` if it cannot fit); `equalize` can force
+ * the panel's width or height; the
+ * panel re-flows inside (titles re-wrap, the body is stretched to fit).
+ *
+ * @param {object} opts
+ * @param {string} opts.title                  - may contain "\n"
+ * @param {object} opts.body                   - `stack` options without x/y; `dir` defaults to "y"
+ * @param {"top"|"left"} [opts.titleSide="top"]
+ * @param {number} [opts.titleFontSize=18]
+ * @param {number} [opts.titleW]               - `left` only: title column width
+ * @param {number} [opts.pad=16]               - inset between the outer edge and the contents
+ * @param {number} [opts.gap=12]               - space between the title area and the body
+ * @param {number} [opts.w]                    - fixed overall width
+ * @param {number} [opts.x=0]
+ * @param {number} [opts.y=0]
+ *
+ * @returns {{ kind:"panel", x:number, y:number, w:number, h:number,
+ *             title:{ x:number, y:number, w:number, h:number, fontSize:number, text:string },
+ *             body:object, overflow:number }}
+ *   Absolute coordinates; `body` is the `stack` result (its `children` too),
+ *   `title.text` is the title already wrapped to `title.w`. `overflow` is how many
+ *   px the panel grew past its fixed width (`w`, or the width an outer `equalize`
+ *   forced); 0 otherwise.
+ *
+ * @example
+ *   const lane = panel({
+ *     title: "Business Services", titleSide: "left",
+ *     body: { dir: "x", cells: [{ text: "Order Service" }, { text: "Payment reconciliation and settlement worker" }] },
+ *   });
+ *   // draw lane as a rect, lane.title as the header rect, lane.body.children[i] as rects
+ */
+export function panel(opts = {}) {
+  return layoutPanel(opts, "", null);
+}
+
+function layoutPanel(spec, where, force, fill = null) {
+  const err = (msg) => new Error(`panel: ${where}${msg}`);
+  if (!spec || typeof spec !== "object" || Array.isArray(spec)) throw err("expected an options object");
+  if (typeof spec.title !== "string") throw err("`title` is required (a string)");
+  const body = spec.body;
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    throw err("`body` is required (the options of a stack, without x/y)");
+  }
+  const titleSide = spec.titleSide ?? "top";
+  if (titleSide !== "top" && titleSide !== "left") {
+    throw err(`\`titleSide\` must be one of top | left, got ${JSON.stringify(spec.titleSide)}`);
+  }
+  const num = (name, def, positive = false) => {
+    const v = spec[name] ?? def;
+    if (v === undefined) return undefined;
+    if (!isNum(v) || (positive ? v <= 0 : v < 0)) {
+      throw err(`\`${name}\` must be a ${positive ? "positive" : "non-negative"} number, got ${JSON.stringify(v)}`);
+    }
+    return v;
+  };
+  const pad = num("pad", 16);
+  const gap = num("gap", 12);
+  const fs = num("titleFontSize", 18, true);
+  const titleW = num("titleW", undefined, true);
+  const wOpt = num("w", undefined, true);
+  const x0 = spec.x ?? 0;
+  const y0 = spec.y ?? 0;
+  if (!isNum(x0)) throw err(`\`x\` must be a number, got ${JSON.stringify(spec.x)}`);
+  if (!isNum(y0)) throw err(`\`y\` must be a number, got ${JSON.stringify(spec.y)}`);
+
+  // `force` comes from an outer stack's equalize: a length this panel must take.
+  // A panel without its own `w` in a column with a fixed `cross` takes the column's inner width.
+  const W = force?.axis === "x" ? force.len : wOpt ?? fill;
+  const minH = force?.axis === "y" ? force.len : 0;
+
+  // The body at the origin. availW / availH are the room it must fill (null: natural).
+  const bodyAt = (availW, availH) => {
+    const dir = body.dir ?? "y";
+    const o = { ...body, dir, x: 0, y: 0 };
+    if (availW != null) o[dir === "x" ? "size" : "cross"] = availW;
+    if (availH != null) o[dir === "y" ? "size" : "cross"] = availH;
+    try {
+      return layoutStack(o, "");
+    } catch (e) {
+      throw err(`body: ${e.message}`);
+    }
+  };
+  const natural = bodyAt(null, null);
+  const naturalTitleW = Math.min(PANEL_TITLE_MAX_W, widestLine(spec.title, fs) + BOUND_TEXT_PAD_X * 2);
+  // Constrain the body on an axis only when there is more room than it needs.
+  const grow = (n, avail) => (avail > n ? avail : null);
+
+  let w, h, titleBox, bodyPos, bodyRes;
+  if (titleSide === "top") {
+    const want = W != null ? W - pad * 2 : naturalTitleW;
+    const innerW = Math.max(want, natural.w);
+    const t = fitBoundText(spec.title, innerW, 0, fs);
+    const availH = minH > 0 ? Math.max(minH - pad * 2 - t.height - gap, natural.h) : null;
+    bodyRes = bodyAt(grow(natural.w, innerW), availH == null ? null : grow(natural.h, availH));
+    w = innerW + pad * 2;
+    h = Math.max(minH, pad * 2 + t.height + gap + bodyRes.h);
+    titleBox = { x: pad, y: pad, w: innerW, h: t.height, fontSize: fs, text: t.text };
+    bodyPos = [pad, pad + t.height + gap];
+  } else {
+    const tw = titleW ?? naturalTitleW;
+    const t = fitBoundText(spec.title, tw, 0, fs);
+    const availW = W != null ? Math.max(W - pad * 2 - tw - gap, natural.w) : natural.w;
+    const innerH = Math.max(t.height, natural.h, minH - pad * 2);
+    bodyRes = bodyAt(grow(natural.w, availW), grow(natural.h, innerH));
+    w = pad * 2 + tw + gap + availW;
+    h = pad * 2 + innerH;
+    titleBox = { x: pad, y: pad, w: tw, h: innerH, fontSize: fs, text: t.text };
+    bodyPos = [pad + tw + gap, pad];
+  }
+
+  translate(bodyRes, bodyPos[0], bodyPos[1]);
+  const overflow = W == null ? 0 : Math.max(0, w - W);
+  const result = {
+    kind: "panel",
+    ...(spec.id !== undefined ? { id: spec.id } : {}),
+    x: 0,
+    y: 0,
+    w,
+    h,
+    title: titleBox,
+    body: bodyRes,
+    overflow,
+  };
+  translate(result, x0, y0);
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// legend
+// ---------------------------------------------------------------------------
+
+const LEGEND_CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"];
+
+/**
+ * A legend: rows of "sample + text", positioned and sized from the text.
+ *
+ * Returns coordinates only. Each row gets a *sample slot* (a box the caller
+ * fills with a color swatch, or draws a line across from its left-middle to
+ * its right-middle) and a *label slot* for the text, vertically centered on
+ * each other. What the sample looks like — fill, stroke, dashes — is the
+ * caller's call, decided by the diagram's semantics.
+ *
+ * The whole block can be dropped in a corner of the diagram's `bounds`, inside
+ * it or just outside it, so the bottom-right coordinates need no hand math.
+ * Label slots are measured with the same estimator the overflow lint uses, so
+ * drawing them as `text` elements never trips `TEXT_OVERFLOW_X`.
+ *
+ * @param {object} opts
+ * @param {Array<{ label: string, id?: any }>} opts.items - non-empty; a label may contain "\n"
+ * @param {"y"|"x"} [opts.dir="y"] - "y" stacks rows, "x" puts all items on one row
+ * @param {number} [opts.sampleW=40]
+ * @param {number} [opts.sampleH=16]
+ * @param {number} [opts.gap=8] - sample slot → label slot
+ * @param {number} [opts.itemGap] - between rows (default 8), or between items when `dir:"x"` (default 24)
+ * @param {number} [opts.fontSize=14]
+ * @param {number} [opts.pad=12] - padding on all four sides of the block
+ * @param {{x:number,y:number}} [opts.at] - top-left of the block (default 0,0); ignored when `corner` is set
+ * @param {{x:number,y:number,w:number,h:number}} [opts.bounds] - the diagram's extent; required with `corner`
+ * @param {"top-left"|"top-right"|"bottom-left"|"bottom-right"} [opts.corner]
+ * @param {"inside"|"outside"} [opts.place="inside"] - inside: tucked into the corner `offset` from both
+ *   edges; outside: above (top corners) / below (bottom corners) the bounds, flush with the corner's side
+ * @param {number} [opts.offset=16] - distance from the bounds' edge(s)
+ *
+ * @returns {{ kind: "legend", x: number, y: number, w: number, h: number,
+ *   items: Array<{ id?: any, text: string,
+ *     sample: {x:number,y:number,w:number,h:number},
+ *     label: {x:number,y:number,w:number,h:number,fontSize:number} }> }}
+ *
+ * @example
+ *   const lg = legend({
+ *     items: [{ label: "request" }, { label: "planned (Q3)" }],
+ *     bounds: { x: 0, y: 0, w: 800, h: 500 }, corner: "bottom-right",
+ *   });
+ *   // for each it of lg.items: draw a line from (sample.x, sample.y + sample.h/2)
+ *   // to (sample.x + sample.w, …), and a text at (label.x, label.y) sized label.w × label.h
+ */
+export function legend(opts = {}) {
+  const { items, dir = "y", place = "inside", at, bounds, corner } = opts ?? {};
+
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error("legend: `items` must be a non-empty array");
+  }
+  items.forEach((it, i) => {
+    if (typeof it?.label !== "string" || it.label === "") {
+      throw new Error(`legend: items[${i}] needs a non-empty string \`label\``);
+    }
+  });
+  if (dir !== "x" && dir !== "y") {
+    throw new Error(`legend: \`dir\` must be "x" or "y", got ${JSON.stringify(dir)}`);
+  }
+  if (place !== "inside" && place !== "outside") {
+    throw new Error(`legend: \`place\` must be "inside" or "outside", got ${JSON.stringify(place)}`);
+  }
+  // Every numeric param must be a finite number (sizes > 0, spacings >= 0),
+  // same bar as stack / panel: a string would otherwise concatenate into the
+  // coordinates and NaN would flow straight into the result.
+  const num = (name, def, kind = "any") => {
+    const v = opts?.[name] ?? def;
+    const bad =
+      !isNum(v) || (kind === "positive" && v <= 0) || (kind === "non-negative" && v < 0);
+    if (bad) {
+      const what = kind === "any" ? "" : `${kind} `;
+      throw new Error(`legend: \`${name}\` must be a ${what}number, got ${JSON.stringify(v)}`);
+    }
+    return v;
+  };
+  const sampleW = num("sampleW", 40, "positive");
+  const sampleH = num("sampleH", 16, "positive");
+  const gap = num("gap", 8, "non-negative");
+  const itemGap = num("itemGap", dir === "x" ? 24 : 8, "non-negative");
+  const fontSize = num("fontSize", 14, "positive");
+  const pad = num("pad", 12, "non-negative");
+  const offset = num("offset", 16);
+  if (at !== undefined && at !== null) {
+    if (typeof at !== "object" || Array.isArray(at)) {
+      throw new Error("legend: `at` must be { x, y }");
+    }
+    for (const k of ["x", "y"]) {
+      if (at[k] !== undefined && !isNum(at[k])) {
+        throw new Error(`legend: \`at.${k}\` must be a number, got ${JSON.stringify(at[k])}`);
+      }
+    }
+  }
+  if (bounds != null || corner != null) {
+    if (corner != null && !LEGEND_CORNERS.includes(corner)) {
+      throw new Error(
+        `legend: \`corner\` must be one of ${LEGEND_CORNERS.join(" / ")}, got ${JSON.stringify(corner)}`
+      );
+    }
+    if (bounds == null || typeof bounds !== "object" || Array.isArray(bounds)) {
+      throw new Error("legend: `bounds` { x, y, w, h } is required when `corner` is given");
+    }
+    for (const k of ["x", "y", "w", "h"]) {
+      if (!isNum(bounds[k])) {
+        throw new Error(
+          `legend: \`bounds.${k}\` must be a number, got ${JSON.stringify(bounds[k])}; ` +
+            "`bounds` is { x, y, w, h }"
+        );
+      }
+    }
+  }
+
+  // Measure each row: the text slot comes from the shared estimator, the row
+  // is as tall as the taller of sample and text.
+  const rows = items.map((it) => {
+    const lines = it.label.split("\n");
+    const textW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize)));
+    const textH = textHeight(it.label, fontSize, 0);
+    return { it, textW, textH, rowH: Math.max(sampleH, textH), rowW: sampleW + gap + textW };
+  });
+
+  const innerW = dir === "x"
+    ? rows.reduce((s, r) => s + r.rowW, 0) + itemGap * (rows.length - 1)
+    : Math.max(...rows.map((r) => r.rowW));
+  const innerH = dir === "x"
+    ? Math.max(...rows.map((r) => r.rowH))
+    : rows.reduce((s, r) => s + r.rowH, 0) + itemGap * (rows.length - 1);
+  const w = pad * 2 + innerW;
+  const h = pad * 2 + innerH;
+
+  // Block origin.
+  let x = at?.x ?? 0;
+  let y = at?.y ?? 0;
+  if (corner) {
+    const right = corner.endsWith("right");
+    const bottom = corner.startsWith("bottom");
+    if (place === "inside") {
+      x = right ? bounds.x + bounds.w - offset - w : bounds.x + offset;
+      y = bottom ? bounds.y + bounds.h - offset - h : bounds.y + offset;
+    } else {
+      x = right ? bounds.x + bounds.w - w : bounds.x;
+      y = bottom ? bounds.y + bounds.h + offset : bounds.y - offset - h;
+    }
+  }
+
+  // Slots, centered within each row.
+  let cursor = (dir === "x" ? x : y) + pad;
+  const out = rows.map((r) => {
+    const rowX = dir === "x" ? cursor : x + pad;
+    const rowY = dir === "x" ? y + pad : cursor;
+    const rowH = dir === "x" ? innerH : r.rowH;
+    cursor += (dir === "x" ? r.rowW : r.rowH) + itemGap;
+    const item = {};
+    if (r.it.id !== undefined) item.id = r.it.id;
+    item.text = r.it.label;
+    item.sample = { x: rowX, y: rowY + (rowH - sampleH) / 2, w: sampleW, h: sampleH };
+    item.label = {
+      x: rowX + sampleW + gap,
+      y: rowY + (rowH - r.textH) / 2,
+      w: r.textW,
+      h: r.textH,
+      fontSize,
+    };
+    return item;
+  });
+
+  return { kind: "legend", x, y, w, h, items: out };
+}
+
+// ---------------------------------------------------------------------------
+// axis
+// ---------------------------------------------------------------------------
+
+// Candidate "nice" tick steps: 1, 2, 5 × 10^k. Picks the one whose tick count
+// over [min, max] lands closest to `count`; a tie goes to the smaller step.
+function niceStep(min, max, count) {
+  const raw = (max - min) / Math.max(count, 1);
+  if (!(raw > 0 && Number.isFinite(raw))) return 1; // collapsed range: any step lands on it
+  const k0 = Math.floor(Math.log10(raw));
+  let best = null;
+  for (let k = k0 - 2; k <= k0 + 2; k++) {
+    for (const m of [1, 2, 5]) {
+      const step = m * 10 ** k;
+      const n = Math.floor(max / step + 1e-9) - Math.ceil(min / step - 1e-9) + 1;
+      const diff = Math.abs(n - count);
+      if (best === null || diff < best.diff || (diff === best.diff && step < best.step)) {
+        best = { step, diff };
+      }
+    }
+  }
+  return best.step;
+}
+
+// Upper bound on ticks per axis; more is never a readable axis.
+const MAX_TICKS = 1000;
+
+// Strip float noise from i*step (0.1*3 → 0.30000000000000004).
+const clean = (v) => Number(v.toPrecision(12));
+
+/**
+ * An axis: a line with marker points on it, the gaps that keep the
+ * line from running through the markers, optional ticks, and the value → pixel
+ * scale. Returns coordinates only — the dots, labels and tick marks are drawn
+ * by the caller.
+ *
+ * Placement of the marks:
+ * - every mark has a `value` → linear over `domain` (default: min..max of the
+ *   values), spread over the axis minus `extend` at both ends when the range
+ *   collapses to one value and there is no `length`, the axis is just the
+ *   `extend`s long and everything sits at the start;
+ * - no mark has a `value` → evenly `spacing` apart, or, when `length` is
+ *   given, evenly spread inside `extend`;
+ * - some have, some don't → throws.
+ *
+ * `segments` use the same `{ at, points }` form as `tree`'s connectors, plus an
+ * `arrow` flag: draw each as sugar `{ shape: "line" | "arrow", at, points }`
+ * (`arrow: true` → `"arrow"`). Runs shorter than 4px — the linter's "renders as
+ * nothing" threshold — are dropped rather than returned as degenerate lines.
+ *
+ * @param {object} opts
+ * @param {{x:number,y:number}} opts.from - start of the axis
+ * @param {"x"|"y"|"up"} [opts.dir="x"] - `x` runs right, `y` runs down, `up` runs up
+ *   (a chart's value axis: the start is the baseline and larger values sit higher)
+ * @param {Array<{id?:string,value?:number,label?:string}>} [opts.marks=[]]
+ * @param {[number,number]} [opts.domain] - value range; defaults to the marks' min..max
+ * @param {number} [opts.length] - total length; default `spacing*(n-1)` + both `extend`s
+ * @param {number} [opts.spacing=160] - gap between valueless marks
+ * @param {[number,number]} [opts.extend=[0,0]] - extra length before the first / after the last mark
+ * @param {number} [opts.gap=0] - how much of the line to cut away on each side of a mark
+ * @param {"none"|"end"} [opts.arrow="none"] - `end` flags the last segment as an arrow
+ * @param {{step?:number,count?:number}} [opts.ticks] - ticks on the domain (`count` defaults to 5;
+ *   step is the nearest of 1/2/5 × 10^k, ticks on multiples of it, inside the domain;
+ *   more than 1000 ticks throws — raise `step` / lower `count`)
+ * @param {"before"|"after"|"alternate"} [opts.labelSide="after"] - before = above (x) / left (y, up)
+ * @param {number} [opts.labelOffset=12] - label anchor distance from the line
+ *
+ * @returns {{ kind:"axis", from, to, marks, ticks, segments, scale }}
+ *   - `marks`: `{ id?, value?, label?, x, y, t, labelAnchor:{x,y,side} }`, `t` ∈ [0,1] along the axis
+ *   - `ticks`: `{ value, x, y, labelAnchor }` (empty without `ticks`)
+ *   - `segments`: `{ at:[x,y], points:[[0,0],[dx,dy]], arrow }`
+ *   - `scale`: `{ domain, origin, pxPerUnit }` — value v sits at
+ *     `origin + (v - domain[0]) * pxPerUnit`, measured along the axis (x for
+ *     `dir:"x"`, y for `"y"` and `"up"`); the `extend` stretches are not part of
+ *     it. On `"up"` the origin is the baseline and `pxPerUnit` is negative.
+ *     `domain` and `pxPerUnit` are null when there is no domain.
+ *
+ * @example
+ *   const a = axis({ from: { x: 60, y: 200 },
+ *     marks: [0, 1, 2, 6].map((value) => ({ value, label: `M${value}` })),
+ *     length: 600, gap: 10, arrow: "end" });
+ *   // a.marks.map(m => m.x) → [60, 160, 260, 660]
+ */
+export function axis(opts = {}) {
+  const {
+    from, dir = "x", marks = [], domain, length, spacing = 160,
+    extend = [0, 0], gap = 0, arrow = "none", ticks, labelSide = "after",
+    labelOffset = 12,
+  } = opts ?? {};
+  const isNum = (v) => typeof v === "number" && Number.isFinite(v);
+  const bad = (name, want, v) =>
+    new Error(`axis: \`${name}\` must be ${want}, got ${JSON.stringify(v) ?? String(v)}`);
+  const checkNum = (name, v, positive = false) => {
+    if (!isNum(v) || (positive ? v <= 0 : v < 0)) {
+      throw bad(name, positive ? "a positive number" : "a non-negative number", v);
+    }
+  };
+
+  if (!from || !isNum(from.x) || !isNum(from.y)) {
+    throw new Error("axis: `from` must be { x, y } with numeric coordinates");
+  }
+  if (dir !== "x" && dir !== "y" && dir !== "up") {
+    throw new Error(`axis: unknown \`dir\` "${dir}" (use "x", "y" or "up")`);
+  }
+  if (!["before", "after", "alternate"].includes(labelSide)) {
+    throw new Error(`axis: unknown \`labelSide\` "${labelSide}" (use "before", "after" or "alternate")`);
+  }
+  if (arrow !== "none" && arrow !== "end") {
+    throw new Error(`axis: unknown \`arrow\` "${arrow}" (use "none" or "end")`);
+  }
+  if (!Array.isArray(marks)) throw new Error("axis: `marks` must be an array");
+  if (!Array.isArray(extend) || extend.length !== 2 || !extend.every(isNum)) {
+    throw bad("extend", "[before, after] numbers", extend);
+  }
+  if (length !== undefined) checkNum("length", length);
+  checkNum("spacing", spacing);
+  checkNum("gap", gap);
+  checkNum("labelOffset", labelOffset);
+  if (ticks !== undefined && ticks !== null) {
+    if (typeof ticks !== "object" || Array.isArray(ticks)) {
+      throw bad("ticks", "{ step? , count? }", ticks);
+    }
+    if (ticks.step !== undefined) checkNum("ticks.step", ticks.step, true);
+    if (ticks.count !== undefined) checkNum("ticks.count", ticks.count, true);
+  }
+
+  const withValue = marks.filter((m) => m && m.value !== undefined && m.value !== null).length;
+  if (withValue !== 0 && withValue !== marks.length) {
+    throw new Error("axis: `value` must be set on every mark or on none — got a mix");
+  }
+  const valued = marks.length > 0 && withValue === marks.length;
+  if (valued && !marks.every((m) => isNum(m.value))) {
+    const badMark = marks.find((m) => !isNum(m.value));
+    throw bad("value", "a finite number on every mark", badMark.value);
+  }
+
+  let dom = domain;
+  if (dom !== undefined) {
+    if (!Array.isArray(dom) || dom.length !== 2 || !dom.every(isNum) || dom[0] > dom[1]) {
+      throw new Error("axis: `domain` must be [min, max] with min <= max");
+    }
+  } else if (valued) {
+    const vs = marks.map((m) => m.value);
+    dom = [Math.min(...vs), Math.max(...vs)];
+  }
+  if (ticks !== undefined && ticks !== null && dom === undefined) {
+    throw new Error("axis: `ticks` needs a `domain` (or marks with `value`)");
+  }
+
+  const n = marks.length;
+  const [e0, e1] = extend;
+  const collapsed = dom !== undefined && dom[0] === dom[1];
+  // Valued marks on a collapsed range all sit on one value: with no `length`
+  // there is nothing to spread, so the axis is only as long as its `extend`s.
+  const total = length ??
+    (valued && collapsed ? e0 + e1 : Math.max(n - 1, 0) * spacing + e0 + e1);
+  const span = total - e0 - e1;
+  // A collapsed range needs no stretch of its own (everything sits at the
+  // start); a real one needs room to be laid out on.
+  if (dom !== undefined && !(collapsed ? span >= 0 : span > 0)) {
+    throw new Error("axis: `length` must leave a positive stretch inside `extend` to place the domain on");
+  }
+
+  // A value sits `e0 + (v - dom[0]) * along` from the start of the axis. On "up"
+  // the page coordinate falls along the axis, and the returned scale is in page
+  // coordinates, so it runs the other way: negative px per unit, origin at the
+  // baseline `from.y - e0`.
+  const along = dom === undefined ? null : (dom[1] === dom[0] ? 0 : span / (dom[1] - dom[0]));
+  const pxPerUnit = along === null || along === 0 || dir !== "up" ? along : -along;
+  const posOfValue = (v) => e0 + (v - dom[0]) * along;
+  const positions = marks.map((m, i) => {
+    if (valued) return posOfValue(m.value);
+    if (length === undefined) return e0 + i * spacing;
+    return n > 1 ? e0 + (i * span) / (n - 1) : e0;
+  });
+
+  const unit = dir === "x" ? [1, 0] : dir === "y" ? [0, 1] : [0, -1];
+  const point = (p) => ({ x: from.x + unit[0] * p, y: from.y + unit[1] * p });
+  const t = (p) => (total > 0 ? p / total : 0);
+  // before = above an x axis / left of a y or up axis
+  const anchor = (p, i) => {
+    const side = labelSide === "alternate" ? (i % 2 === 0 ? "before" : "after") : labelSide;
+    const off = side === "before" ? -labelOffset : labelOffset;
+    const c = point(p);
+    return dir === "x"
+      ? { x: c.x, y: c.y + off, side }
+      : { x: c.x + off, y: c.y, side };
+  };
+
+  const outMarks = marks.map((m, i) => {
+    const c = point(positions[i]);
+    const out = {};
+    if (m.id !== undefined) out.id = m.id;
+    if (m.value !== undefined) out.value = m.value;
+    if (m.label !== undefined) out.label = m.label;
+    return { ...out, x: c.x, y: c.y, t: t(positions[i]), labelAnchor: anchor(positions[i], i) };
+  });
+
+  const outTicks = [];
+  if (ticks !== undefined && ticks !== null) {
+    const [lo, hi] = dom;
+    const addTick = (value) => {
+      const p = posOfValue(value);
+      const c = point(p);
+      outTicks.push({ value, x: c.x, y: c.y, labelAnchor: anchor(p, outTicks.length) });
+    };
+    if (lo === hi) {
+      // A range that collapsed to one value has no steps to walk: one tick on it.
+      addTick(lo);
+    } else {
+      const step = ticks.step ?? niceStep(lo, hi, ticks.count ?? 5);
+      const first = Math.ceil(lo / step - 1e-9);
+      const last = Math.floor(hi / step + 1e-9);
+      // Count before generating: a tiny step or a huge count would otherwise
+      // allocate until the process dies. `!(<=)` also catches Infinity / NaN.
+      if (!(last - first + 1 <= MAX_TICKS)) {
+        throw new Error(
+          `axis: \`ticks\` would produce more than ${MAX_TICKS} ticks — ` +
+            (ticks.step !== undefined ? "raise `ticks.step`" : "lower `ticks.count`"),
+        );
+      }
+      for (let i = first; i <= last; i++) addTick(clean(i * step));
+    }
+  }
+
+  // Line pieces = [0, total] minus a hole of `gap` either side of every mark.
+  const holes = (gap > 0 ? positions : [])
+    .map((p) => [p - gap, p + gap])
+    .sort((a, b) => a[0] - b[0]);
+  const pieces = [];
+  let cursor = 0;
+  for (const [a, b] of holes) {
+    if (a > cursor) pieces.push([cursor, Math.min(a, total)]);
+    cursor = Math.max(cursor, b);
+  }
+  if (cursor < total) pieces.push([cursor, total]);
+  const kept = pieces.filter(([a, b]) => b - a >= 4);
+  const segments = kept.map(([a, b], i) => {
+    const s = point(a);
+    return {
+      at: [s.x, s.y],
+      points: [[0, 0], [unit[0] * (b - a), unit[1] * (b - a)]],
+      arrow: arrow === "end" && i === kept.length - 1,
+    };
+  });
+
+  return {
+    kind: "axis",
+    from: { x: from.x, y: from.y },
+    to: point(total),
+    marks: outMarks,
+    ticks: outTicks,
+    segments,
+    scale: {
+      domain: dom === undefined ? null : [dom[0], dom[1]],
+      origin: dir === "x" ? from.x + e0 : dir === "y" ? from.y + e0 : from.y - e0,
+      pxPerUnit,
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// taper
+// ---------------------------------------------------------------------------
+
+const TAPER_NARROW = ["top", "bottom"];
+// Vertical breathing room above and below a layer's label.
+const TAPER_PAD_Y = 8;
+
+/**
+ * Layers that narrow step by step — a pyramid (narrow at the top) or a funnel
+ * (narrow at the bottom). Returns coordinates only: each layer's four corners
+ * (draw them as sugar `polygon`), the box its label fits in (draw it as `text`),
+ * where its value goes on the right, and where the conversion rate between each
+ * two layers goes.
+ *
+ * Shape. Layers are listed top to bottom, always, whichever way the figure
+ * narrows. The *wider* edge of each layer sits one `step` inside the wider edge
+ * of its neighbour toward the narrow end, so the width falls by the same step
+ * layer after layer; values never change it (a layer scaled by its value would be
+ * too thin to hold a name). Inside a layer the slanted sides keep the slope the
+ * figure's sides would have if the gap between layers were part of it, so the
+ * sides read as one straight line broken by the gaps. `step` is picked so the
+ * narrowest edge, for layers of their nominal height, is `minWidth`.
+ *
+ * Text. A label's box is as wide as the layer's narrowest edge minus the same
+ * horizontal inset bound text gets, and as tall as its wrapped lines. A label that
+ * does not fit on one line wraps; a layer that cannot hold the wrapped lines grows
+ * taller than `layerH`, and the layers below move down.
+ *
+ * @param {object} opts
+ * @param {Array<string|{text:string, value?:number|string}>} opts.layers - top to bottom; non-empty
+ * @param {number} opts.width - width of the widest edge of the whole figure
+ * @param {"top"|"bottom"} [opts.narrow="top"] - which end is narrow: "top" = pyramid, "bottom" = funnel
+ * @param {number} [opts.minWidth=0.3*width] - width of the narrowest edge; positive and below `width`
+ * @param {number} [opts.layerH=56] - nominal (minimum) layer height
+ * @param {number} [opts.gap=12] - vertical gap between layers
+ * @param {number} [opts.fontSize=16] - label font size
+ * @param {number} [opts.valueGap=24] - from the figure's right edge to the value / rate column
+ * @param {number} [opts.x=0] - left of the widest edge
+ * @param {number} [opts.y=0] - top of the first layer
+ *
+ * @returns {{ kind:"taper", narrow:string, x:number, y:number, w:number, h:number, cx:number,
+ *   layers: Array<{ index:number, text:string, value?:number|string,
+ *     x:number, y:number, w:number, h:number,
+ *     corners:[number,number][],
+ *     textBox:{x:number,y:number,w:number,h:number,fontSize:number,text:string},
+ *     valueAnchor?:{x:number,y:number} }>,
+ *   rates: Array<{ from:number, to:number, ratio?:number, text?:string, anchor:{x:number,y:number} }> }}
+ *   - `corners`: top-left, top-right, bottom-right, bottom-left — ready for a polygon's `points`.
+ *   - `textBox.text`: the label with "\n" at the wrap points; draw it as a `text` of that size.
+ *   - `valueAnchor` (only for layers with a `value`): the left-middle of the value's text, one column for all layers.
+ *   - `rates` (one per pair of neighbouring layers, whatever the values): `anchor` in the gap between the
+ *     two layers, same column as the values. `ratio` = lower / upper and `text` = its percentage
+ *     ("40%", "12.5%") only where both values are numbers and the upper one is above 0.
+ *
+ * @example
+ *   const f = taper({ narrow: "bottom", width: 560, layers: [
+ *     { text: "Visited", value: 1000 }, { text: "Signed up", value: 400 } ] });
+ *   // f.layers[0].corners → draw as { shape: "polygon", points: corners, fill }
+ *   // f.rates[0].text → "40%", at f.rates[0].anchor
+ */
+export function taper(opts = {}) {
+  const o = opts ?? {};
+  const { layers, width, narrow = "top" } = o;
+  const bad = (name, want, v) =>
+    new Error(`taper: \`${name}\` must be ${want}, got ${JSON.stringify(v) ?? String(v)}`);
+  const num = (name, def, kind = "any") => {
+    const v = o[name] ?? def;
+    const wrong =
+      !isNum(v) || (kind === "positive" && v <= 0) || (kind === "non-negative" && v < 0);
+    if (wrong) throw bad(name, kind === "any" ? "a number" : `a ${kind} number`, o[name]);
+    return v;
+  };
+
+  if (!Array.isArray(layers) || layers.length === 0) {
+    throw bad("layers", "a non-empty array of layer names or { text, value? }", layers);
+  }
+  const items = layers.map((l, i) => {
+    const item = typeof l === "string" ? { text: l } : l;
+    if (!item || typeof item !== "object" || typeof item.text !== "string" || item.text === "") {
+      throw bad(`layers[${i}]`, "a non-empty string or { text, value? } with a non-empty `text`", l);
+    }
+    const v = item.value;
+    if (v !== undefined && v !== null && !isNum(v) && typeof v !== "string") {
+      throw bad(`layers[${i}].value`, "a number or a string", v);
+    }
+    return { text: item.text, value: v ?? undefined };
+  });
+  if (!isNum(width) || width <= 0) throw bad("width", "a positive number", width);
+  if (!TAPER_NARROW.includes(narrow)) throw bad("narrow", '"top" or "bottom"', narrow);
+  const minWidth = num("minWidth", width * 0.3, "positive");
+  if (minWidth >= width) throw bad("minWidth", "a positive number below `width`", minWidth);
+  const layerH = num("layerH", 56, "positive");
+  const gap = num("gap", 12, "non-negative");
+  const fontSize = num("fontSize", 16, "positive");
+  const valueGap = num("valueGap", 24, "non-negative");
+  const x0 = num("x", 0);
+  const y0 = num("y", 0);
+
+  const n = items.length;
+  // The wider edge falls `step` per layer; across a layer of height h its sides
+  // close in by step * h / (h + gap) in total (the rest happens in the gap).
+  const step = (width - minWidth) / (n - 1 + layerH / (layerH + gap));
+  const cx = x0 + width / 2;
+  const column = x0 + width + valueGap;
+
+  let y = y0;
+  const out = items.map((item, i) => {
+    const wide = narrow === "bottom" ? width - i * step : width - (n - 1 - i) * step;
+    const narrowEdge = (h) => wide - (step * h) / (h + gap);
+
+    // Grow the layer until its wrapped label fits; the narrow edge shrinks a
+    // little as the layer grows, so settle it by iterating (h only ever rises).
+    let h = layerH;
+    let text = item.text;
+    for (let k = 0; k < 20; k++) {
+      const boxW = Math.max(1, narrowEdge(h) - BOUND_TEXT_PAD_X * 2);
+      text = wrapText(item.text, boxW, fontSize);
+      const need = Math.max(layerH, textHeight(text, fontSize, 0) + TAPER_PAD_Y * 2);
+      if (need <= h) break;
+      h = need;
+    }
+    const lo = narrowEdge(h);
+    const topW = narrow === "bottom" ? wide : lo;
+    const botW = narrow === "bottom" ? lo : wide;
+    const corners = [
+      [cx - topW / 2, y],
+      [cx + topW / 2, y],
+      [cx + botW / 2, y + h],
+      [cx - botW / 2, y + h],
+    ];
+    const textW = Math.max(1, lo - BOUND_TEXT_PAD_X * 2);
+    const textH = textHeight(text, fontSize, 0);
+    const layer = {
+      index: i,
+      text: item.text,
+      ...(item.value !== undefined ? { value: item.value } : {}),
+      x: cx - wide / 2,
+      y,
+      w: wide,
+      h,
+      corners,
+      textBox: { x: cx - textW / 2, y: y + (h - textH) / 2, w: textW, h: textH, fontSize, text },
+      ...(item.value !== undefined ? { valueAnchor: { x: column, y: y + h / 2 } } : {}),
+    };
+    y += h + gap;
+    return layer;
+  });
+
+  // Every pair of neighbours gets an anchor in the gap — a funnel may show only
+  // the rates, with no value on any layer, or values written as formatted text
+  // ("10,000"). The figures ride along only when both are numbers and the one
+  // above is positive.
+  const rates = [];
+  for (let i = 0; i + 1 < n; i++) {
+    const a = out[i];
+    const b = out[i + 1];
+    const rate = { from: i, to: i + 1, anchor: { x: column, y: (a.y + a.h + b.y) / 2 } };
+    if (isNum(a.value) && isNum(b.value) && a.value > 0) {
+      rate.ratio = b.value / a.value;
+      rate.text = `${Number((rate.ratio * 100).toFixed(1))}%`;
+    }
+    rates.push(rate);
+  }
+
+  const last = out[n - 1];
+  return {
+    kind: "taper",
+    narrow,
+    x: x0,
+    y: y0,
+    w: width,
+    h: last.y + last.h - y0,
+    cx,
+    layers: out,
+    rates,
   };
 }

@@ -19,7 +19,7 @@ _Avoid_: card（recipe 里另指单个小格子）, section, band, shell
 _Avoid_: segmented axis, timeline line
 
 **legend**：
-一块「样本 + 文字」行组成的图例组件，管每行的位置和整块的摆放，样本画成什么由 recipe 定。
+一块「样本 + 文字」行组成的图例组件，管每行的位置和整块的摆放，样本画成什么由入口 skill 定。
 _Avoid_: key, color key
 
 **slot**：

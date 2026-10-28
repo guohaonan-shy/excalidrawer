@@ -27,14 +27,15 @@ measurement, recipe growth is unfalsifiable.
    defect. A run that ends with non-empty `warnings` failed Layer A — no
    judgement needed, no vision needed.
 2. **Fixtures with known-good targets.** `examples/comparison-figures.mjs`
-   builds three comparison figures in code — the reference output the recipe is
-   supposed to produce. Each exercises a different rule:
+   builds three comparison figures in code — the reference output the
+   `comparison` entry skill is supposed to produce. Each exercises a different rule:
    - `comparison-coverage` — row cards; paired dimensions must share y and h
    - `comparison-subscores` — single panel; per-side lists must *not* be boxed
      into rows (the choice rule)
    - `comparison-pricing` — Layout C; fan-out arrows must anchor to the shell,
      and a footer row must stay level across an asymmetric split
-3. **A two-layer gate already written down** — `skills/shared/SKILL.md` §7.5.
+3. **A two-layer gate already written down** — the "出图" section of
+   `skills/steps/SKILL.md`.
    Layer A is machine-checkable; Layer B is a visual rubric.
 
 ## The part worth building: structural assertions

@@ -50,6 +50,11 @@ const CANVAS_WHITE = { r: 255, g: 255, b: 255 };
 
 const SHAPE_TYPES = new Set(["rectangle", "diamond", "ellipse"]);
 
+// A closed polygon (a `line` with polygon: true) counts as a shape, ranged by
+// its bounding box (x / y / width / height) like a rectangle.
+const isPolygon = (e) => e.type === "line" && e.polygon === true;
+const isShape = (e) => (SHAPE_TYPES.has(e.type) || isPolygon(e)) && e.width > 0 && e.height > 0;
+
 /**
  * @param {Array} elements - raw Excalidraw elements (may be nested; flattened)
  * @returns {Array<{code:string, ids:string[], message:string}>}
@@ -128,9 +133,7 @@ function longestLineWidth(text, fontSize) {
 // --- shape overlap ---------------------------------------------------------
 
 function checkShapeOverlap(flat, warnings) {
-  const shapes = flat.filter(
-    (e) => SHAPE_TYPES.has(e.type) && e.width > 0 && e.height > 0
-  );
+  const shapes = flat.filter(isShape);
   for (let i = 0; i < shapes.length; i++) {
     for (let j = i + 1; j < shapes.length; j++) {
       const a = shapes[i];
@@ -208,9 +211,7 @@ function pathLength(pts) {
 // --- arrow crossing a non-endpoint shape ("line over a module") ------------
 
 function checkArrowCrossings(flat, warnings) {
-  const shapes = flat.filter(
-    (e) => SHAPE_TYPES.has(e.type) && e.width > 0 && e.height > 0
-  );
+  const shapes = flat.filter(isShape);
   if (shapes.length === 0) return;
 
   for (const el of flat) {
@@ -303,6 +304,16 @@ function checkContrast(flat, byId, warnings) {
       const c = byId.get(el.containerId);
       const parsed = c && parseColor(c.backgroundColor);
       if (parsed) bg = parsed;
+    } else {
+      // Free text has no container, but a label drawn over a filled polygon
+      // (a `taper` layer) is read against that fill: the topmost one whose
+      // bounding box holds the text's center.
+      const cx = el.x + (el.width || 0) / 2;
+      const cy = el.y + (el.height || 0) / 2;
+      const under = flat.filter(
+        (p) => isPolygon(p) && p.width > 0 && p.height > 0 && pointInRect([cx, cy], p) && parseColor(p.backgroundColor)
+      );
+      if (under.length > 0) bg = parseColor(under.at(-1).backgroundColor);
     }
 
     const ratio = contrastRatio(fg, bg);

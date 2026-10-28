@@ -1,12 +1,14 @@
 /**
- * Export Excalidraw diagrams to SVG and PNG.
+ * Export Excalidraw diagrams to SVG, PNG and WebP.
  *
  * SVG is generated directly from element definitions (no browser required).
- * PNG is rendered from SVG using the `sharp` library.
+ * PNG and WebP are rasterized from the SVG with resvg-js; WebP is then encoded
+ * losslessly with @jsquash/webp.
  */
 
 import { readFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
+import { createRequire } from "module";
 import { dirname, join, basename } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -426,11 +428,16 @@ function renderLinear(el) {
   if (!el.points || el.points.length < 2) return "";
 
   const pts = el.points.map(([dx, dy]) => [el.x + dx, el.y + dy]);
-  const { d, samples } = linearGeometry(el, pts);
+  const geometry = linearGeometry(el, pts);
+  const { samples } = geometry;
+  // Only a closed polygon line takes a fill; every other line and arrow stays
+  // unfilled whatever its backgroundColor says.
+  const closed = el.type === "line" && el.polygon === true;
+  const d = closed ? `${geometry.d} Z` : geometry.d;
 
   const attrs = svgAttrs({
     d,
-    fill: "none",
+    fill: closed && el.backgroundColor !== "transparent" ? el.backgroundColor : "none",
     stroke: el.strokeColor,
     "stroke-width": el.strokeWidth,
     "stroke-dasharray": strokeDashArray(el.strokeStyle),
@@ -599,15 +606,12 @@ export function toSvg(elements) {
 // ---------------------------------------------------------------------------
 
 /**
- * Render elements to a PNG Buffer.
+ * Rasterize elements with resvg (shared by PNG and WebP export, so both come
+ * from the same font loading, white background and `scale`).
  *
- * Uses @resvg/resvg-js for fast native SVG-to-PNG rendering.
- *
- * @param {Array} elements  - flat array of element objects
- * @param {number} scale    - output scale factor (default 2 for retina)
- * @returns {Promise<Buffer>} PNG buffer
+ * @returns {Promise<import("@resvg/resvg-js").RenderedImage>}
  */
-export async function toPng(elements, scale = 2) {
+export async function rasterize(elements, scale) {
   const svg = toSvg(elements);
   const fontPath = join(__dirname, "fonts", "Excalifont-Regular.ttf");
 
@@ -621,5 +625,89 @@ export async function toPng(elements, scale = 2) {
     fitTo: { mode: "zoom", value: scale },
   });
 
-  return Buffer.from(resvg.render().asPng());
+  return resvg.render();
+}
+
+/**
+ * Render elements to a PNG Buffer.
+ *
+ * Uses @resvg/resvg-js for fast native SVG-to-PNG rendering.
+ *
+ * @param {Array} elements  - flat array of element objects
+ * @param {number} scale    - output scale factor (default 2 for retina)
+ * @returns {Promise<Buffer>} PNG buffer
+ */
+export async function toPng(elements, scale = 2) {
+  return encodePng(await rasterize(elements, scale));
+}
+
+/**
+ * Encode an already-rasterized image (from {@link rasterize}) as PNG. Lets a
+ * caller that wants several bitmap formats rasterize once.
+ *
+ * @param {import("@resvg/resvg-js").RenderedImage} image
+ * @returns {Buffer}
+ */
+export function encodePng(image) {
+  return Buffer.from(image.asPng());
+}
+
+// ---------------------------------------------------------------------------
+// WebP export (lossless, via @jsquash/webp wasm)
+// ---------------------------------------------------------------------------
+
+let _webpEncoder = null;
+
+/**
+ * Load @jsquash/webp once. The package is written for browsers, so in Node we
+ * read its wasm file ourselves and hand the compiled module to `init`. The
+ * SIMD build is used when the host can run it (the package picks the same
+ * build internally, so the module we pass must match).
+ */
+function loadWebpEncoder() {
+  if (!_webpEncoder) {
+    _webpEncoder = (async () => {
+      const require = createRequire(import.meta.url);
+      const { default: encode, init } = await import("@jsquash/webp/encode.js");
+      let wasm;
+      try {
+        wasm = await WebAssembly.compile(readFileSync(require.resolve("@jsquash/webp/codec/enc/webp_enc_simd.wasm")));
+      } catch {
+        wasm = await WebAssembly.compile(readFileSync(require.resolve("@jsquash/webp/codec/enc/webp_enc.wasm")));
+      }
+      await init(wasm);
+      return encode;
+    })();
+    _webpEncoder.catch(() => { _webpEncoder = null; });
+  }
+  return _webpEncoder;
+}
+
+/**
+ * Render elements to a lossless WebP Buffer.
+ *
+ * Same rasterization as {@link toPng} (fonts, white background, `scale`); only
+ * the final encode differs: the RGBA pixels go straight to the lossless WebP
+ * encoder, with no PNG round trip. There is deliberately no quality option.
+ *
+ * @param {Array} elements  - flat array of element objects
+ * @param {number} scale    - output scale factor (default 2 for retina)
+ * @returns {Promise<Buffer>} WebP buffer
+ */
+export async function toWebp(elements, scale = 2) {
+  return encodeWebp(await rasterize(elements, scale));
+}
+
+/**
+ * Encode an already-rasterized image (from {@link rasterize}) as lossless WebP.
+ *
+ * @param {import("@resvg/resvg-js").RenderedImage} image
+ * @returns {Promise<Buffer>}
+ */
+export async function encodeWebp(image) {
+  const encode = await loadWebpEncoder();
+  const pixels = image.pixels;
+  const data = new Uint8ClampedArray(pixels.buffer, pixels.byteOffset, pixels.byteLength);
+  const out = await encode({ data, width: image.width, height: image.height }, { lossless: 1 });
+  return Buffer.from(out);
 }

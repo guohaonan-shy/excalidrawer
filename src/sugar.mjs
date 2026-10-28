@@ -16,6 +16,13 @@
  *                                                                      right = U-route detour)
  *                 L4 { shape:"arrow", at:[x,y], points:[[dx,dy]...] }  (manual escape)
  *
+ *   polygon sugar: { shape:"polygon", id?, points:[[x,y]...], fill?, stroke?, dashed? }
+ *                 — absolute vertices (>= 3), expanded to ONE closed `line` element
+ *                   (`polygon: true`) that exports filled. Only for trapezoids and
+ *                   the like (the `taper` component's layers), not a general
+ *                   drawing tool. Layer A treats it as a shape over its bounding
+ *                   box; an arrow `from`/`to` it connects to that box.
+ *
  *   line sugar:   { shape:"line", ... }  — same addressing as arrow (L1-L4),
  *                 no arrowheads; takes edges?:"sharp"|"round" (default sharp).
  *
@@ -40,11 +47,11 @@
  */
 
 import {
-  base, rect, diamond, ellipse, textEl, arrow, line, colors,
+  base, rect, diamond, ellipse, textEl, arrow, line, polygon, colors,
   ARROWHEADS, ARROW_TYPES, STROKE_STYLES, LINE_EDGES, strokeWidths,
 } from "./elements.mjs";
 import { edgePoint, routeU, labelAnchor } from "./layout.mjs";
-import { fitBoundText } from "./text.mjs";
+import { fitBoundText, estimateTextWidth } from "./text.mjs";
 
 export class SugarError extends Error {
   constructor(issues) {
@@ -54,7 +61,7 @@ export class SugarError extends Error {
   }
 }
 
-const SHAPE_KINDS = ["rect", "diamond", "ellipse", "text"];
+const SHAPE_KINDS = ["rect", "diamond", "ellipse", "text", "polygon"];
 const SIDES = ["top", "right", "bottom", "left"];
 
 /** Resolve a color token: "#rrggbb" / "transparent" passthrough, palette key, or stroke accent. */
@@ -103,6 +110,14 @@ export function desugar(elements) {
     const id = typeof el.id === "string" && el.id ? el.id : `el-${i}`;
     if (!SHAPE_KINDS.includes(kind)) {
       issues.push(`element[${i}] (${id}): unknown shape "${kind}" — expected ${SHAPE_KINDS.join("/")}/arrow/line`);
+      return;
+    }
+    if (kind === "polygon") {
+      const made = polygonSugar(el, i, id, issues);
+      if (made) {
+        raw.push(made.element);
+        bboxes.set(id, made.bbox);
+      }
       return;
     }
     if (!isXY(el.at)) {
@@ -329,6 +344,61 @@ export function desugar(elements) {
 }
 
 /**
+ * Expand one polygon sugar element: absolute `points` → a closed, filled `line`.
+ * Returns { element, bbox } or null after pushing issues. The bbox is registered
+ * as a plain rectangle so id-anchored arrows land on the bounding box's edges.
+ */
+function polygonSugar(el, i, id, issues) {
+  const where = `element[${i}] (${id})`;
+  const pts = el.points;
+  if (!Array.isArray(pts)) {
+    issues.push(`${where}: polygon needs "points":[[x,y],...]`);
+    return null;
+  }
+  if (!pts.every(isXY)) {
+    issues.push(`${where}: every polygon point must be [x,y] numbers`);
+    return null;
+  }
+  // A last point equal to the first only restates the closing edge.
+  const verts = pts.length > 1 && pts[0][0] === pts.at(-1)[0] && pts[0][1] === pts.at(-1)[1] ? pts.slice(0, -1) : pts;
+  if (verts.length < 3) {
+    issues.push(`${where}: polygon needs at least 3 distinct points`);
+    return null;
+  }
+  const xs = verts.map((p) => p[0]);
+  const ys = verts.map((p) => p[1]);
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  const w = Math.max(...xs) - x;
+  const h = Math.max(...ys) - y;
+  if (w === 0 || h === 0) {
+    issues.push(`${where}: polygon points enclose no area (all on one horizontal or vertical line)`);
+    return null;
+  }
+
+  const extra = {};
+  if (el.stroke != null) {
+    const s = resolveColor(el.stroke, "stroke");
+    if (s === undefined) {
+      issues.push(`${where}: unknown stroke color "${el.stroke}"`);
+      return null;
+    }
+    extra.strokeColor = s;
+  }
+  let fill = "transparent";
+  if (el.fill != null) {
+    fill = resolveColor(el.fill, "fill");
+    if (fill === undefined) {
+      issues.push(`${where}: unknown fill color "${el.fill}"`);
+      return null;
+    }
+  }
+  if (el.dashed) extra.strokeStyle = "dashed";
+
+  return { element: polygon(id, verts, fill, extra), bbox: { x, y, w, h, type: "rectangle" } };
+}
+
+/**
  * Auto-pick a (fromSide, toSide) pair from box geometry. Prefers the axis on
  * which the boxes are *disjoint* — vertical separation wins, which suits the
  * top-down / layered diagrams this serves: two boxes in adjacent rows connect
@@ -420,7 +490,8 @@ function anchorAtT(absPoints, t) {
  */
 function pushLabel(raw, arrowId, text, absPoints, labelT) {
   const a = labelT == null ? labelAnchor(absPoints) : anchorAtT(absPoints, labelT);
-  const w = Math.max(28, text.length * 9);
+  // Same ruler as node text, template edge labels and Layer A: widest line wins.
+  const w = Math.max(28, ...String(text).split("\n").map((l) => estimateTextWidth(l, 14)));
   const h = 18;
   let x;
   let y;

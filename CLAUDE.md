@@ -1,11 +1,11 @@
 # excalidrawer
 
-Code-first Excalidraw diagram generation — CLI, MCP server, built-in templates, and SVG/PNG export. No browser required. Pure ESM (`"type": "module"`), Node.
+Code-first Excalidraw diagram generation — CLI, MCP server, layout components, and SVG/PNG/WebP export. No browser required. Pure ESM (`"type": "module"`), Node.
 
 ## Entry points
 
-- **Library** — `import 'excalidrawer'` (`src/index.mjs`); subpath `excalidrawer/templates`.
-- **CLI** — `excalidrawer` bin → `src/cli.mjs`. Commands: `render`, `compute-layout`, `generate`, `types`.
+- **Library** — `import 'excalidrawer'` (`src/index.mjs`).
+- **CLI** — `excalidrawer` bin → `src/cli.mjs`. Commands: `render`, `compute-layout`. (`generate -t` / `types` and the built-in templates were removed in 0.6.0.)
 - **MCP server** — `excalidrawer-mcp` bin → `src/mcp.mjs`. stdio server exposing `render_diagram` and `compute_layout`.
 
 The `render` / `compute-layout` CLI commands and the MCP tools share the exact same tool definitions (`src/tools/`), so the two surfaces never drift.
@@ -19,22 +19,22 @@ npm run test:example  # node examples/basic.mjs
 
 ## Source layout
 
-- `src/elements.mjs` — primitive builders: `box`, `diamondBox`, `arrow`, `line`, `textEl`, `rect`, `ellipse`. `arrow` / `line` mirror Excalidraw's two linear tools: arrow takes `arrowType` (sharp/round/elbow), `startArrowhead`/`endArrowhead`, `strokeStyle`, `strokeWidth`; line takes `strokeWidth` + `edges` (sharp/round).
-- `src/layout.mjs` — layout helpers: `row`, `grid`, plus gridLayout / chain / swimlane / hub-and-spoke / edge anchors / U-routing / label anchors / titledBox / fitContainer / `tree` (tidy tree: parent centered on its children, contiguous subtree bands, shared-trunk connectors as L4 line segments; right or down) / `equalize` (one height for a group of sibling cells — a box's `h` is a floor, so without it the box whose label wraps grows alone and the row goes ragged) / `contrastText` / `readableOn`.
-- `src/sugar.mjs` — sugar shorthand element parsing.
+- `src/elements.mjs` — primitive builders: `box`, `diamondBox`, `arrow`, `line`, `polygon`, `textEl`, `rect`, `ellipse`. `arrow` / `line` mirror Excalidraw's two linear tools: arrow takes `arrowType` (sharp/round/elbow), `startArrowhead`/`endArrowhead`, `strokeStyle`, `strokeWidth`; line takes `strokeWidth` + `edges` (sharp/round).
+- `src/layout.mjs` — layout helpers: `row`, `grid`, plus gridLayout / chain / swimlane / hub-and-spoke / edge anchors / U-routing / label anchors / titledBox / fitContainer / `tree` (tidy tree: parent centered on its children, contiguous subtree bands, shared-trunk connectors as L4 line segments; right or down) / `equalize` (one height for a group of sibling cells — a box's `h` is a floor, so without it the box whose label wraps grows alone and the row goes ragged) / `stack` (lay cells along one axis, container sized from content; nests; returns absolute coordinates) / `panel` (title area + a stack of cells, sized from both; title on top or left; usable as a stack cell) / `axis` (marked line: mark positions, line segments broken around each mark, ticks, value→coordinate scale) / `legend` (sample + text rows with a size and corner placement; coordinates only) / `taper` (layers that narrow by an equal step — pyramid or funnel: each layer's four corners, a label box sized to the narrowest edge (wraps, the layer grows), value and conversion-rate anchors; coordinates only) / `contrastText` / `readableOn`.
+- `src/sugar.mjs` — sugar shorthand element parsing. `shape: "polygon"` (absolute `points`, `fill`) expands to one closed `line` element with `polygon: true`; it exists for `taper`'s trapezoids, not as a general drawing tool.
 - `src/render.mjs` — serializes elements to the render output; runs the linter and returns `warnings`.
-- `src/validate.mjs` — deterministic quality linter → non-fatal `warnings`: text overflow (X/Y), shape overlap, arrow-crosses-shape, low text/fill contrast (WCAG), degenerate arrows. This is Layer A of the skill quality gate; Layer B (visual PNG self-check) lives in `skills/shared/SKILL.md` §7.5 and runs at the agent layer (no LLM in the package).
-- `src/export.mjs` — `excalidraw()` (JSON), `toSvg()` (embedded fonts), `toPng()` (resvg-js native). Arrowheads are drawn as geometry ported from Excalidraw's `getArrowheadPoints` (fixed 25px / ±20°, aimed one head-length back along the drawn curve) — not SVG markers, which scale with stroke width and misalign on curves.
+- `src/validate.mjs` — deterministic quality linter → non-fatal `warnings`: text overflow (X/Y), shape overlap, arrow-crosses-shape, low text/fill contrast (WCAG), degenerate arrows. A closed polygon counts as a shape (ranged by its bounding box), and free text laid over a filled polygon is contrast-checked against that fill. This is Layer A of the skill quality gate; Layer B (visual PNG / WebP self-check) lives in the "出图" section of `skills/steps/SKILL.md` and runs at the agent layer (no LLM in the package).
+- `src/export.mjs` — `excalidraw()` (JSON), `toSvg()` (embedded fonts), `toPng()` (resvg-js native). Arrowheads are drawn as geometry ported from Excalidraw's `getArrowheadPoints` (fixed 25px / ±20°, aimed one head-length back along the drawn curve) — not SVG markers, which scale with stroke width and misalign on curves. Lines and arrows export unfilled; only a closed polygon line (`polygon: true`) takes its `backgroundColor` as a fill.
 - `src/text.mjs`, `src/fonts/` — text measurement + font handling (auto-loads system CJK font for Chinese/Japanese/Korean text).
-- `src/templates/` — `timeline`, `flowchart`, `architecture`, `sequence`, `tree`.
+- `examples/templates/` — `timeline`, `flowchart`, `architecture`, `tree`: the old built-in templates, kept only to draw the matching README gallery figures. Not exported, not in the npm tarball.
 - `src/tools/` — shared MCP/CLI tool definitions.
-- `tests/` — `node --test` files: cjk, elements, layout, linear, render, sugar, tools, tree, validate.
+- `tests/` — `node --test` files: axis, cjk, elements, layout, legend, linear, panel, polygon, render, skills-entry, skills-steps, stack, sugar, taper, tools, tree, validate. `skills-entry` guards the entry-skill convention above; `skills-steps` checks the step skill's sections, component table, references and shared wording.
 - `docs/gallery/` — README *What it makes* images, one per diagram type. Generated by `node examples/gallery.mjs` (deterministic); unlike other rendered output these PNGs are committed (`.gitignore` exception). Regenerate when rendering changes.
-- `skills/` — one skill per diagram type plus a shared base, modeled on [lark-cli](https://github.com/larksuite/cli/tree/main/skills):
-  - `skills/shared/` — the read-first base. `SKILL.md` holds every cross-cutting rule (MCP precheck + CLI fallback, output naming, label language, export-format selection, render call, iteration); `references/` holds `semantics.md` (which component / line style / stroke weight / color a meaning maps to — the layer between the recipes and the API) + `sugar.md` (the component API reference). Read order: semantics → sugar → type recipe; precedence: user → recipe → semantics → component defaults. Its description is deliberately non-triggering so it is not invoked as a standalone diagram skill.
-  - `skills/{flowchart,timeline,architecture,sequence,comparison,tree}/` — each declares a **前置条件: read `../shared/SKILL.md` first** (live sibling, lark-style), then adds only its own clarify questions + `references/<type>.md` recipe; a recipe restates a semantics rule only when it narrows or overrides it. Recipes reference the shared schema at `../../shared/references/sugar.md`. `comparison` = left-vs-right A/B diagrams (symmetric two-column + VS, three-column with a center dimension label, asymmetric sub-cards); its hard rule is that a dimension's two cards share y **and** h — see its recipe for why bound text can't be used in multi-line cells. `tree` = root → children hierarchy (left→right or top→down); its hard rule is that coordinates come from the `tree` layout helper (`compute_layout`), never by hand — the helper centers each parent on its own children, which per-layer centering (the flowchart recipe) gets wrong.
-  - **Why live sibling, not self-contained copies:** a whole-repo / plugin install lays all skill folders flat as siblings under `.agents/skills/`, so `../shared/` resolves. Always install the full set (plugin or whole-repo), never a single skill folder — the sibling ref would dangle. This keeps the shared docs single-source (no per-skill duplication, no sync script).
-  - Skills do NOT configure MCP; `shared/SKILL.md` §1 documents the `claude mcp add excalidrawer -- excalidrawer-mcp` prerequisite.
+- `skills/` — two layers, split by who calls them and when (terms in `GLOSSARY.md` "Skill"): **entry skills** (one per diagram type, the user calls them) and the **step skill** `steps` (an entry skill calls it when it reaches a step). Modeled on [lark-cli](https://github.com/larksuite/cli/tree/main/skills):
+  - `skills/steps/` — the step skill. `SKILL.md` has four named sections an entry skill points at: "clarify" (how to ask), "组件" (a component → which reference to read table, plus the reading order), "出图" (MCP precheck + CLI fallback, output naming, label language, export-format reference, render call, the two-layer quality gate, iteration), "新增一种图类型" (the checklist for adding a type, for #12); a table at the top of `SKILL.md` gives each section's line range (a test checks the ranges, so update them when the file changes), so an agent can read one section only. Its description is written for entry skills to call, not as a standalone drawing entry. `references/` holds `semantics.md` (which line style / stroke weight / arrowhead / color a meaning maps to, plus the values every diagram shares — title size, subtitle size, body size) and **one file per component**: `shapes.md`, `connectors.md` (arrow / line, auto-routing, back-edges, label dodging), `stack.md` (incl. `equalize`), `panel.md` (incl. the older `titledBox` / `fitContainer`), `axis.md`, `legend.md`, `tree.md`, `classic-layouts.md` (`chain`, `gridLayout`, `swimlane`, `hubSpoke`). Each says when to use it, params and returns, how to draw it with sugar, and what it can draw. The `compute_layout` helper whitelist and these references must agree (`tests/skills-steps.test.mjs` checks every helper is documented).
+  - `skills/{flowchart,timeline,architecture,sequence,comparison,tree,state-machine,pyramid,chart}/` — the entry skills (the last three arrived in 0.6.0 — spec `new-diagram-types`; high-level data-flow overviews are architecture's fourth layout, not a skill of their own); each is **one `SKILL.md` and nothing else**, written in natural language (中文 body, bilingual `description`): ask → compose → render → common mistakes. It says what to ask, what a good diagram of its type looks like (which components, what each draws there), and how it goes wrong; it never says how to do a step. It calls skill `steps` at each step with the same one-liner (Claude Code: Skill tool, `excalidrawer:steps`; other hosts: read `../steps/SKILL.md`), names the section, and says "这一步只读这一节". When the user's description already lists everything in the diagram, the entry skill skips asking and does not read the asking rules (same sentence in every entry skill and in `steps`' clarify). **Guarded by `tests/skills-entry.test.mjs`:** an entry skill's body (after the frontmatter) must not contain a code block (`text` blocks for ASCII sketches excepted), `render_diagram` / `compute_layout`, a sugar field name, a number with `px`, or a coordinate like `y = 150`; the test prints file, line and the matched word. Component names (stack, panel, axis, legend, tree) and content counts ("1–8 children") are fine. The title size is written once, in `steps/references/semantics.md`. `comparison` = left-vs-right A/B diagrams (symmetric two-column + VS, three-column with a center dimension label, asymmetric sub-cards); its hard rule is that a dimension's two cards share y **and** h. `tree` = root → children hierarchy (left→right or top→down); its hard rule is that coordinates come from the `tree` layout component, never by hand — it centers each parent on its own children, which per-layer centering (the flowchart's main line) gets wrong.
+  - **Why call by skill name, with a path fallback:** a whole-repo / plugin install lays all skill folders flat as siblings under `.agents/skills/`, so `../steps/` resolves for hosts that read files; hosts with a Skill tool call `excalidrawer:steps` by name. Always install the full set (plugin or whole-repo), never a single skill folder. This keeps the step docs single-source (no per-skill duplication, no sync script).
+  - Skills do NOT configure MCP; the "出图" section of `steps/SKILL.md` documents the `claude mcp add excalidrawer -- excalidrawer-mcp` prerequisite.
 - `.claude-plugin/` (`plugin.json` + `marketplace.json`, `source: "."`), `.cursor-plugin/`, `.codex-plugin/` — multi-platform plugin manifests (superpowers-style) that bundle the whole `skills/` folder. Plugin version starts at `0.0.1`, independent of the npm package version. The plugin path and the per-skill `npx skills add` path share the same `skills/` source — one source, two install surfaces.
 
 ## CLI usage
@@ -46,23 +46,9 @@ cat elements.json | excalidrawer render -o docs/diagram -f svg,png
 
 # Compute layout coordinates (prints JSON)
 excalidrawer compute-layout --helper gridLayout -a '{"count":6,"cols":3,"cellW":140,"cellH":50}'
-
-# Generate from a built-in template; list types
-excalidrawer generate -t timeline -i data.json -o docs/timeline
-excalidrawer types
 ```
 
 `render` accepts either a bare element array or `{ "elements": [...] }`.
-
-## Built-in templates
-
-| Type | Input shape |
-|------|-------------|
-| `timeline` | `{ title, items: [{ label, time, desc, color? }] }` |
-| `flowchart` | `{ title?, direction?, nodes: [{ id, label, type?, color? }], edges: [{ from, to, label? }] }` (node types: `start`, `end`, `process`, `decision`, `io`) |
-| `architecture` | `{ title?, sections: [{ label, color?, items }], connections? }` |
-| `sequence` | `{ title?, actors: [{ label, color? }], steps: [{ actor, text, from?, arrow?, style? }] }` |
-| `tree` | `{ title?, direction?, root: { label, desc?, color?, children?: [node \| string] }, widths?, levels?, numberLeaves?, arrowheads?, equalize? }` (`direction`: `horizontal` = root left, `vertical` = root top) |
 
 ## Library API
 
@@ -88,7 +74,7 @@ Colors: `colors.blue/green/yellow/purple/red/orange/gray`, `colors.bg*` (section
 - `arrow` points are relative `[dx, dy]` offsets from the arrow's `x, y` origin.
 - PNG rendering uses `@resvg/resvg-js` (fast native, no headless browser).
 - This repo is the open-source home for the **npm package (CLI + library + MCP) and the diagram skills** under `skills/`. The skills install two ways from the same source: as a multi-platform **plugin** (`.claude-plugin/` / `.cursor-plugin/` / `.codex-plugin/`) or à la carte via **`npx skills add`** (skills.sh channel). A separate, more elaborate skill set also lives in the personal [harold-skills](https://github.com/guohaonan-shy/harold-skills) marketplace; the two share a common ancestor but iterate independently (see memory).
-- Version lives in `package.json` (currently 0.5.15); changes tracked in `CHANGELOG.md`.
+- Version lives in `package.json` (currently 0.6.0); changes tracked in `CHANGELOG.md`.
 
 ## idea-loop
 
@@ -104,7 +90,7 @@ Colors: `colors.blue/green/yellow/purple/red/orange/gray`, `colors.bg*` (section
 
 issue 除了 `status:*` 状态，还带分类 label：父类打成 `type:<父类>`，子类打成 `type:<父类>/<子类>`，打子类时父类一起打。idea-loop 验证 issue 时打，人也可以手动打。
 
-- `diagram`：新图类型、模板、skill recipe
+- `diagram`：新图类型、模板、入口 skill
 - `engine`：渲染、布局、组件层、图元
 - `io`：格式转换
   - `import`：Mermaid、draw.io 等外部格式导入

@@ -280,6 +280,27 @@ export function line(id, x, y, points, opts = {}) {
   });
 }
 
+/**
+ * Closed, optionally filled polygon from absolute vertices — the shape the
+ * `taper` component's trapezoids are drawn with. Excalidraw's own form of it is
+ * a `line` with `polygon: true` whose last point repeats the first; x / y /
+ * width / height are the vertices' bounding box, so the element reads like any
+ * other shape to the linter. Only for simple polygons: this is not a general
+ * drawing tool.
+ *
+ * @param {string} id
+ * @param {Array<[number, number]>} vertices - absolute [x, y], at least 3
+ * @param {string} bg - fill color ("transparent" for none)
+ * @param {object} [extra] - raw element fields (strokeColor, strokeStyle, ...)
+ */
+export function polygon(id, vertices, bg, extra = {}) {
+  const x = Math.min(...vertices.map((p) => p[0]));
+  const y = Math.min(...vertices.map((p) => p[1]));
+  const rel = vertices.map(([vx, vy]) => [vx - x, vy - y]);
+  rel.push([...rel[0]]);
+  return line(id, x, y, rel, { polygon: true, backgroundColor: bg, ...extra });
+}
+
 // ---------------------------------------------------------------------------
 // Layout utilities
 // ---------------------------------------------------------------------------

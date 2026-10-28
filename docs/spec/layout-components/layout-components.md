@@ -1,6 +1,6 @@
 ---
 type: spec
-status: 正式
+status: 完成
 tags: [engine, component-layer, layout-components]
 summary: 加 stack / panel / axis / legend 四个组件，几何由内容推出，不再手算
 related: ["[[2026-10-26-component-layer-grill]]", "[[webp-output-format]]"]
@@ -52,7 +52,7 @@ issues: [26]
 - **axis**：一条带标记点的轴。给出标记点后返回各点坐标、留好缺口的分段线、可选的末段箭头、刻度位置、标签锚点，以及数值到坐标的换算。
 - **legend**：一块由「样本 + 文字」行组成的图例。返回每行的样本槽和文字槽，整块可以按角摆到图的范围内或外。
 
-拿复现那个例子来说：外层 `stack(dir: "y")` 放两个 `panel(titleSide: "left")`，每个 panel 的 body 是 `stack(dir: "x")`，条目只写文字。返回的泳道高度是 132 加内边距，不会越界，也用不着 `laneH`。
+拿复现那个例子来说：外层 `stack(dir: "y")` 放两个 `panel(titleSide: "left")`，每个 panel 的 body 是 `stack(dir: "x")`，条目只写文字。泳道高度等于最高条目加内边距（条目宽 160 时是 132 加内边距；不写宽度时按 200 封顶，长标签折 4 行、高 110），不会越界，也用不着 `laneH`。
 
 同一行为的入口，逐个：
 
@@ -127,8 +127,8 @@ issues: [26]
 
 ### 共用的约定
 
-- 坐标都是绝对坐标。每个组件都收 `x`、`y`（容器左上角，默认 0），axis 收 `from`。
-- 每个结果都带 `kind`（`"stack"` / `"panel"` / `"text"` / `"titled"` / `"box"` / `"axis"` / `"legend"`）和 `x, y, w, h`。
+- 坐标都是绝对坐标。stack、panel 收 `x`、`y`（容器左上角，默认 0）；axis 用 `from` 定起点；legend 用 `at: {x, y}` 定左上角，或用 `bounds` + `corner` 按角摆，不认单独的 `x`、`y`。（review 第 1 轮 S4 后改：原写「每个组件都收 x、y」，跟 axis、legend 的接口冲突，人批「按推荐」改 spec。）
+- 每个结果都带 `kind`（`"stack"` / `"panel"` / `"text"` / `"titled"` / `"box"` / `"axis"` / `"legend"`）。stack、panel、legend 和各格子的结果带 `x, y, w, h`；axis 的结果带 `from`、`to`，不带 `x, y, w, h`。
 - 输入里带的 `id` 原样写回对应的结果，agent 靠它把结果对回自己的数据。
 - 线段沿用 `tree` 的格式：`{ at: [x, y], points: [[0,0],[dx,dy]] }`，直接画成 sugar 的 `shape: "line"` 或 `arrow`。依据：产品已有做法（`tree` 的 `segments`）。
 - 文字测量一律走 `fitBoundText` / `titledBox`，跟渲染器用同一套数。依据：`equalize` 的现有做法。
@@ -168,6 +168,7 @@ cell 收五种（出自 grill，人在 Q2、Q3 同意）：
 - **纵向 stack 给了 `cross`**：不写宽度的格子取内宽（`cross - pad*2`），不再按自然宽度。comparison 的整列行卡就是这种：定列宽，行卡铺满。依据：最小改动；这样不用多加一个 `stretch` 对齐值。
 - **equalize**：取所有子格横轴尺寸的最大值，所有子格都改成这个值，文字按新尺寸重新量。横向 stack 统一高度，纵向 stack 统一宽度。嵌套的 stack / panel 被拉大后，按新尺寸重排自己的内部（panel 场景 4）。
 - **横轴尺寸**：没给 `cross` 时，取最大子格加 `pad*2`。
+- **横轴放不下**：给了 `cross` 但有格子比内宽还宽（写了宽度的格子、放不下的 panel、嵌套的横排 stack）时，跟主轴同一个规矩：容器撑到最宽的格子，`crossOverflow` 写撑出的像素数（没撑大为 0）；嵌套在里面的 panel 的 `overflow` 也照实报。（review 第 2 轮 S3，人批「S3 照主轴」，2026-10-26）
 - **主轴尺寸**：没给 `size` 时，等于 `pad*2 + Σ 子格 + gap*(n-1)`，`justify` 不起作用。给了 `size` 但内容放不下时，容器撑到内容的长度，`overflow` 写超出的像素数；放得下时 `overflow` 为 0。依据：「第一稿就可用」（`PRODUCT.md` 设计原则），宁可撑大也不越界，同时让 agent 知道。
 - **space-between 只有一个子格**：按 start 处理。
 
@@ -186,12 +187,14 @@ panel({
 })
 → { kind: "panel", x, y, w, h,
     title: { x, y, w, h, fontSize },
-    body:  { kind: "stack", x, y, w, h, overflow, children } }
+    body:  { kind: "stack", x, y, w, h, overflow, children },
+    overflow }
 ```
 
 - `top`：标题区宽度等于 panel 内宽，标题按这个宽度折行、量出高度；内容区在它下方 `gap` 处。
 - `left`：标题区是左边一整列，高度等于 panel 内高，这样表头 rect 能撑满整行，标题文字由 recipe 在这个区域里居中；内容区在它右边 `gap` 处。
 - panel 的宽度：写了 `w` 就用 `w`，内容区随之变宽，按 body 的 `justify` 分布；没写就由内容撑出。
+- `w` 比内容需要的窄时：panel 撑大到装得下，结果的 `overflow` 写撑出的像素数（没撑大时为 0），跟 stack 的 `overflow` 同一个意思。（review 第 1 轮 S2，人批「接受撑大，并给 panel 加上超出量」，2026-10-26）
 - 依据：`top` 覆盖 comparison 的侧标题和 architecture 子泳道的标签，`left` 覆盖 architecture 的分层表头（`swimlane` 的 `headerW` 列）。命名出自 grill：recipe 里 card 已经指单个小格子，装子格的容器叫 panel（`GLOSSARY.md`）。
 
 ### axis 的接口
@@ -220,6 +223,9 @@ axis({
 
 - 摆位：所有 mark 都带 `value` 时按 `domain` 线性换算到轴上（`extend` 之内的那一段）；都不带时按 `spacing` 等距，写了 `length` 就均分；有的带有的不带：抛错。依据：两种摆法分别对应 timeline 的等距与按月份两种写法；混着写没有能对上的语义。
 - 好看的间隔：取 1、2、5 乘以 10 的整数次幂里，使刻度数最接近 `count` 的那个，刻度落在它的整数倍上。
+- 数值范围首尾相等（只有一个值，或所有值相同）又要刻度时：只出一个刻度，落在这个值上；标记点照旧在起点。（review 第 1 轮 S1，人批「S1 选只出一个刻度」，2026-10-26）
+- 刻度数有上限 1000：按给定的 `step` 或 `count` 算出来超过 1000 个刻度时抛错，报错写明 axis，并提示调大 `step`（或调小 `count`）。（review 第 1 轮后，人批「刻度数这次就加上限，超了报错并提示调大 step」，2026-10-26）
+- 只有一个带数值的标记点（或所有值相同）又没写 `length` 时：正常返回，轴长为 0，标记点和刻度都在起点，跟不带数值的单个标记点一致；不按「算不出正的轴长就报错」处理。（review 第 2 轮 S1，人批「S1 单值优先」，2026-10-26）
 - `scale` 给 #12 的图表用：数值 `v` 的坐标是 `origin + (v - domain[0]) * pxPerUnit`，沿轴方向。
 - 标签锚点是标签文字的参考点，`side` 说明文字放在锚点的哪一侧，recipe 照着摆 text 元素。`alternate` 时第 1、3、5… 个标记点在 before 侧，第 2、4… 个在 after 侧（timeline 上下交替的写法）。
 - 不管：柱子、折线、数据点、网格线。依据：人在 grill Q6 同意的范围；这些归 #12。
@@ -248,6 +254,19 @@ legend({
 ### 跟现有 helper、模板的关系
 
 四个组件跟现有 helper 并列，现有 helper 一个不改。`swimlane` 的固定 `laneH` 留着，旧调用照常能跑；recipe 换用 stack / panel 是 #27 的事。模板也不改写到组件上：`generate` 在 0.6.0 删掉，模板只剩库里的直接调用，没有收益。依据：「默认改动最小」。
+
+### 实现中补记的边界做法
+
+工单没写、执行方实现时定的几处，人在 PR #32 的第 1 次停下里批了照现在留下（原话「第二题选 A」，2026-10-26）：
+
+- stack：带标题的格子，结果的标题区、正文区还带上折行后的文字，调用方照量过的样子画。
+- panel：标题区也带上折行后的标题文字，理由同上（review 第 1 轮 S5，人批「按推荐」，2026-10-26）。
+- stack：竖排且给了 `cross` 时，嵌套的子 stack 保持自然宽度；只有不写宽度的文字格、带标题的格子铺满。
+- panel：被定宽或被外层拉宽、比内容需要的宽时，竖排 body 里不写宽度的格子铺满，横排 body 按 `justify` 分布。
+- axis：最后一个标记点正好在轴终点时，箭头画在它前面那一段上、指向它。
+- axis：自动挑刻度间隔时，两种间隔离 `count` 一样近，取较小的。
+- axis：两个标记点的缺口重叠时合并成一个；切出来短于 4 像素的线段丢掉（退化箭头的阈值）。
+- axis：给了 `domain` 却算不出正的轴长时抛错，提示写 `length`；没有 `domain` 时 `scale` 的 `domain`、`pxPerUnit` 为 null。
 
 ### 每个组件替掉 recipe 的哪几处（给 #27）
 
@@ -291,7 +310,7 @@ legend({
   - 库导出的四个函数。能抓到：几何对不对、边界情形、报错。漏掉：MCP 的参数映射。
   - `compute_layout` 工具的 `run()`。能抓到：白名单里有、参数平铺能映射到函数、抛错转成 `{ error }`。漏掉：几何细节（交给上一个 seam）。
 - **增量功能测试**：
-  1. 前置：复现里的三个条目（含那条长标签）。步骤：用 `stack(dir:"y")` 套两个 `panel(titleSide:"left")`，每个 body 是 `stack(dir:"x")`，条目只写文字；把结果拼成 sugar 交给 `render`。期望：泳道高度 ≥ 132 + 上下内边距，`warnings` 里没有 `SHAPE_OVERLAP`。覆盖：stack 1、2、5，panel 1、2。
+  1. 前置：复现里的三个条目（含那条长标签）。步骤：用 `stack(dir:"y")` 套两个 `panel(titleSide:"left")`，每个 body 是 `stack(dir:"x")`，条目只写文字；把结果拼成 sugar 交给 `render`。期望：泳道高度等于最高条目加上下内边距（条目宽 160 时 ≥ 132 + 上下内边距），`warnings` 里没有 `SHAPE_OVERLAP`。人的决定（2026-10-26）：「第一题选 A」，132 只在条目宽 160 时成立，代码不动。覆盖：stack 1、2、5，panel 1、2。
   2. 前置：一行三个文字格，第二个折成 3 行。步骤：`stack(dir:"x", equalize:true)`。期望：三个子格 `h` 相同，等于折行那个的高度。覆盖：stack 3。
   3. 前置：两个 80 宽的格子，`size: 400`。步骤：分别用 `justify` 的四个值。期望：start 时第一个格子贴左内边距；center 时两侧空白相等；end 时最后一个贴右；space-between 时首尾贴边、中间均分。再把 `size` 改成 100，期望容器宽为内容宽、`overflow > 0`。覆盖：stack 4、6。
   4. 前置：外层纵向 stack 里两个 panel，标题长短不同。步骤：打开 equalize。期望：两个 panel 同宽，各自 body 的宽度跟着变，`justify:"center"` 时子格居中。覆盖：panel 3、4。

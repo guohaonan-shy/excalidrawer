@@ -1,6 +1,6 @@
 ---
 type: spec
-status: 正式
+status: 完成
 tags: [diagram, new-diagram-types]
 summary: 0.6.0 加状态机、金字塔/漏斗、柱状/折线、high-level 全景，按图类型并行实现
 related: ["[[2026-10-28-new-diagram-types-grill]]", "[[layout-components]]", "[[skill-layers]]", "[[example-gallery]]"]

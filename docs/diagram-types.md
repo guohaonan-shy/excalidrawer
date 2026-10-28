@@ -1,7 +1,9 @@
 # Design note: new diagram types
 
-**Status:** planned — direction agreed 2026-08-17, not yet scheduled to a
-version. Written after reading
+**Status:** scheduled for 0.6.0 — specified in
+[`spec/new-diagram-types`](spec/new-diagram-types/new-diagram-types.md) (state machine,
+pyramid / funnel, bar / line chart as entry skills; high-level as architecture's
+fourth layout). Direction first agreed 2026-08-17. Written after reading
 [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design)
 (27 diagram types, no code renderer — see the contrast noted in
 [`component-layer.md`](component-layer.md)).
@@ -33,8 +35,8 @@ viz) rather than trying to become a charting library.
 ## Open questions
 
 - Each new type = a new skill folder under the current per-type-skill
-  architecture, unless it's better framed as a recipe variant of an existing
-  skill (e.g. "high-level" as an `architecture` recipe variant rather than a
+  architecture, unless it's better framed as a variant inside an existing
+  entry skill (e.g. "high-level" as a variant of the `architecture` skill rather than a
   standalone skill — depends on how much its layout actually differs).
 - Composite types (tree, pyramid) likely need the `stack`/pack primitives
   discussed in [`component-layer.md`](component-layer.md) before their

@@ -2,12 +2,12 @@ import { writeFileSync, mkdirSync } from "fs";
 import { dirname } from "path";
 
 import { defineTool } from "./schema.mjs";
-import { render, VALID_FORMATS } from "../render.mjs";
+import { render, VALID_FORMATS, DEFAULT_FORMATS } from "../render.mjs";
 
 export const renderDiagram = defineTool({
   name: "render_diagram",
   description:
-    "Render an array of diagram elements to .excalidraw / .svg / .png files. " +
+    "Render an array of diagram elements to .excalidraw / .svg / .png / .webp files. " +
     "The terminal step of diagram creation.\n" +
     "Elements use the sugar shorthand:\n" +
     "  shape:   { shape:'rect'|'diamond'|'ellipse'|'text', id?, at:[x,y], " +
@@ -23,6 +23,8 @@ export const renderDiagram = defineTool({
     "Escape hatch: { shape:'arrow', at:[x,y], points:[[dx,dy]...] }.\n" +
     "  line:    { shape:'line', ...same addressing as arrow, edges?:'sharp'|'round', strokeWidth?, strokeStyle? } " +
     "— a plain connector/divider with no arrowheads.\n" +
+    "  polygon: { shape:'polygon', id?, points:[[x,y]...] (absolute, >= 3), fill?, stroke?, dashed? } " +
+    "— a closed, filled polygon (for the trapezoids `compute_layout` `taper` returns); no `text`, lay a text shape over it.\n" +
     "Raw Excalidraw elements also pass through; missing base fields are filled in. " +
     "Use `compute_layout` for geometry (grids, chains, swimlanes, hub-and-spoke, " +
     "edge anchors, U-routing, label anchors). " +
@@ -47,14 +49,14 @@ export const renderDiagram = defineTool({
     formats: {
       type: "array",
       items: "string",
-      description: `Subset of [${VALID_FORMATS.join(", ")}]. Omit for all three. svg suits Markdown/GitHub, png suits slides/Notion, excalidraw is editable.`,
+      description: `Subset of [${VALID_FORMATS.join(", ")}]. Omit for ${DEFAULT_FORMATS.join(" + ")}.`,
     },
     scale: {
       type: "number",
       min: 1,
       max: 4,
       default: 2,
-      description: "PNG pixel scale multiplier (1–4). Ignored for svg/excalidraw.",
+      description: "Pixel scale multiplier (1–4) for png / webp. Ignored for svg/excalidraw.",
     },
   },
   async run(args) {

@@ -1,0 +1,176 @@
+# stack：沿一根轴排一组格子，容器按内容长
+
+`stack` 把一组格子沿一个方向排开，**容器尺寸从内容里算出来**：不用手写 `laneH`、`shellH`、`y += h + GAP`，长标签也推不出容器。它只返回坐标；颜色、线型、画成什么由你定。`equalize` 是它的一个选项，也有单独的 helper。两者都经 `compute_layout` 调用。
+
+## 什么时候用
+
+- 一行或一列格子，宽或高要跟着文字走：流程图的主线、一层里的服务、一组里程碑卡、一列行卡。
+- 一组本该**一样高（或一样宽）**的格子：用 `equalize`（见下）。
+- 容器里再套容器：stack 里嵌 stack 或 [panel](panel.md)，一次调用拿回所有层的绝对坐标。
+- 需要一列的总长：顺序图的步骤列，生命线长度取它的 `h`。
+
+## 参数和返回
+
+```text
+stack — { dir:"x"|"y", cells:[cell, …],
+          gap?=16, pad?=0, align?:"start"|"center"|"end",
+          size?, justify?:"start"|"center"|"end"|"space-between", cross?,
+          equalize?, maxW?=200, fontSize?=16, x?, y? }
+      → { kind:"stack", x, y, w, h, overflow, crossOverflow,
+          children:[{ kind, id?, x, y, w, h, … }] }
+```
+
+`cell` 有五种：
+
+| cell | 意思 | 结果的 `kind` |
+|---|---|---|
+| `{ text, w?, fontSize? }` | 一个带文字的格子，高度按 `w` 折行量出 | `text`（另带 `fontSize`） |
+| `{ title, body?, w?, titleFontSize?, bodyFontSize?, padding?, gap? }` | 标题加正文的格子，`titledBox` 的量法 | `titled`（另带 `title`、`body` 两个文字区，各带折行后的 `text`） |
+| `{ w, h }` | 尺寸已知的格子 | `box` |
+| `{ stack: {…} }` | 嵌套的 stack，参数同上，`x`、`y` 不用写 | `stack` |
+| `{ panel: {…} }` | 嵌套的 [panel](panel.md) | `panel` |
+
+- `dir` 是主轴：`"x"` 一行，`"y"` 一列。输入里带的 `id` 原样写回对应的结果，靠它把结果对回你的数据。
+- **不写 `w` 的文字格**取最长一行的自然宽度（加左右内边距），超过 `maxW`（默认 200）就按 `maxW` 折行。
+- `equalize: true`：所有子格取同一横轴尺寸（行 = 同高，列 = 同宽），文字按新尺寸重新量。嵌套的 stack / panel 被拉大后，按新尺寸重排自己的内部。
+- `size` 固定主轴长度（含 `pad`），`justify` 分配多出来的空间（`start` / `center` / `end` / `space-between`）。内容放不下时容器撑大，`overflow` 写超出的像素数（放得下为 0）。
+- `cross` 固定横轴长度（含 `pad`）：竖排时不写 `w` 的文字格（和不写 `w` 的 panel）铺满 `cross - pad*2`；有格子比它宽，容器撑大，`crossOverflow` 写撑出多少（没撑大为 0）。
+- `align` 是横轴上的对齐（`start` / `center` / `end`）。
+- 放在固定宽度的列或画布里时，**检查 `overflow` / `crossOverflow`**：不为 0 说明版式被撑开了。
+
+## 怎么画出来
+
+拿到结果后，每个 `children[i]` 画成一个 `rect`（`kind: "text"` 的带 `text`，直接用 `fontSize`）：
+
+```js
+{ shape: "rect", id: c.id, at: [c.x, c.y], size: [c.w, c.h], fill: "blue", text: label, fontSize: c.fontSize }
+```
+
+- `kind: "titled"`：画一个不带 `text` 的 `rect`，再把 `title.text`、`body.text`（已折行）作为两个独立的 `text` 元素放在 `title` / `body` 的 `x, y` 上。
+- `kind: "box"`：尺寸已知，画 `rect` 并自己决定里面的文字。
+- 容器本身需要可见的外壳时，用顶层的 `x, y, w, h` 画一个 `rect`，先画，让里面的格子叠在上面。
+- 颜色、线型、字号选择在你手里，按 [`semantics.md`](semantics.md) 定。
+
+## 效果
+
+### 一行格子一样高：`equalize`
+
+框的 `h` 是**下限**：标签折行的框只让自己长高，别的不动，三个声明为 `size: [180, 60]` 的框可能画出 60 / 83 / 60，一行就参差了。所以任何本该读成一行 / 一带的格子都要先量整组的高度，再把这个高度给组里每一个框：标签照样折行居中，框齐平，Layer A 照样生效。
+
+最省事的写法是 stack 的 `equalize: true`（上面）。要在 stack 之外量，用单独的 helper（`compute_layout` 把结果放在 `.result` 里）：
+
+```text
+equalize — { cells:[{w,text,fontSize?} | {w,title,body?,…} | {w,h}], minH? }
+         → { h, cells:[{ w, h, contentH }] }
+```
+
+它返回一个能装下整组的高度，每个格子都带上这个组高。把 `h` 当作该组每个框的 `size[1]`。适用的地方：
+
+- **流程图**同一行的分支、一组并列步骤；
+- **architecture** 同一层里的服务；
+- **timeline** 同一侧的里程碑卡（偏移才能保持不变）；
+- **sequence** 的角色表头（所有生命线从同一条基线往下放）；
+- **comparison** 的每一对格子（两侧同一个维度要同 y 同 h）。
+
+一整行同 y 同 h 是 comparison 唯一的硬规矩：不一样高，读者没法横着扫。对每个维度各调一次 `equalize`，把左右两侧的格子一起交给它，量出的 `h` 同时给两边：
+
+```js
+// 每个维度一次 → 左右一对在间隙两侧齐平；列宽 400、panel 内边距 16 → 内宽 368
+const hs = rows.map(([l, r]) => compute_layout({ helper: "equalize", args: {
+  cells: [{ w: 368, text: l, fontSize: 14 }, { w: 368, text: r, fontSize: 14 }], minH: 44,
+}}).result.h);
+// 两侧各一个 panel，body 的格子写成 { w: 368, h: hs[i] }，见 panel.md
+```
+
+### 格子里再分格：嵌套
+
+一格之内先排一行、下面再接一行，用 stack 里嵌 stack，一次调用拿回所有层的绝对坐标。比如 comparison 里一侧拆成并排的两张子卡、下方一行总结：
+
+```js
+compute_layout({ helper: "stack", args: {
+  dir: "y", gap: 20, x: 30, y: 200,
+  cells: [
+    { stack: { dir: "x", gap: 30, equalize: true,
+               cells: [{ text: "Monthly\n$29", w: 200 }, { text: "Annual\n$290", w: 200 }] } },
+    { text: "Fits: small teams", w: 430 },
+  ],
+}})
+```
+
+子卡等高（`equalize: true`），整列宽 430。**对面那一侧的整宽卡也要和子卡同高**：同一行的所有卡（左边的两张子卡加右边的一张整宽卡）一起交给一次 `equalize`，量出的 `h` 同时给三张；下面的"适合谁"一行同理再量一次。分开量，行就错位了。**一侧的外壳宽度永远不因内部拆分而变**：两侧的列外宽相同，只有里面的拆法不同，列宽不一样会读成偏向。窄子卡折行折得对但不一定好看（200 宽的格子大约装 22 个字符）：自己把"价格 · 用量"拆成两行，或缩短短语；大致预算 200 宽 ≈ 22 字符、340 ≈ 40、430 ≈ 52。
+
+### 一列步骤：顺序图的表头、生命线和分段
+
+顺序图的步骤用一列 stack 排，每步是一个文字格（格里的文字就是写在箭头上的消息），箭头画在格子的底边；**生命线的长度取这个 stack 的 `h`**（再加一点尾巴），不再靠 `60 + 52 * stepCount` 这种公式，步数一多一少也不会不够长。
+
+**格宽怎么取**：一条消息的格宽 = 它跨过的距离减 40（箭头两端各让出 20），跨 `k` 个相邻角色就是 `k * dx - 40`，`dx` 是相邻角色的 x 间距。格宽决定文字在哪里折行，进而决定这一格有多高；取成消息真正占的宽度，折行出来的高度才和它在图上的样子一致。
+
+**角色间距 `dx` 怎么推**（角色的 x 按 `dx` 等距排，见 [`classic-layouts.md`](classic-layouts.md) 的 `chain`）：每条消息的文字宽按字号 14 估，拉丁字符约 `0.62 * 14 ≈ 8.7`，汉字按 `14`；这条消息要的间距是 `(文字宽 + 40) / 它跨的格数`，所有消息里取最大的，**不小于 330**（约 25 个拉丁字符的消息放得下）。有一条相邻角色之间的消息特别长，就按它放宽 `dx`，别让文字冲进邻居的泳道。
+
+```js
+const dx = 330;                                   // 或按上面的推法放宽
+const steps = compute_layout({ helper: "stack", args: {
+  dir: "y", gap: 14, x: 0, y: lifelineTop + 10,
+  cells: messages.map((m) => ({ text: m.text, w: m.span * dx - 40, fontSize: 14 })),   // m.span：跨几个相邻角色
+}}).result;
+// 第 i 步的 y = steps.children[i].y；生命线：{ shape: "line", at: [cx, lifelineTop], points: [[0, 0], [0, steps.h + 30]] }
+```
+
+整张顺序图由三样东西搭成：
+
+- **角色表头**：一行 `rect`，每个角色一个，以角色的 x 为中心（x 取自 [`classic-layouts.md`](classic-layouts.md) 的 `chain`）。多行名字会撑高自己那一格，所以先把全部表头放进 `equalize` 量出统一的 `h`，再按这个 `h` 画；生命线都从这一条基线往下放。
+- **生命线**：每个角色一条 `line`，**虚线、灰色、细**，在连线之前画，让消息和分段叠在它上面。不要用细长的实心 `rect` 当生命线：它会盖住穿过它的消息文字。
+- **分段条**（可选）：消息分成几个阶段时（"写入"、"读取"），在步骤列里插一个横贯所有生命线的灰色 `rect` 格，文字写阶段名，宽取最左到最右的生命线；它跟消息一样占步骤列的一格。分段条与表头之间留的空隙取步骤列的 `gap`；分段条**上面**（前一条消息的箭头画在格子底边，紧挨着下一格）要多留一个 `gap`，否则箭头像贴在条上；分段条下面不要再额外加空隙（消息的文字占着格子上半，已经留出了位置）。
+  **生命线要在分段条处断开**：线永远画在形状之后（见 [`connectors.md`](connectors.md) 的"先画谁"），整根连续的线会从分段条上面划过去。每条生命线拆成几段，分别从表头底边画到第一个分段条的上沿、从每个分段条的下沿画到下一个分段条的上沿、最后画到列尾；没有分段条时就是一整根。
+
+```js
+// 分段条是步骤列里的一格：宽 = 最左到最右的角色表头
+{ shape: "rect", at: [leftX, c.y], size: [rightX - leftX, c.h], fill: "gray", text: "Write — after the server confirms", fontSize: 14 }
+```
+
+需要突出其中一部分消息（"本次新增的"）时，用颜色区分，并按 [`legend.md`](legend.md) 配图例（"红 = 本次新增；虚线 = 响应"），虚线仍只表示响应。
+
+### 一个里程碑的三行文字
+
+时间线上每个里程碑的"时间 / 标题 / 描述"三行，各是一个竖排 stack 里的文字格，`align: "center"` 让它们以里程碑为中心；三行的间距由 `gap` 定，不再写 `+28` / `+56`：
+
+```js
+compute_layout({ helper: "stack", args: {
+  dir: "y", gap: 2, align: "center", x: cx - 105, y: top,
+  cells: [{ text: m.time, w: 190, fontSize: 18 }, { text: m.label, w: 190, fontSize: 20 }, { text: m.desc, w: 210, fontSize: 13 }],
+}})
+```
+
+三行都画成无边框透明的 `rect`，文字绑在里面（这样文字在格子里垂直居中，上下两侧的文字块到轴的距离才一致；单独的 `text` 元素是顶对齐，会把距离拉得不一样）：`{ shape: "rect", at: [c.x, c.y], size: [c.w, c.h], fill: "transparent", stroke: "transparent", text, fontSize, textColor }`。
+
+`time` 的文字用里程碑的颜色（`textColor`），`label` 最醒目（默认墨色），`desc` 灰色小字（`textColor` 取灰）。`yellow` 的文字压在白底上对比不够（Layer A 报 `LOW_CONTRAST`），`orange` 也只有约 3.0:1，同样会报，所以 `time` 取 `yellow` 里程碑时用默认墨色。`desc` 的格宽按文字量定：用户给的描述比默认格宽装得下的长时，放宽格宽（相邻里程碑的间距够的话），不要让它折成两行。同一侧的里程碑卡要等高时，把各卡的 stack 放进 `equalize` 再画。
+
+### 一行里不同宽度的节点：流程图主线
+
+流程图的主线是一个横排 stack：不写 `w` 就按各节点文字取自然宽度；`gap` 留够箭头和标签的位置（主线相邻节点之间大约 70）。支线（判断分叉下面那一行）另起一个 stack，放在主线下方。
+
+用户选的方向对应 `dir`：横向 → `"x"`，纵向 → `"y"`。纵向时 `gap` 取大约 50 就够放箭头，标题下方留出的位置见 [`semantics.md`](semantics.md) §9。
+
+**判断菱形不要写成文字格**：菱形能放文字的区域比外框小，按文字量出的高度装不下标签。把它写成已知尺寸的格子 `{ w: 170, h: 100 }`（`kind: "box"`），画成 `shape: "diamond"` 并自己绑文字。菱形比同一行的矩形高：
+
+- 这一行有菱形时**不要开 `equalize`**，它会把所有格子都拉到菱形那么高；改用 `align: "center"`，让矩形在行内垂直居中，和菱形共用一条中线。
+- 这一行没有菱形（比如支线上并排的几个步骤）时才开 `equalize: true`，让它们等高。
+
+```js
+compute_layout({ helper: "stack", args: {
+  dir: "x", gap: 70, align: "center", x: 40, y: 150,
+  cells: [{ text: "PR opened" }, { text: "CI + review" }, { w: 170, h: 100 }, { text: "Merge to main" }, { text: "Deploy" }],
+}})
+```
+
+支线节点要对齐到某个主线节点的正下方：stack 的结果只给每格的 `x, w`，自己算中心，支线格的 `x = 主线格.x + (主线格.w - 支线格.w) / 2`。支线放在主线下方时，支线 stack 的 `y` 取主线 `y + h` 再加一个行距（大约 80）。
+
+给整行定一个固定宽度时，用 `size` + `justify: "space-between"`。
+
+### 在固定宽度里居中排一行
+
+```js
+{ stack: { dir: "x", gap: 30, size: 330, justify: "center", cells: items.map((l) => ({ text: l, w: 150 })) } }
+```
+
+固定宽度的容器（子泳道、一层的内容区）里把一行条目居中，不用手算 `startX = cell.x + (cell.w - used) / 2`。这通常在 [panel](panel.md) 的 `body` 里写。
