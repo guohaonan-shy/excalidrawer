@@ -8,6 +8,12 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
 ### Added
 
+- **Three new entry skills registered: `state-machine`, `pyramid`, `chart`.**
+  The step skill's entry-skill lists and its output-naming table
+  (`state-machine-<name>`, `pyramid-<name>`, `chart-<name>`) carry the three
+  names ahead of the skills themselves, which land one by one in 0.6.0
+  (spec `new-diagram-types`). High-level data-flow overviews become
+  architecture's fourth layout instead of a skill of their own.
 - **Lossless WebP output.** `render()` accepts `webp` in `formats` and returns
   `outputs.webp` as a Buffer; the new `toWebp(elements, scale)` export sits
   next to `toPng` and shares its rasterization (fonts, white background,

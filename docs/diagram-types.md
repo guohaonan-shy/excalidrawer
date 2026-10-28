@@ -1,7 +1,9 @@
 # Design note: new diagram types
 
-**Status:** planned — direction agreed 2026-08-17, not yet scheduled to a
-version. Written after reading
+**Status:** scheduled for 0.6.0 — specified in
+[`spec/new-diagram-types`](spec/new-diagram-types/new-diagram-types.md) (state machine,
+pyramid / funnel, bar / line chart as entry skills; high-level as architecture's
+fourth layout). Direction first agreed 2026-08-17. Written after reading
 [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design)
 (27 diagram types, no code renderer — see the contrast noted in
 [`component-layer.md`](component-layer.md)).
