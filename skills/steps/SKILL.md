@@ -17,8 +17,8 @@ not the whole file.
 |---|---|---|
 | [clarify](#clarify) | 行 33–55 | the "ask the user" step |
 | [组件](#组件) | 行 57–88 | the "compose the diagram" step - which component to use and how to fill its fields |
-| [出图](#出图) | 行 90–259 | the "render and deliver" step |
-| [新增一种图类型](#新增一种图类型) | 行 261–286 | writing a new entry skill |
+| [出图](#出图) | 行 90–260 | the "render and deliver" step |
+| [新增一种图类型](#新增一种图类型) | 行 262–287 | writing a new entry skill |
 
 To read one section, open this file with an offset at its first line and a limit of its length (the line numbers are checked by `tests/skills-steps.test.mjs`, which tells you the right ones if you change the file).
 
@@ -212,7 +212,8 @@ array **only when something is wrong** (files are still written — warnings are
 non-fatal). **A non-empty `warnings` means NOT done: fix the flagged elements and
 re-render until `warnings` is absent.** On the CLI fallback path the same lint
 prints to **stderr** (`⚠ N quality warning(s)`, 0.5.13+) — read it there, it is
-the same gate.
+the same gate. **Nothing on stderr means Layer A passed** (the line is printed
+only when there are warnings); do not wait for a "no warnings" message.
 
 Each warning is `{ code, ids, message }`; `ids` names the offending element(s),
 `message` states the fix:

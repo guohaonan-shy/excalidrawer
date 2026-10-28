@@ -34,7 +34,7 @@
 - [x] 步骤 skill「出图」的 CLI 小节写明 `.result` 外壳的差别和 `-f` 的写法
 - [x] `examples/comparison-figures.mjs` 不再指向已删的 recipe
 - [x] `npm test` 全绿
-- [ ] review 第 1 轮 E4（2026-10-28）：步骤 skill「出图」的 CLI 兜底写明：stderr 没有输出就是 Layer A 通过（有告警时才打印 `⚠ N quality warning(s)`）
+- [x] review 第 1 轮 E4（2026-10-28）：步骤 skill「出图」的 CLI 兜底写明：stderr 没有输出就是 Layer A 通过（有告警时才打印 `⚠ N quality warning(s)`）
 
 ## 选中的存量回归
 - `tests/tools.test.mjs`：同在 `tests/` 下读工具定义，新测试不能改动它的行为
