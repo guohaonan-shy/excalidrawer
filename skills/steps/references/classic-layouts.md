@@ -17,7 +17,7 @@ hubSpoke    — { center:{x,y}, spokeCount, radius, startAngleDeg?=-90, clockwis
 
 从 `start` 起，每步前进 `(dx, dy)`，返回 `count` 个点。适合**每一步间距本来就相等**的线性排列：
 
-- 顺序图里角色的 x（`dx` 大约 330，装得下约 25 个字符的消息标签；标签更长就放宽到 380 以上，否则标签会冲进邻居的泳道），表头 `rect` 以这个 x 为中心。角色表头先用 [`equalize`](stack.md) 量一个统一的高度，再把所有生命线从同一条基线往下放。表头配色在相邻角色之间取差别大的：`yellow → blue → purple → green → red → orange → gray`。
+- 顺序图里角色的 x（`dx` 大约 330，装得下约 25 个字符的消息标签；标签更长就放宽到 380 以上，否则标签会冲进邻居的泳道），表头 `rect` 以这个 x 为中心。角色表头先用 [`equalize`](stack.md) 量一个统一的高度，再把所有生命线从同一条基线往下放。表头配色在相邻角色之间取差别大的：`yellow → blue → purple → green → orange → gray`（红不给表头：红读作出错，留给强调的消息）；同类的角色同色，不同类的相邻角色才要差别大。
 - 流程图的主线（横排或竖排）优先用 [`stack`](stack.md)：节点宽高按文字取，不是等距。只有每个节点尺寸都固定、间距本来就相等的竖排判断树才用 `chain({ start, count, dy })`，`dy` 是节点高加一段间隔。
 
 ## gridLayout：规整的格子
