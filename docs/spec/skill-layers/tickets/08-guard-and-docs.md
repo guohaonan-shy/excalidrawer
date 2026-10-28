@@ -35,6 +35,7 @@
 - [x] `examples/comparison-figures.mjs` 不再指向已删的 recipe
 - [x] `npm test` 全绿
 - [x] review 第 1 轮 E4（2026-10-28）：步骤 skill「出图」的 CLI 兜底写明：stderr 没有输出就是 Layer A 通过（有告警时才打印 `⚠ N quality warning(s)`）
+- [ ] review 第 2 轮 S2（2026-10-28）：扫描对连线的点列字段、形状的文字字段也生效——按代码的样子（字段名后跟冒号和值）写进入口 skill 正文就红；普通行文里出现这两个词不红——工单 08 验收原话「出现……sugar 字段名……就红，报出文件、行号和命中的词」
 
 ## 选中的存量回归
 - `tests/tools.test.mjs`：同在 `tests/` 下读工具定义，新测试不能改动它的行为
