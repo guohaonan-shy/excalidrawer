@@ -20,6 +20,8 @@
 >
 > 另外这张工单一并做完前几张交回、归给收尾的几件（详情见共享笔记）：6 份入口 skill 每处「看它的『…』」后补「这一步只读这一节」（comparison 已有）；步骤 skill「出图」的 CLI 小节补三句：CLI 的 compute-layout 直接打印对象、没有 MCP 的 `.result` 外壳，只要 PNG 写 `-f png`、多种格式写 `-f png,excalidraw`；步骤 skill 开头的节表方便按节读（比如写每节的行号范围或在 SKILL.md 开头列节名）；入口 skill 的「导出格式从对话里推」与「出图」的「推不出来就问一句」措辞统一；stack 参考里时序图步骤列的宽度取法与角色间距的推法写清；`examples/comparison-figures.mjs` 文件头注释改成指向步骤 skill 的 panel 参考。
 
+> 人的决定（2026-10-28）：「选A」——内容说全时只免掉内容上的问题；「怎么画」的选择从内容推不出来、用户也没说的，照问一题（timeline、sequence、comparison、tree 现有的那句例外保留）。
+
 ## 验收标准
 - [x] 在任一入口 skill 正文里加一行 `y = 150`，`npm test` 红，报出这一行；删掉后全绿
 - [x] 6 个入口 skill 现状下扫描测试全绿
