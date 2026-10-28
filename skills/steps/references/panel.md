@@ -30,7 +30,7 @@ panel — { title, body:{ dir?="y", cells, …stack 参数，不含 x/y },
 ## 怎么画出来
 
 - 外壳：用顶层 `x, y, w, h` 画一个 `rect`，先画。
-- 标题：画成表头 `rect`（`text: title.text`，已折行），位置尺寸取 `title`；或者只画一个 `text` 元素放在 `title.x, title.y`。
+- 标题：画成表头 `rect`（`text: title.text`，已折行），位置尺寸取 `title`；或者只画一个 `text` 元素放在 `title.x, title.y`。**分层带的层名只画文字**（见下面「分层带」）：不填色、不描边的 `rect`（`fill: "transparent"`、`stroke: "transparent"`，文字在标题区里水平垂直居中），不要给它一个有边框的矩形。
 - 内容：每个 `body.children[i]` 照 [`stack.md`](stack.md) 画。
 
 ```js
@@ -40,7 +40,7 @@ const p = compute_layout({ helper: "panel", args: {
   x: 40, y: 92,
 }}).result;
 els.push({ shape: "rect", at: [p.x, p.y], size: [p.w, p.h], fill: "bgGreen", stroke: "green" });
-els.push({ shape: "rect", at: [p.title.x, p.title.y], size: [p.title.w, p.title.h], fill: "bgGreen", stroke: "green", text: p.title.text, fontSize: p.title.fontSize });
+els.push({ shape: "rect", at: [p.title.x, p.title.y], size: [p.title.w, p.title.h], fill: "transparent", stroke: "transparent", text: p.title.text, fontSize: p.title.fontSize });
 for (const c of p.body.children) els.push({ shape: "rect", at: [c.x, c.y], size: [c.w, c.h], fill: "green", text: "…", fontSize: c.fontSize });
 ```
 
@@ -60,7 +60,7 @@ compute_layout({ helper: "stack", args: {
 }})
 ```
 
-每层配色：外壳 `bg<Color>` 加同色 `stroke`，标题 `rect` 同底色、`fontSize: 18`，服务格子填中间色。一层一个色系，层与层不同色：
+每层配色：外壳 `bg<Color>` 加同色 `stroke`，服务格子填中间色。**层名只是文字，不画外框**：标题区画成 `fill` / `stroke` 都是 `"transparent"` 的 `rect`，`fontSize` 取 `title.fontSize`；层名站在外壳的浅底色上，不再有自己的矩形（有边框的层名读成又一个服务）。一层一个色系，层与层不同色：
 
 | 层 | 外壳 / 标题 | 服务格子 |
 |---|---|---|
@@ -72,7 +72,7 @@ compute_layout({ helper: "stack", args: {
 
 标题 `title` 的 `fontSize` 取返回值里的 `title.fontSize`，不要另写。
 
-带连线的分层带：各层的服务照常在带里居中，**不要为了对齐把整层平移**（层的条目数不同时，平移会让一层偏右、另一层偏左，整张图失衡）。想让互相连接的服务跨层竖直对齐，先在不改变含义的前提下调这一层的服务次序，让它们尽量落在同一列；仍有错位时用连线的 `fromT` / `toT` 补，见 [`connectors.md`](connectors.md) 的「跨层」。
+带连线的分层带：各层的服务照常在带里居中，**不要为了对齐把整层平移**（层的条目数不同时，平移会让一层偏右、另一层偏左，整张图失衡）。想让互相连接的服务跨层竖直对齐，只在不改变含义的前提下调这一层的服务次序，让它们尽量落在同一列；仍有错位就让直角折线自己拐，不去挪连线的出入点，见 [`connectors.md`](connectors.md) 的「跨层」。
 
 ### 层里再分子泳道（标题在上）
 
