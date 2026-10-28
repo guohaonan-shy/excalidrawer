@@ -85,7 +85,10 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   `tests/skills-entry.test.mjs` fails when an entry skill's body contains a
   code block (ASCII `text` sketches excepted), `render_diagram` /
   `compute_layout`, a sugar field name, a number with `px`, or a coordinate
-  such as `y = 150`, and prints the file, line and word.
+  such as `y = 150`, and prints the file, line and word. The entry skills are
+  whatever directories sit next to `steps/` with a `SKILL.md` (no hard-coded
+  list), so a newly added diagram type is covered by this test and by the
+  steps-wording checks without editing them.
 - **Sequence diagrams size their step column from the message.** The steps
   reference now says how a message cell's width follows the distance it spans
   and how the actor spacing is derived from the longest message.

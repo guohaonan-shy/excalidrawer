@@ -1,9 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync, statSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { readFileSync, readdirSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { entrySkillDirs } from "./skill-dirs.mjs";
 
 // Guard for the entry-skill convention (docs/spec/skill-layers): an entry skill
 // (`skills/<type>/SKILL.md`, everything under skills/ except `steps/`) is written
@@ -81,13 +83,6 @@ export function scanEntrySkill(text) {
   return findings;
 }
 
-/** Entry skills = every directory under skillsDir except `steps`. */
-export function entrySkillDirs(skillsDir) {
-  return readdirSync(skillsDir)
-    .filter((n) => n !== "steps" && statSync(join(skillsDir, n)).isDirectory())
-    .sort();
-}
-
 /** Scan every entry skill under skillsDir. Returns ["<type>/SKILL.md:<line>: <word>"]. */
 export function scanSkillsDir(skillsDir) {
   const out = [];
@@ -162,13 +157,14 @@ test("scanner lets frontmatter, text blocks, component names and content counts 
 test("scanner works on a skills directory: reports file and line, skips steps/", () => {
   const dir = mkdtempSync(join(tmpdir(), "skills-scan-"));
   try {
-    const real = readFileSync(join(SKILLS, "flowchart", "SKILL.md"), "utf8");
-    mkdirSync(join(dir, "flowchart"));
-    writeFileSync(join(dir, "flowchart", "SKILL.md"), real.trimEnd() + "\n\n主线 y = 150\n");
+    const type = entrySkillDirs(SKILLS)[0];
+    const real = readFileSync(join(SKILLS, type, "SKILL.md"), "utf8");
+    mkdirSync(join(dir, type));
+    writeFileSync(join(dir, type, "SKILL.md"), real.trimEnd() + "\n\n主线 y = 150\n");
     mkdirSync(join(dir, "steps"));
     writeFileSync(join(dir, "steps", "SKILL.md"), "---\nname: steps\n---\ny = 150, render_diagram, 40px\n```js\n```\n");
     const lastLine = real.trimEnd().split("\n").length + 2;
-    assert.deepEqual(scanSkillsDir(dir), [`flowchart/SKILL.md:${lastLine}: y = 150`]);
+    assert.deepEqual(scanSkillsDir(dir), [`${type}/SKILL.md:${lastLine}: y = 150`]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -176,8 +172,9 @@ test("scanner works on a skills directory: reports file and line, skips steps/",
 
 // --- the real entry skills ------------------------------------------------------
 
-test("the six entry skills are the directories next to steps, and each holds only SKILL.md", () => {
-  assert.deepEqual(entrySkillDirs(SKILLS), ["architecture", "comparison", "flowchart", "sequence", "timeline", "tree"]);
+test("every entry skill (a directory next to steps with a SKILL.md) holds only SKILL.md", () => {
+  assert.ok(entrySkillDirs(SKILLS).length > 0, "no entry skill found under skills/");
+  assert.ok(!entrySkillDirs(SKILLS).includes("steps"), "steps is not an entry skill");
   for (const name of entrySkillDirs(SKILLS)) {
     assert.deepEqual(readdirSync(join(SKILLS, name)), ["SKILL.md"], `${name}/ must only hold SKILL.md`);
   }

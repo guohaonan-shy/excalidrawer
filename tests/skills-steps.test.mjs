@@ -5,12 +5,13 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { HELPERS } from "../src/tools/compute-layout.mjs";
+import { entrySkillDirs } from "./skill-dirs.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SKILLS = join(ROOT, "skills");
 const STEPS = join(SKILLS, "steps");
 const REFS = join(STEPS, "references");
-const ENTRY_SKILLS = ["flowchart", "timeline", "architecture", "sequence", "comparison", "tree"];
+const ENTRY_SKILLS = entrySkillDirs(SKILLS);
 
 const read = (p) => readFileSync(p, "utf8");
 const refFiles = () => readdirSync(REFS).filter((f) => f.endsWith(".md"));
