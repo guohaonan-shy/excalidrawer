@@ -10,9 +10,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 1. 问清楚
 
-提问的通用规则：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。
-
-用户已经贴出完整的节点和连线时，这一步跳过。否则问这几件事：
+用户的描述已经能列全这张图的全部内容（节点，以及每个分叉通向哪里）就不问，也不去读提问规则，直接到第 2 步。否则先看提问的通用规则：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。这一步只读这一节。然后问这几件事：
 
 1. **核心场景**：自由文本，比如「表单提交到落库」「代码评审到合并」。
 2. **判断 / 分叉点有几个**：没有（一条直线流程）、一个是否判断、两三个判断、自己列。
@@ -20,11 +18,11 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 可选的追问：失败 / 异常的分支要不要单独画一个终点；有没有重试、退回上一步的循环。
 
-导出格式不用问，按去向直接定，规则在 `steps` 的『出图』里。
+导出格式不用先问：对话里读得出图要去哪就直接定，读不出来才在出图时问一句（规则在 `steps` 的『出图』里）。
 
 ## 2. 构图
 
-组件的用法：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。只读下面用到的那几份参考。
+组件的用法：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。这一步只读这一节，再读下面用到的那几份参考。
 
 ### 一张好的流程图长什么样
 
@@ -77,7 +75,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 3. 出图
 
-出图、命名、导出格式、两层质量关、迭代：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』。流程图的文件名用 flowchart-<name>。
+出图、命名、导出格式、两层质量关、迭代：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』。这一步只读这一节。流程图的文件名用 flowchart-<name>。
 
 ## 4. 常见画坏法
 

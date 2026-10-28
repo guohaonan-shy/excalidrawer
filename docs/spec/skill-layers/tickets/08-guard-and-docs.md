@@ -21,17 +21,17 @@
 > 另外这张工单一并做完前几张交回、归给收尾的几件（详情见共享笔记）：6 份入口 skill 每处「看它的『…』」后补「这一步只读这一节」（comparison 已有）；步骤 skill「出图」的 CLI 小节补三句：CLI 的 compute-layout 直接打印对象、没有 MCP 的 `.result` 外壳，只要 PNG 写 `-f png`、多种格式写 `-f png,excalidraw`；步骤 skill 开头的节表方便按节读（比如写每节的行号范围或在 SKILL.md 开头列节名）；入口 skill 的「导出格式从对话里推」与「出图」的「推不出来就问一句」措辞统一；stack 参考里时序图步骤列的宽度取法与角色间距的推法写清；`examples/comparison-figures.mjs` 文件头注释改成指向步骤 skill 的 panel 参考。
 
 ## 验收标准
-- [ ] 在任一入口 skill 正文里加一行 `y = 150`，`npm test` 红，报出这一行；删掉后全绿
-- [ ] 6 个入口 skill 现状下扫描测试全绿
-- [ ] 标题字号在 `skills/` 里只出现在 `steps` 的语义参考一处
-- [ ] `CLAUDE.md`、README 不再提 `skills/shared` 或「type recipe 在 `references/<type>.md`」
-- [ ] `CHANGELOG.md` 的改动只在 Unreleased 节下
-- [ ] 三种装法的验证结果写进 PR 描述（每种：调到 / 没调到 + 卡在哪）
-- [ ] 「用户已说全就不问、不读提问规则」在步骤 skill 的 clarify 和 6 份入口 skill 里是同一个说法（人的决定第一题）
-- [ ] 6 份入口 skill 每处调用步骤 skill 的地方都带「这一步只读这一节」
-- [ ] 步骤 skill「出图」的 CLI 小节写明 `.result` 外壳的差别和 `-f` 的写法
-- [ ] `examples/comparison-figures.mjs` 不再指向已删的 recipe
-- [ ] `npm test` 全绿
+- [x] 在任一入口 skill 正文里加一行 `y = 150`，`npm test` 红，报出这一行；删掉后全绿
+- [x] 6 个入口 skill 现状下扫描测试全绿
+- [x] 标题字号在 `skills/` 里只出现在 `steps` 的语义参考一处
+- [x] `CLAUDE.md`、README 不再提 `skills/shared` 或「type recipe 在 `references/<type>.md`」
+- [x] `CHANGELOG.md` 的改动只在 Unreleased 节下
+- [ ] 三种装法的验证结果写进 PR 描述（每种：调到 / 没调到 + 卡在哪） ⏭ 延后 → PR 交付验收：三种装法都真装过，静态可发现性已验（交回的 verified 有逐项结果）；让模型实际走到「出图」一步没跑成（临时配置目录里没有登录凭据，不为此拷贝凭据），描述由编排者写进 PR，要人看过再认
+- [x] 「用户已说全就不问、不读提问规则」在步骤 skill 的 clarify 和 6 份入口 skill 里是同一个说法（人的决定第一题）
+- [x] 6 份入口 skill 每处调用步骤 skill 的地方都带「这一步只读这一节」
+- [x] 步骤 skill「出图」的 CLI 小节写明 `.result` 外壳的差别和 `-f` 的写法
+- [x] `examples/comparison-figures.mjs` 不再指向已删的 recipe
+- [x] `npm test` 全绿
 
 ## 选中的存量回归
 - `tests/tools.test.mjs`：同在 `tests/` 下读工具定义，新测试不能改动它的行为

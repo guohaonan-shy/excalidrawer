@@ -10,9 +10,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 1. 问清楚
 
-提问的通用规则（一轮问几题、什么时候用选择题）：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。导出格式不用问，从对话里推（见第 3 步）。
-
-**用户已经粘出完整的分层和服务时，结构性的问题都跳过，也不用去调 `steps`。** 否则问这三件：
+**用户的描述已经能列全这张图的全部内容（有哪几层、每层有哪些服务）就不问，也不去读提问规则。** 否则先看提问的通用规则（一轮问几题、什么时候用选择题）：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。这一步只读这一节。然后问这三件：
 
 1. **系统核心组成**：自由文本，让用户把组成列出来，由你按层归。
 2. **结构形态**：单选。
@@ -27,6 +25,8 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 可选追问：有没有 API Gateway、消息队列、Service Mesh 这类应该单独成一层的东西。选了画连线时，哪些调用是异步的、哪些服务是计划中的，用户没说就问，不要猜：虚线猜错了比没有虚线更误导。
 
 这几个选项各自落到哪些组件上，第 2 步调 `steps` 时在 panel 那一份里有对照。
+
+导出格式不用先问：对话里读得出图要去哪就直接定，读不出来才在出图时问一句（规则在 `steps` 的『出图』里）。
 
 ## 2. 构图
 
@@ -65,7 +65,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 - **legend**：用了自定义的线型含义（虚线 = 异步、虚线框 = 计划中）时放一个图例，三行以内。
 - **标题**：一张图一个标题，点明这是什么系统的什么视图；标题的字号和位置是全图共用的值，不在这里写，在 `steps` 的 semantics 那一份里。
 
-组件的参数和它们怎么配合，调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。只读用到的那几份：形状与文字、panel、stack、连线、semantics（线型、颜色含义在里面）；用了自定义线型或颜色含义时再加 legend。
+组件的参数和它们怎么配合，调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。这一步只读这一节，再读用到的那几份参考：形状与文字、panel、stack、连线、semantics（线型、颜色含义在里面）；用了自定义线型或颜色含义时再加 legend。
 
 ### 配色
 
@@ -89,7 +89,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 3. 出图
 
-调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』：文件命名（架构图是 `architecture-<名字>`）、导出格式、两层质量关和迭代都在那里。两关都过才算画完。
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』，这一步只读这一节：文件命名（架构图是 `architecture-<名字>`）、导出格式、两层质量关和迭代都在那里。两关都过才算画完。
 
 ## 4. 常见画坏法
 

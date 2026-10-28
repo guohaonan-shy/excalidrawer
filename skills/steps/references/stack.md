@@ -101,12 +101,17 @@ compute_layout({ helper: "stack", args: {
 
 ### 一列步骤：顺序图的表头、生命线和分段
 
-顺序图的步骤用一列 stack 排，每步是一个文字格（消息文字，宽取它跨的距离），箭头画在格子的底边；**生命线的长度取这个 stack 的 `h`**（再加一点尾巴），不再靠 `60 + 52 * stepCount` 这种公式，步数一多一少也不会不够长。
+顺序图的步骤用一列 stack 排，每步是一个文字格（格里的文字就是写在箭头上的消息），箭头画在格子的底边；**生命线的长度取这个 stack 的 `h`**（再加一点尾巴），不再靠 `60 + 52 * stepCount` 这种公式，步数一多一少也不会不够长。
+
+**格宽怎么取**：一条消息的格宽 = 它跨过的距离减 40（箭头两端各让出 20），跨 `k` 个相邻角色就是 `k * dx - 40`，`dx` 是相邻角色的 x 间距。格宽决定文字在哪里折行，进而决定这一格有多高；取成消息真正占的宽度，折行出来的高度才和它在图上的样子一致。
+
+**角色间距 `dx` 怎么推**（角色的 x 按 `dx` 等距排，见 [`classic-layouts.md`](classic-layouts.md) 的 `chain`）：每条消息的文字宽按字号 14 估，拉丁字符约 `0.62 * 14 ≈ 8.7`，汉字按 `14`；这条消息要的间距是 `(文字宽 + 40) / 它跨的格数`，所有消息里取最大的，**不小于 330**（约 25 个拉丁字符的消息放得下）。有一条相邻角色之间的消息特别长，就按它放宽 `dx`，别让文字冲进邻居的泳道。
 
 ```js
+const dx = 330;                                   // 或按上面的推法放宽
 const steps = compute_layout({ helper: "stack", args: {
   dir: "y", gap: 14, x: 0, y: lifelineTop + 10,
-  cells: messages.map((m) => ({ text: m.text, w: 330, fontSize: 14 })),
+  cells: messages.map((m) => ({ text: m.text, w: m.span * dx - 40, fontSize: 14 })),   // m.span：跨几个相邻角色
 }}).result;
 // 第 i 步的 y = steps.children[i].y；生命线：{ shape: "line", at: [cx, lifelineTop], points: [[0, 0], [0, steps.h + 30]] }
 ```

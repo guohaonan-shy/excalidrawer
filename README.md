@@ -156,8 +156,8 @@ or `%APPDATA%\Claude\claude_desktop_config.json` (Windows), then restart the app
 Only if you want the two MCP tools **without** the skills. The recommended
 Codex path is [the plugin](#agent-plugin-claude-code--codex-recommended), which
 brings the skills and this MCP server together — a bare `codex mcp add` gives
-you `render_diagram` / `compute_layout` but none of the recipes (palette
-conventions, back-edge routing, swimlane parameters, quality gates).
+you `render_diagram` / `compute_layout` but none of the skills' guidance (palette
+conventions, back-edge routing, layout components, quality gates).
 
 ```bash
 codex mcp add excalidrawer -- npx -y -p excalidrawer@latest -c excalidrawer-mcp
@@ -179,15 +179,23 @@ Claude Code and Codex both install them.
 | `tree` | Hierarchies from one root — taxonomies, org charts, user-story maps; left→right or top→down | tree, 树状图, hierarchy, org chart, 层级图, 分类树 |
 | `steps` | Step skill — how to ask, which component to use and how to fill it (one reference per component), output rules, quality gate (called by the entry skills, not invoked directly) | — |
 
-Each entry skill opens by calling `steps` (in Claude Code, the Skill tool with
-`excalidrawer:steps`; other hosts read `../steps/SKILL.md`) and looks at one
-named section of it, so the cross-cutting rules and each component's usage live
-in one place instead of being copied into every entry skill. Given a request,
-an entry skill clarifies intent with a couple of `AskUserQuestion` prompts,
-composes sugar elements using the component references in
-[`skills/steps/references/`](skills/steps/references/), then calls the MCP
-server's `render_diagram` tool to emit `.excalidraw` / `.svg` / `.png` /
+An entry skill is a single `SKILL.md` in plain language: what to ask, what a
+good diagram of that type looks like, and how it usually goes wrong. It holds
+no coordinates, sizes, tool calls or code (a test,
+[`tests/skills-entry.test.mjs`](tests/skills-entry.test.mjs), keeps it that
+way). When it reaches a step that needs mechanics, it calls `steps` (in Claude
+Code, the Skill tool with `excalidrawer:steps`; other hosts read
+`../steps/SKILL.md`) and names the one section to read - `clarify`, `组件`,
+`出图` - so the cross-cutting rules and each component's usage live in one place
+instead of being copied into every entry skill. Given a request, an entry skill
+asks a couple of `AskUserQuestion` prompts (skipping the ones about what to draw if your description already
+lists everything in the diagram), composes the diagram with the component
+references in [`skills/steps/references/`](skills/steps/references/), then calls
+the MCP server's `render_diagram` tool to emit `.excalidraw` / `.svg` / `.png` /
 `.webp`.
+
+To add a diagram type, follow the checklist in the `新增一种图类型` section of
+[`skills/steps/SKILL.md`](skills/steps/SKILL.md).
 
 > All skills call the `excalidrawer-mcp` server. The plugin install above ships
 > a manifest that registers it automatically; without the plugin, wire up the

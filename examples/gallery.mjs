@@ -22,8 +22,8 @@ const outDir = new URL("../docs/gallery/", import.meta.url).pathname;
 mkdirSync(outDir, { recursive: true });
 
 // Sequence: the browser-cache read/write flow from a real spec (report audio
-// prefetch & shared cache). Built from sugar the way the `sequence` skill
-// recipe composes it — header row, dashed lifelines, phase bands, one labelled
+// prefetch & shared cache). Built from sugar the way the `sequence` entry skill
+// describes it — header row, dashed lifelines, phase bands, one labelled
 // message per row — rather than with the built-in template.
 function cacheSequence() {
   const actors = [
@@ -123,7 +123,7 @@ const figures = {
     ],
   }),
 
-  sequence: cacheSequence, // sugar, composed the way the sequence skill recipe does
+  sequence: cacheSequence, // sugar, composed the way the sequence entry skill describes
 
   timeline: () => timeline({
     title: "2026 product roadmap",

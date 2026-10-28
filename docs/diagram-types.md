@@ -33,8 +33,8 @@ viz) rather than trying to become a charting library.
 ## Open questions
 
 - Each new type = a new skill folder under the current per-type-skill
-  architecture, unless it's better framed as a recipe variant of an existing
-  skill (e.g. "high-level" as an `architecture` recipe variant rather than a
+  architecture, unless it's better framed as a variant inside an existing
+  entry skill (e.g. "high-level" as a variant of the `architecture` skill rather than a
   standalone skill — depends on how much its layout actually differs).
 - Composite types (tree, pyramid) likely need the `stack`/pack primitives
   discussed in [`component-layer.md`](component-layer.md) before their

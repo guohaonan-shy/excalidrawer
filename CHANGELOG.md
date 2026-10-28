@@ -15,10 +15,11 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   The MCP `render_diagram` tool and `excalidrawer render -f webp` write
   `<output>.webp`. `webp` is opt-in: with no `formats` the output is still
   excalidraw + svg + png. `generate` is unchanged.
-- **Export formats are a reference in the shared skill.** The fixed
-  four-option "format" question is gone; `skills/shared/SKILL.md` §6 now maps
-  each format to where it fits, and the agent picks from the conversation,
-  asking about the destination only when it can't tell.
+- **Export formats are a reference in the step skill.** The fixed
+  four-option "format" question is gone; the "出图" section of
+  `skills/steps/SKILL.md` now maps each format to where it fits, and the agent
+  picks from the conversation, asking about the destination only when it can't
+  tell.
 - **`stack` layout helper.** `stack({ dir, cells, … })` lays a group of cells
   along one axis and sizes the container from their content — text cells wrap
   to their width (or take their natural width, capped at `maxW`), titled cells
@@ -58,6 +59,36 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   outside a corner of the diagram. Coordinates only — the caller draws the
   swatch or line. Exported from the package and available through the MCP
   `compute_layout` tool (and the CLI `compute-layout`).
+
+### Changed
+
+- **Skills are two layers: entry skills in natural language, one step skill
+  `steps` for the mechanics.** Each of the six diagram skills (flowchart,
+  timeline, architecture, sequence, comparison, tree) is now a single
+  `SKILL.md`: what to ask, what a good diagram looks like (which components,
+  what each draws), common ways it goes wrong. The `references/<type>.md`
+  recipes are deleted, and with them the hand-copied coordinates, sizes and
+  tool calls; the geometry now comes from the stack / panel / axis / legend /
+  tree components. The shared base skill is renamed `steps` (`skills/steps/`): its `SKILL.md`
+  has the named sections an entry skill points at (`clarify`, `组件`, `出图`,
+  `新增一种图类型`), and the sugar field notes are split into one reference per
+  component under `skills/steps/references/`. An entry skill calls `steps` by
+  name (Claude Code: `excalidrawer:steps`; other hosts read
+  `../steps/SKILL.md`) at the step that needs it and reads only the named
+  section, instead of loading the whole base up front. When the user's
+  description already lists everything in the diagram, the entry skill skips
+  the questions and never reads the asking rules.
+- **The diagram title is one size everywhere.** Comparison and architecture
+  used 26; flowchart and timeline used 28. The size now lives once, in the
+  steps semantics reference, as 28.
+- **A test keeps entry skills in natural language.**
+  `tests/skills-entry.test.mjs` fails when an entry skill's body contains a
+  code block (ASCII `text` sketches excepted), `render_diagram` /
+  `compute_layout`, a sugar field name, a number with `px`, or a coordinate
+  such as `y = 150`, and prints the file, line and word.
+- **Sequence diagrams size their step column from the message.** The steps
+  reference now says how a message cell's width follows the distance it spans
+  and how the actor spacing is derived from the longest message.
 
 ## 0.5.15
 

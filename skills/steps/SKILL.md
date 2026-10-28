@@ -13,12 +13,14 @@ four named sections. An entry skill calls this skill at the step it needs and
 names the section; read **that section only** and the references it points to,
 not the whole file.
 
-| section | when an entry skill sends you here |
-|---|---|
-| [clarify](#clarify) | the "ask the user" step |
-| [组件](#组件) | the "compose the diagram" step - which component to use and how to fill its fields |
-| [出图](#出图) | the "render and deliver" step |
-| [新增一种图类型](#新增一种图类型) | writing a new entry skill |
+| section | lines (read only these) | when an entry skill sends you here |
+|---|---|---|
+| [clarify](#clarify) | 行 33–55 | the "ask the user" step |
+| [组件](#组件) | 行 57–88 | the "compose the diagram" step - which component to use and how to fill its fields |
+| [出图](#出图) | 行 90–259 | the "render and deliver" step |
+| [新增一种图类型](#新增一种图类型) | 行 261–286 | writing a new entry skill |
+
+To read one section, open this file with an offset at its first line and a limit of its length (the line numbers are checked by `tests/skills-steps.test.mjs`, which tells you the right ones if you change the file).
 
 The loop an entry skill walks:
 
@@ -30,9 +32,13 @@ detect type → clarify → pick components & styles (组件) → compose sugar
 
 ## clarify
 
-Always run **AskUserQuestion** (≤ 3 questions per round) before composing,
-unless the user already pasted a complete structured spec (full nodes/edges,
-ready actor list, milestone list, tiers + services).
+用户的描述已经能列全这张图的全部内容（节点和分叉去向、里程碑、角色和消息、层与服务、对比的两侧和维度、树的层级……）就不问，也不去读提问规则。入口 skill 在这一步开头写的是同一句话，所以它不会为此来读这一节；只有要问的时候才读下面。
+
+Otherwise run **AskUserQuestion** (≤ 3 questions per round) before composing.
+The entry skill lists the type-specific questions; a choice about *how to draw*
+(layout, axis style, return-message style, split direction) that the content
+cannot settle is still asked when the user didn't say, even if the content is
+complete.
 
 - **AskUserQuestion fits**: discrete choice, 2–4 short options, single select
   ("horizontal vs vertical", "include connections? yes / no", "axis style").
@@ -40,8 +46,7 @@ ready actor list, milestone list, tiers + services).
   paths, or > 4 options. Keep an "Other / 自定义" escape so the user can override.
 
 Don't ask anything derivable from the request itself — that includes the
-export format (see *Export format reference* under 出图). The entry skill lists
-the type-specific questions to ask, in plain language; "the user picked X →
+export format (see *Export format reference* under 出图). "The user picked X →
 which parameter" is written in the component reference the choice feeds, not in
 the entry skill.
 
@@ -107,6 +112,16 @@ npx -y -p excalidrawer@^0.5.13 -c "excalidrawer compute-layout --helper gridLayo
 
 `elements.json` accepts either a bare sugar array or `{ "elements": [...] }`.
 
+The CLI and the MCP tools return slightly different shapes and take formats
+differently:
+
+- `compute-layout` prints the result object directly, with no `.result` wrapper.
+  MCP's `compute_layout` returns `{ helper, result }`, which is why the
+  component references write `.result` - on the CLI read the printed object itself.
+- `render` writes `excalidraw,svg,png` unless told otherwise. For PNG only,
+  pass `-f png`; for several formats, a comma list with no spaces, e.g.
+  `-f png,excalidraw` (MCP: `formats: ["png", "excalidraw"]`).
+
 ### Output naming (gstack style) + language
 
 Diagrams write to the user's current working directory with semantic file
@@ -158,11 +173,11 @@ conversation language — separate from diagram labels.
 `scale` (1–4) enlarges the export for `png` / `webp`; use 3 for print or a
 high-resolution deck.
 
-Choose the formats directly when the destination can be read from the
-conversation ("画一个流程图贴 Notion"), and keep `excalidraw` alongside so the
-diagram stays editable. Ask one short question about where the diagram will go
-only when the conversation doesn't say. Leave `formats` out to get
-excalidraw + svg + png.
+不先问导出格式：对话里读得出图要去哪就直接定（"画一个流程图贴 Notion"），读不出来才在出图时问一句。Choose the formats directly when the destination can be read from the
+conversation, and keep `excalidraw` alongside so the diagram stays editable.
+Ask one short question about where the diagram will go only when the
+conversation doesn't say - at this step, not in clarify. Leave `formats` out to
+get excalidraw + svg + png.
 
 ### Render call
 

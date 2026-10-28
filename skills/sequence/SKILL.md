@@ -10,7 +10,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 1. 问清楚
 
-提问的通用规则（一轮问几题、什么时候用选择题）：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。
+用户的描述已经能列全这张图的全部内容（有哪些角色、每一步是谁对谁说了什么）就不问，也不去读提问规则。返回消息样式是怎么画的选择，从内容推不出来，用户没说的仍要问，选项在下面。否则先看提问的通用规则（一轮问几题、什么时候用选择题）：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。这一步只读这一节。
 
 要问的三件事：
 
@@ -21,11 +21,13 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
    - 按语义（UML）：请求画实线，响应画虚线。
    - 全实线：不区分请求和响应。
 
-用户已经贴来完整的角色和步骤时，跳过前两问。用户选了哪一项，对应怎么画，写在 `steps` 里连线那份参考的「顺序图里的消息」中，这里不重复。
+导出格式不用先问：对话里读得出图要去哪就直接定，读不出来才在出图时问一句（规则在 `steps` 的『出图』里）。
+
+用户选了哪一项，对应怎么画，写在 `steps` 里连线那份参考的「顺序图里的消息」中，这里不重复。
 
 ## 2. 构图
 
-调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。下面的组件，读它们各自那一份参考。
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。这一步只读这一节，再读下面用到的组件各自那一份参考。
 
 **一张好的时序图**：
 
@@ -56,7 +58,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 3. 出图
 
-调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』。文件名前缀是 sequence；导出格式、质量关、迭代都在那一节。
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』。这一步只读这一节。文件名前缀是 sequence；导出格式、质量关、迭代都在那一节。
 
 ## 4. 常见画坏法
 

@@ -10,7 +10,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 1. 问清楚
 
-提问的通用规则（一轮问几题、什么时候用选择题）：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。导出格式不用问，从对话里推（见第 3 步）。
+用户的描述已经能列全这张图的全部内容（根和每一层有什么）就不问，也不去读提问规则。分裂方向、叶子编号和层名标注是怎么画的选择，从内容推不出来，用户没说的仍要问，选项在下面。否则先看提问的通用规则（一轮问几题、什么时候用选择题）：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。这一步只读这一节。
 
 要问三件事：
 
@@ -42,6 +42,8 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 3. **叶子编号和层名标注**：多选。叶子带编号、每层标注层名（比如 Root / Category / Skill）、都不要。用户给的原文已经带编号时，编号那一项不用问，直接保留。
 
+导出格式不用先问：对话里读得出图要去哪就直接定，读不出来才在出图时问一句（规则在 `steps` 的『出图』里）。
+
 用户选了哪一项，对应怎么画，第 2 步调 `steps` 时在 tree 那一份里有对照，这里不重复。
 
 ## 2. 构图
@@ -69,7 +71,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 - **层名标注**（只在第 1 步选了每层标注层名时画）：上下分裂时放在树的左边，对着每一层；左右分裂时放在每一列的上方。树的起点要给它留出位置。
 - **标题**：一张图一个标题，点明这棵树是什么的什么视图；标题的字号和位置是全图共用的值，不在这里写，在 `steps` 的 semantics 那一份里。
 
-组件的参数和它们怎么配合，调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。只读用到的那几份：形状与文字、tree、semantics。树的连线是 tree 直接给出的现成线段，不用读连线那一份；只有边要画成箭头时才去读它。
+组件的参数和它们怎么配合，调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。这一步只读这一节，再读用到的那几份参考：形状与文字、tree、semantics。树的连线是 tree 直接给出的现成线段，不用读连线那一份；只有边要画成箭头时才去读它。
 
 ### 配色
 
@@ -86,7 +88,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 3. 出图
 
-调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』：文件命名（树状图是 `tree-<名字>`）、导出格式、两层质量关和迭代都在那里。两关都过才算画完。
+调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』，这一步只读这一节：文件命名（树状图是 `tree-<名字>`）、导出格式、两层质量关和迭代都在那里。两关都过才算画完。
 
 ## 4. 常见画坏法
 

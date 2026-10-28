@@ -10,9 +10,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 1. 问清楚
 
-提问的通用规则：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。这一步只读『clarify』那一节，别的节和组件的参考，走到对应的那一步再读。
-
-用户已经给出两侧的名称和完整的维度列表时，这一步跳过版式以外的提问。否则问这几件事：
+用户的描述已经能列全这张图的全部内容（两侧的名称和完整的维度）就不问，也不去读提问规则。版式是怎么画的选择，从内容推不出来，用户没说的仍要问，选项在下面。否则先看提问的通用规则：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『clarify』。这一步只读这一节，别的节和组件的参考，走到对应的那一步再读。然后问这几件事：
 
 1. **两侧是什么，比什么**：自由文本。要的是「左侧叫什么 / 右侧叫什么」，加一组两侧都适用的维度（覆盖范围、价格、反馈深度这一类）。某一侧在某个维度上没有内容不是问题：写「无」本身就是对比的结论。
 2. **版式**：单选。
@@ -25,11 +23,11 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 可选的追问：图里的文字用什么语言。默认写英文；用户的内容是中文、又没说要不要保留中文时，才问一句保留还是翻成英文，规则在 `steps` 的『出图』。
 
-导出格式不用问，按去向直接定，规则在 `steps` 的『出图』里。用户选了哪一项、对应怎么传参，写在 `steps` 里 panel 那份参考的「用户的选择 → 参数」，这里不重复。
+导出格式不用先问：对话里读得出图要去哪就直接定，读不出来才在出图时问一句（规则在 `steps` 的『出图』里）。用户选了哪一项、对应怎么传参，写在 `steps` 里 panel 那份参考的「用户的选择 → 参数」，这里不重复。
 
 ## 2. 构图
 
-组件的用法：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。只读下面用到的那几份参考。
+组件的用法：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『组件』。这一步只读这一节，再读下面用到的那几份参考。
 
 ### 先把内容排成「维度」
 
@@ -95,7 +93,7 @@ allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_lay
 
 ## 3. 出图
 
-出图、命名、导出格式、两层质量关、迭代：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』。文件名用 comparison-<对象>-<轴>，比如 comparison-speaking-apps-coverage；同一个轴、内容改了，重出到同一个文件名；换一个轴就是新的文件，不要往现有图上加一列。
+出图、命名、导出格式、两层质量关、迭代：调 skill `steps`（Claude Code 用 Skill 工具调 `excalidrawer:steps`；其他宿主读 `../steps/SKILL.md`），看它的『出图』。这一步只读这一节。文件名用 comparison-<对象>-<轴>，比如 comparison-speaking-apps-coverage；同一个轴、内容改了，重出到同一个文件名；换一个轴就是新的文件，不要往现有图上加一列。
 
 ## 4. 常见画坏法
 
