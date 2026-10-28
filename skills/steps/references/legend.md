@@ -1,6 +1,6 @@
 # legend：图例
 
-`legend` 给出图例每一行的**样本槽**和**文字槽**，以及整块的尺寸，还能自己摆到图的某个角上。**样本画成什么由你按 [`semantics.md`](semantics.md) 定**：色块还是线段、实线还是虚线、多粗。它只返回坐标。
+`legend` 给出图例每一行的 **sample slot** 和 **label slot**，以及整块的尺寸，还能自己摆到图的某个角上。**样本画成什么由你按 [`semantics.md`](semantics.md) 定**：色块还是线段、实线还是虚线、多粗。它只返回坐标。
 
 ## 什么时候用
 
@@ -17,7 +17,7 @@ legend — { items:[{label,id?}], dir?:"y"|"x"="y", sampleW?=40, sampleH?=16,
            items:[{ id?, text, sample:{x,y,w,h}, label:{x,y,w,h,fontSize} }] }
 ```
 
-- 每个 item 返回一个 `sample` 槽和一个 `label` 槽，垂直方向互相居中；`text` 是输入的文字，`label` 是放它的文字槽。
+- 每个 item 返回一个 `sample` slot 和一个 `label` slot，垂直方向互相居中；`text` 是输入的文字，`label` 是放它的 label slot。
 - `dir: "x"` 把各项排成一行（放在图下方时不占高度）。
 - **摆放**：有 `corner` 时以它为准，此时 `bounds`（图的范围）必填；没有 `corner` 就用 `at`（块的左上角）；都没有就在 (0, 0)。`place: "inside"` 贴着 `bounds` 的那个角往里缩 `offset`；`place: "outside"` 放在 `bounds` 外面：上方两个角放在上方，下方两个角放在下方，左右跟那个角对齐。
 - 参数错了会抛出点名 `legend` 和那个参数的错。
@@ -33,9 +33,9 @@ const lg = compute_layout({ helper: "legend", args: {
 
 对每个 `item`：
 
-- **线型样本**：从样本槽的左中画到右中，用图里同样的 `strokeStyle` / `strokeWidth` / `stroke`：
+- **线型样本**：从 sample slot 的左中画到右中，用图里同样的 `strokeStyle` / `strokeWidth` / `stroke`：
   `{ shape: "line", at: [s.x, s.y + s.h / 2], points: [[0, 0], [s.w, 0]], strokeStyle: "dashed" }`
-- **色块样本**：填满样本槽：`{ shape: "rect", at: [s.x, s.y], size: [s.w, s.h], fill: "green" }`
+- **色块样本**：填满 sample slot：`{ shape: "rect", at: [s.x, s.y], size: [s.w, s.h], fill: "green" }`
 - **文字**：`{ shape: "text", at: [l.x, l.y], size: [l.w, l.h], text: item.text, fontSize: l.fontSize }`
 
 图例整块的 `x, y, w, h` 可以不画外壳，也可以画一个浅色 `rect`，先画，让样本和文字叠在上面。把图例放进画布时，画布的宽高要算上图例（`place: "outside"` 时更要）。

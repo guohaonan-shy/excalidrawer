@@ -39,9 +39,9 @@
 - [x] 仓库内所有指向 `skills/` 下文件的 markdown 相对链接都能解析到存在的文件
 - [x] 照 flowchart 入口 skill（recipe 未改）+ `steps` 画 gallery 里的「Pull request to production」流程图，Layer A 无 warning
 - [x] `npm test` 全绿
-- [ ] review 第 1 轮 C1（2026-10-28）：图例与语义参考里把 legend 结果的空位叫 sample slot、label slot，不用「样本槽」「文字槽」——术语表 slot 条目：「_Avoid_: 区域, zone, area, 槽」
-- [ ] review 第 1 轮 E1（2026-10-28）：panel 参考「分层带」的示例与正文一致——正文要求 body 同时 `justify: "center"`，示例里也要有，照抄示例时服务在层里居中
-- [ ] review 第 1 轮 E2（2026-10-28）：语义参考里「architecture 的 sections 默认按颜色循环上色」与 architecture 入口 skill 的分层配色表（表现层蓝、网关紫、业务绿、数据黄）对上：写明 architecture 按入口 skill 的分层配色，不走默认循环
+- [x] review 第 1 轮 C1（2026-10-28）：图例与语义参考里把 legend 结果的空位叫 sample slot、label slot，不用「样本槽」「文字槽」——术语表 slot 条目：「_Avoid_: 区域, zone, area, 槽」
+- [x] review 第 1 轮 E1（2026-10-28）：panel 参考「分层带」的示例与正文一致——正文要求 body 同时 `justify: "center"`，示例里也要有，照抄示例时服务在层里居中
+- [x] review 第 1 轮 E2（2026-10-28）：语义参考里「architecture 的 sections 默认按颜色循环上色」与 architecture 入口 skill 的分层配色表（表现层蓝、网关紫、业务绿、数据黄）对上：写明 architecture 按入口 skill 的分层配色，不走默认循环
 
 ## 选中的存量回归
 - `tests/tools.test.mjs`：`compute_layout` 的 helper 白名单与说明，`steps` 的组件参考要跟它对得上

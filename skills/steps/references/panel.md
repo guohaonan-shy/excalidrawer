@@ -55,7 +55,7 @@ compute_layout({ helper: "stack", args: {
   dir: "y", gap: 18, equalize: true, x: 40, y: 100,
   cells: layers.map((layer) => ({ panel: {
     title: layer.label, titleSide: "left", titleW: 130,
-    body: { dir: "x", gap: 40, align: "center", cells: layer.items.map((l) => ({ text: l, w: 160 })) },
+    body: { dir: "x", gap: 40, align: "center", justify: "center", cells: layer.items.map((l) => ({ text: l, w: 160 })) },
   } })),
 }})
 ```
