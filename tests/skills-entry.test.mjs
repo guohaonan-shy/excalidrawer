@@ -31,6 +31,7 @@ const SUGAR_FIELDS = [
 const GENERIC_FIELDS = [
   "via", "dashed", "gap", "pad", "align", "justify", "cross", "maxW",
   "size", "fill", "stroke", "at", "from", "to", "edges", "clearance", "shape",
+  "points", "text",
 ];
 
 const wordRe = (names) => new RegExp(`\\b(${names.join("|")})\\b`);
@@ -127,6 +128,21 @@ test("scanner flags coordinates, px numbers, tool names, sugar fields and code b
     "16:via",
     "17:arrowType",
   ]);
+});
+
+test("scanner flags the polyline point list and the shape text field in code form, not as plain words", () => {
+  const body = [
+    "# t",                              // 6
+    "points: [[0, 0], [40, 0]]",        // 7
+    "text: \"API\"",                    // 8
+    "把 `points` 填上。",               // 9
+    "给 `text` 填上。",                 // 10
+    "连线的 points 由出图一步算好。",   // 11
+    "节点的 text 写短一点，别写成 text 块。", // 12
+    "points are the ones you pick; text is plain.", // 13
+  ].join("\n");
+  const found = scanEntrySkill(fm + body).map((f) => `${f.line}:${f.word}`);
+  assert.deepEqual(found, ["7:points", "8:text", "9:points", "10:text"]);
 });
 
 test("scanner lets frontmatter, text blocks, component names and content counts through", () => {
