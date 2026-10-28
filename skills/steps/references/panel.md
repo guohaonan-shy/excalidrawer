@@ -188,5 +188,6 @@ architecture 入口 skill 的「结构形态」问题，用户选了哪项，就
 | 经典分层 | 上面「分层带」：竖排 stack，每层一个 `titleSide: "left"` 的 panel，外层 `equalize: true` |
 | 分层加子分组 | 上面「层里再分子泳道」：整层的表头 panel 包一行 `equalize` 过的子泳道 panel |
 | 自由拓扑 | 不用 panel 分层带：按分组摆用 [`classic-layouts.md`](classic-layouts.md) 的 `gridLayout`，围着一个中心摆用 `hubSpoke`；连线按 id 连，见 [`connectors.md`](connectors.md) |
+| 全景 | 左到右的数据全景：每段一个 panel（`titleSide: "top"`），段内系统竖排成一列；整排是 `dir: "x"` 的横排 stack 并 `equalize: true`（`equalize` 只拉齐横排的高，所以每段高度一致），各段 panel **固定同一个 `w`**（不然段名长的那段会自己变宽）；整排和下方的贯穿横带放进同一个 `equalize: true` 的竖排 stack，由它取等宽（横带宽度 = 整排）。段间一条粗箭头，不画段内连线。可运行的写法见 [`examples/high-level-figures.mjs`](../../../examples/high-level-figures.mjs) |
 
 「是否画连线」的三个选项（不画 / 关键流 / 完整连线）不对应参数：选了不画就不往元素数组里放任何箭头。

@@ -19,6 +19,16 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   line element (SVG / PNG keep the fill; other lines and arrows still export
   unfilled); Layer A treats it as a shape over its bounding box. New README
   figures `docs/gallery/pyramid.png` and `docs/gallery/funnel.png`.
+- **Data-stack overview: a fourth layout of the `architecture` skill.** For
+  "where does the data flow" rather than "who calls whom": one panel per stage
+  in a left-to-right row (data sources → ingest → storage → compute → consume),
+  the systems of a stage in a column, one thick arrow between neighbouring
+  stages and none between systems, and a band under the whole row, as wide as
+  the row, for what spans every stage (governance, monitoring, access).
+  `architecture` now asks one more question — calls or data flow — unless the
+  request already says it, and triggers on "data stack" / "high-level" / 数据全景.
+  No new entry skill or component; the output is still
+  `architecture-<name>`. New README figure `docs/gallery/high-level.png`.
 - **`state-machine` entry skill.** States and transitions with events and
   guards (`event [guard] / action`), the main path in one row, an initial dot
   and final double rings, back-edges, self-loops, two-way transitions and one

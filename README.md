@@ -30,6 +30,7 @@ Nine diagram types, each with its own agent skill. Click a figure for full size.
 <tr>
   <td align="center" width="33%"><a href="docs/gallery/pyramid.png"><img src="docs/gallery/pyramid.png" alt="Pyramid"></a><br><b>Pyramid</b><br><sub>Ranked layers, narrow at the top</sub></td>
   <td align="center" width="33%"><a href="docs/gallery/funnel.png"><img src="docs/gallery/funnel.png" alt="Funnel"></a><br><b>Funnel</b><br><sub>Stage-by-stage drop-off with conversion</sub></td>
+  <td align="center" width="33%"><a href="docs/gallery/high-level.png"><img src="docs/gallery/high-level.png" alt="High-level data stack"></a><br><b>High-level data stack</b><br><sub>Where data flows, stage by stage (an Architecture layout)</sub></td>
 </tr>
 </table>
 
