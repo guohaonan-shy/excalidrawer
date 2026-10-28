@@ -131,6 +131,18 @@ test("the diagram title size appears (as 标题字号) only in the steps semanti
   assert.deepEqual(hits, ["steps/references/semantics.md"]);
 });
 
+test("no skill file outside the semantics reference restates the diagram title's size or position as a number", () => {
+  // catches "标题 y = 30，字号 28", "标题字号 28" and the like; the sub-title (副标题) is a separate value
+  const restated = /(?<!副)标题[^\n]{0,20}(?:字号\s*\d|\b28\b|\by\s*=\s*\d)/;
+  const hits = [];
+  for (const f of markdownFiles(SKILLS)) {
+    const rel = relative(SKILLS, f);
+    if (rel === "steps/references/semantics.md") continue;
+    read(f).split("\n").forEach((l, i) => { if (restated.test(l)) hits.push(`${rel}:${i + 1}`); });
+  }
+  assert.deepEqual(hits, []);
+});
+
 test("every place an entry skill calls steps says the step reads only that section", () => {
   const missing = [];
   for (const t of ENTRY_SKILLS) {
