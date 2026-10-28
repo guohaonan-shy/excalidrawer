@@ -102,7 +102,7 @@ const side = (title, rows) => ({ panel: {
 compute_layout({ helper: "stack", args: { dir: "x", gap: 120, x: 40, y: 90, cells: [side(leftName, leftRows), side(rightName, rightRows)] } })
 ```
 
-画出来：结果里每个 panel 先画外壳 `rect`（`bgGray` / `bgBlue` 加同色描边），再画表头 `rect`（取 `title` 的位置尺寸，`text` 用 `title.text`），再画行卡：`body.children[i]` 的 `x, y, w, h` 就是卡的位置，**文字写在你自己画的 `rect` 的 `text` 上**（`equalize` 量高度时传进去的那一串，和画出来的是同一串）。VS 的 `x` 取左侧 panel 右边缘与右侧 panel 左边缘的中点（左 `x + w` 与右 `x` 的平均）减去它宽度的一半，`y` 取表头 `title.y + title.h / 2` 减去它高度的一半；中间的间隙不画任何东西。
+画出来：结果里每个 panel 先画外壳 `rect`（`bgGray` / `bgBlue` 加同色描边），再画表头 `rect`（取 `title` 的位置尺寸，`text` 用 `title.text`），再画行卡：`body.children[i]` 的 `x, y, w, h` 就是卡的位置，**文字写在你自己画的 `rect` 的 `text` 上**（`equalize` 量高度时传进去的那一串，和画出来的是同一串）。VS 的 `x` 取左侧 panel 右边缘与右侧 panel 左边缘的中点（左 `x + w` 与右 `x` 的平均）减去它宽度的一半，`y` 取两侧外壳的垂直中点（panel 的 `y + h / 2`，两侧同高）减去它高度的一半，不取表头的高度：VS 要落在两个外壳之间的正中，左右居中、上下也居中；中间的间隙不画任何东西。
 
 行卡里一行大约装多少字：368 宽、字号 15 到 16 约 35 个字符，所以 36 个字符的一句会把最后一个词挤到第三行；折行后最后一行只剩一个词时，缩短这句或自己换一处行，比如把 "horizontal needs sharding extensions" 改成 "horizontal via sharding extensions"。
 
@@ -129,7 +129,7 @@ const row = compute_layout({ helper: "equalize", args: { cells: [
 
 两侧表头是同 y 同 h 的 `rect`（单行名字，直接绑文字）：panel 的 `title` 区就是它（`titleSide: "top"`，两侧同样的字号），表头在外壳里面时，外壳填 `bg<Color>`，表头填同色系的中间色（`gray` / `blue` / `purple`，文字用默认墨色），这样表头才和外壳、行卡分得开；表头悬在外壳外面时，表头填 `bg<Color>` 加本侧 `stroke` 和 `textColor`。表头在外壳里面时不需要箭头；想让表头悬在外壳上方（像 gallery 里那张 coverage 图），就用竖排 stack 摆 `[表头, 正文外壳]`，中间留一段，再画一条短箭头从表头指向外壳（[`connectors.md`](connectors.md) 的「表头指向正文」）。
 
-`VS` 是普通文字，放在间隙正中、表头行的垂直中点；不要在间隙里画圆形徽标，那会和卡片抢注意力。间隙 ≥ 100，徽标不能压到任何 rect（`SHAPE_OVERLAP`）。
+`VS` 是普通文字，放在间隙正中：水平在两个外壳之间的中点，垂直在外壳的上下中点（不是表头那一行的高度）；不要在间隙里画圆形徽标，那会和卡片抢注意力。间隙 ≥ 100，徽标不能压到任何 rect（`SHAPE_OVERLAP`）。
 
 ### 三列版式（中间一列写维度名）
 
@@ -145,7 +145,7 @@ const row = compute_layout({ helper: "equalize", args: { cells: [
 
 | 用户选了 | 怎么画 |
 |---|---|
-| 对称双栏 + VS（推荐） | 两侧各一个 `titleSide: "top"` 的 panel，body 是竖排 stack，放进一个横排 stack，`gap` 取 120，两侧列宽相同；VS 画在间隙正中 |
+| 对称双栏 + VS（推荐） | 两侧各一个 `titleSide: "top"` 的 panel，body 是竖排 stack，放进一个横排 stack，`gap` 取 120，两侧列宽相同；VS 画在间隙正中（左右、上下都居中） |
 | 中间一列写维度名的三栏 | 每行三格，见上「三列版式」；表头仍是两侧各一个 |
 | 非对称（一侧拆子卡） | 竖排 stack 里嵌横排 stack（`equalize: true`），见 [`stack.md`](stack.md)；对面那侧的整宽卡一起量高；两侧列外宽相同 |
 | 中立 | 左侧 `blue`、右侧 `purple`，线条粗细一样 |
