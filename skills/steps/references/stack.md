@@ -122,7 +122,9 @@ compute_layout({ helper: "stack", args: {
 }})
 ```
 
-`time` 的文字用里程碑的颜色（`stroke`），`label` 最醒目，`desc` 灰色小字（`stroke: "gray"`）。`yellow` 的文字压在白底上对比不够（Layer A 报 `LOW_CONTRAST`），`time` 取 `yellow` 里程碑时换成 `orange` 或默认墨色。同一侧的里程碑卡要等高时，把各卡的 stack 放进 `equalize` 再画。
+三行都画成无边框透明的 `rect`，文字绑在里面（这样文字在格子里垂直居中，上下两侧的文字块到轴的距离才一致；单独的 `text` 元素是顶对齐，会把距离拉得不一样）：`{ shape: "rect", at: [c.x, c.y], size: [c.w, c.h], fill: "transparent", stroke: "transparent", text, fontSize, textColor }`。
+
+`time` 的文字用里程碑的颜色（`textColor`），`label` 最醒目（默认墨色），`desc` 灰色小字（`textColor` 取灰）。`yellow` 的文字压在白底上对比不够（Layer A 报 `LOW_CONTRAST`），`orange` 也只有约 3.0:1，同样会报，所以 `time` 取 `yellow` 里程碑时用默认墨色。`desc` 的格宽按文字量定：用户给的描述比默认格宽装得下的长时，放宽格宽（相邻里程碑的间距够的话），不要让它折成两行。同一侧的里程碑卡要等高时，把各卡的 stack 放进 `equalize` 再画。
 
 ### 一行里不同宽度的节点：流程图主线
 
