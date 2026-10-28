@@ -1922,8 +1922,8 @@ const TAPER_PAD_Y = 8;
  * Layers that narrow step by step — a pyramid (narrow at the top) or a funnel
  * (narrow at the bottom). Returns coordinates only: each layer's four corners
  * (draw them as sugar `polygon`), the box its label fits in (draw it as `text`),
- * where its value goes on the right, and where the conversion rate between two
- * layers goes.
+ * where its value goes on the right, and where the conversion rate between each
+ * two layers goes.
  *
  * Shape. Layers are listed top to bottom, always, whichever way the figure
  * narrows. The *wider* edge of each layer sits one `step` inside the wider edge
@@ -1957,12 +1957,13 @@ const TAPER_PAD_Y = 8;
  *     corners:[number,number][],
  *     textBox:{x:number,y:number,w:number,h:number,fontSize:number,text:string},
  *     valueAnchor?:{x:number,y:number} }>,
- *   rates: Array<{ from:number, to:number, ratio:number, text:string, anchor:{x:number,y:number} }> }}
+ *   rates: Array<{ from:number, to:number, ratio?:number, text?:string, anchor:{x:number,y:number} }> }}
  *   - `corners`: top-left, top-right, bottom-right, bottom-left — ready for a polygon's `points`.
  *   - `textBox.text`: the label with "\n" at the wrap points; draw it as a `text` of that size.
  *   - `valueAnchor` (only for layers with a `value`): the left-middle of the value's text, one column for all layers.
- *   - `rates` (only where both values are numbers and the upper one is above 0): `ratio` = lower / upper,
- *     `text` = its percentage ("40%", "12.5%"), `anchor` in the gap between the two layers, same column.
+ *   - `rates` (one per pair of neighbouring layers, whatever the values): `anchor` in the gap between the
+ *     two layers, same column as the values. `ratio` = lower / upper and `text` = its percentage
+ *     ("40%", "12.5%") only where both values are numbers and the upper one is above 0.
  *
  * @example
  *   const f = taper({ narrow: "bottom", width: 560, layers: [
@@ -2058,19 +2059,20 @@ export function taper(opts = {}) {
     return layer;
   });
 
+  // Every pair of neighbours gets an anchor in the gap — a funnel may show only
+  // the rates, with no value on any layer, or values written as formatted text
+  // ("10,000"). The figures ride along only when both are numbers and the one
+  // above is positive.
   const rates = [];
   for (let i = 0; i + 1 < n; i++) {
     const a = out[i];
     const b = out[i + 1];
-    if (!isNum(a.value) || !isNum(b.value) || a.value <= 0) continue;
-    const ratio = b.value / a.value;
-    rates.push({
-      from: i,
-      to: i + 1,
-      ratio,
-      text: `${Number((ratio * 100).toFixed(1))}%`,
-      anchor: { x: column, y: (a.y + a.h + b.y) / 2 },
-    });
+    const rate = { from: i, to: i + 1, anchor: { x: column, y: (a.y + a.h + b.y) / 2 } };
+    if (isNum(a.value) && isNum(b.value) && a.value > 0) {
+      rate.ratio = b.value / a.value;
+      rate.text = `${Number((rate.ratio * 100).toFixed(1))}%`;
+    }
+    rates.push(rate);
   }
 
   const last = out[n - 1];

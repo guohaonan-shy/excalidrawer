@@ -97,7 +97,7 @@ export function signupFunnel() {
     ...drawLayers(t, { id: "step", fills }),
   ];
   t.layers.forEach((l) => els.push(cell(l.valueAnchor, l.value.toLocaleString("en-US"))));
-  t.rates.forEach((r) => els.push(cell(r.anchor, r.text, { fontSize: 13, textColor: "gray" })));
+  t.rates.forEach((r) => r.text && els.push(cell(r.anchor, r.text, { fontSize: 13, textColor: "gray" })));
   return els;
 }
 

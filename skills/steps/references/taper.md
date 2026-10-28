@@ -18,7 +18,7 @@ taper — { layers:[string | {text, value?}] (自上而下), width, narrow?:"top
                     corners:[[x,y]×4],                 // 左上、右上、右下、左下
                     textBox:{ x, y, w, h, fontSize, text },
                     valueAnchor?:{ x, y } }],
-          rates:[{ from, to, ratio, text, anchor:{x,y} }] }
+          rates:[{ from, to, anchor:{x,y}, ratio?, text? }] }
 ```
 
 - **层的顺序永远是自上而下**，不管往哪头收窄。金字塔的第一项是塔尖，漏斗的第一项是入口。用户按"底层在前"说（需求层次从生理需求说起）时，你先反过来再传。
@@ -27,7 +27,7 @@ taper — { layers:[string | {text, value?}] (自上而下), width, narrow?:"top
 - **文字框**：宽度是这一层最窄那条边减去两侧留白，高度是折行后的行数。放不下就折行，`textBox.text` 已经带好 `\n`，按它原样画；折行后装不下的层会自己长高，下面的层跟着往下挪，所以不要自己算每层的 y，一律取返回的。`textBox` 整个落在梯形里。
 - **`layers[i].x, y, w, h`** 是这一层梯形的外接矩形，`corners` 是四个顶点。
 - **`valueAnchor`**：只有带 `value` 的层才有。所有层的数值锚点在同一列（整张图右边缘往右 `valueGap`），纵向对着这一层的中线。它是数值文字的**左中**：`at: [anchor.x, anchor.y - 文字高 / 2]`。
-- **`rates`**：相邻两层的 `value` 都是数字、上一层大于 0 时才有。`ratio` 是下一层除以上一层，`text` 是写好的百分比（`"40%"`、`"12.5%"`），`anchor` 在两层之间的缝里，跟数值同一列。`value` 是字符串（如 `"1.2M"`）时只摆数值，没有转化率。
+- **`rates`**：每一对相邻层都有一项（N 层就有 N-1 项），不论这些层有没有给数、给的是不是数字；`anchor` 在两层之间的缝里，跟数值同一列。`ratio`（下一层除以上一层）和 `text`（写好的百分比，`"40%"`、`"12.5%"`）只在两层的 `value` 都是数字、上一层大于 0 时才带上。所以用户只给转化率、每层没有数时，传不带 `value` 的层，转化率文字自己写在对应的 `anchor` 上；`value` 写成 `"10,000"`、`"1.2M"` 这类字符串时只摆数值，也没有 `text`，要转化率就自己算好再写在 `anchor` 上。
 - 参数错了会抛出点名 `taper` 和那个参数的错。
 
 ## 怎么画出来
@@ -45,7 +45,7 @@ const f = compute_layout({ helper: "taper", args: {
 - **梯形**：`{ shape: "polygon", id: "layer-0", points: l.corners, fill: "blue" }`。多边形见 [`shapes.md`](shapes.md) 的「多边形」。
 - **层名**：`{ shape: "text", at: [b.x, b.y], size: [b.w, b.h], text: b.text, fontSize: b.fontSize }`，`b = l.textBox`。文字压在梯形上，Layer A 按梯形的填充算对比度：浅色填充配默认墨色字。
 - **数值**：`{ shape: "text", at: [l.valueAnchor.x, l.valueAnchor.y - 11], size: [宽, 22], text: String(l.value) }`，宽度按位数留；左对齐的效果靠"文字自己居中、框刚好够宽"得到，别把框做得比字宽很多。
-- **转化率**：同样摆成一个 `text`，`at: [r.anchor.x, r.anchor.y - 9]`，字号 13、`textColor` 用灰，写 `r.text`。夹在两个数值之间的灰字需要一句说明（副标题里写"灰字 = 相邻两步的转化率"）。
+- **转化率**：同样摆成一个 `text`，`at: [r.anchor.x, r.anchor.y - 9]`，字号 13、`textColor` 用灰，写 `r.text`；`r.text` 缺的那一项（没有数，或数不是数字）写用户给的转化率。夹在两个数值之间的灰字需要一句说明（副标题里写"灰字 = 相邻两步的转化率"）。
 
 ## 效果
 

@@ -74,9 +74,9 @@ export const computeLayout = defineTool({
     "(rows of a sample slot + a text slot; draw the sample as a filled rect, or a line from the slot's left-middle to right-middle; with `corner` + `bounds` the block places itself)\n" +
     "  taper       — { layers:[string|{text,value?}] (top to bottom), width, narrow?:'top'|'bottom'='top' ('top' = pyramid, 'bottom' = funnel), minWidth?=0.3*width, " +
     "layerH?=56, gap?=12, fontSize?=16, valueGap?=24, x?, y? } → " +
-    "{kind:'taper',narrow,x,y,w,h,cx,layers:[{index,text,value?,x,y,w,h,corners:[[x,y]×4 tl,tr,br,bl],textBox:{x,y,w,h,fontSize,text},valueAnchor?:{x,y}}],rates:[{from,to,ratio,text,anchor:{x,y}}]} " +
+    "{kind:'taper',narrow,x,y,w,h,cx,layers:[{index,text,value?,x,y,w,h,corners:[[x,y]×4 tl,tr,br,bl],textBox:{x,y,w,h,fontSize,text},valueAnchor?:{x,y}}],rates:[{from,to,ratio?,text?,anchor:{x,y}}]} " +
     "(stacked trapezoids that narrow by the same step per layer — values never change the shape; draw each layer's corners as shape:'polygon', " +
-    "textBox as a centered text (its text is already wrapped; a layer whose label wraps grows taller), valueAnchor / rates[].anchor as left-middle of the number's text)\n" +
+    "textBox as a centered text (its text is already wrapped; a layer whose label wraps grows taller), valueAnchor / rates[].anchor as left-middle of the number's text; rates has one entry per pair of neighbouring layers, ratio / text only when both values are numbers)\n" +
     "On bad input it returns { error }.",
   params: {
     helper: {

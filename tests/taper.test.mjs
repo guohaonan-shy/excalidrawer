@@ -142,7 +142,9 @@ test("taper pyramid: the top layer is the narrowest, widths grow downward, the b
   assert.equal(r.w, 600);
   // layers given as bare strings carry no value anchors
   for (const l of r.layers) assert.equal(l.valueAnchor, undefined);
-  assert.deepEqual(r.rates, []);
+  // ...but every pair of neighbours still gets a conversion anchor, with no figures on it
+  assert.equal(r.rates.length, 4);
+  for (const x of r.rates) assert.deepEqual(Object.keys(x).sort(), ["anchor", "from", "to"]);
 });
 
 test("taper: the narrowest edge is `minWidth` (default 30% of width) when layers keep their nominal height", () => {
@@ -182,16 +184,39 @@ test("taper: conversion rates are value[i+1] / value[i], anchored in the gap bet
   });
 });
 
-test("taper: a rate is left out where either value is missing or the one above is 0; text keeps one decimal when needed", () => {
+test("taper: every pair of neighbours gets a rate anchor; ratio and text come only where both values are numbers and the upper one is above 0", () => {
   const r = taper({
     layers: [{ text: "a", value: 1000 }, { text: "b", value: 125 }, { text: "c" }, { text: "d", value: 0 }, { text: "e", value: 5 }],
     narrow: "bottom",
     width: 500,
   });
-  assert.deepEqual(r.rates.map((x) => [x.from, x.to, x.text]), [[0, 1, "12.5%"]]);
-  const withString = taper({ layers: [{ text: "a", value: "1.2M" }, { text: "b", value: "300k" }], narrow: "bottom", width: 500 });
-  assert.equal(withString.layers[0].valueAnchor.y, withString.layers[0].y + withString.layers[0].h / 2);
-  assert.deepEqual(withString.rates, [], "string values have no ratio");
+  assert.deepEqual(r.rates.map((x) => [x.from, x.to]), [[0, 1], [1, 2], [2, 3], [3, 4]]);
+  assert.deepEqual(r.rates.map((x) => x.text), ["12.5%", undefined, undefined, undefined]);
+  assert.equal(r.rates[0].ratio, 0.125);
+  for (const x of r.rates.slice(1)) assert.ok(!("ratio" in x) && !("text" in x), "no figures where the pair is not numeric / upper is 0");
+  r.rates.forEach((x, i) => {
+    approx(x.anchor.y, (r.layers[i].y + r.layers[i].h + r.layers[i + 1].y) / 2);
+    approx(x.anchor.x, r.x + r.w + 24);
+  });
+});
+
+test("taper: a conversion-rates-only funnel (no values, or values written as formatted strings) still gets 3 anchors for 4 layers", () => {
+  const bare = taper({ layers: ["Visited", "Signed up", "Activated", "Paying"], narrow: "bottom", width: 560 });
+  assert.equal(bare.rates.length, 3);
+  const formatted = taper({
+    layers: [{ text: "Visited", value: "10,000" }, { text: "Signed up", value: "4,200" }, { text: "Activated", value: "1.2M" }, { text: "Paying", value: "300k" }],
+    narrow: "bottom",
+    width: 560,
+  });
+  assert.equal(formatted.layers[0].valueAnchor.y, formatted.layers[0].y + formatted.layers[0].h / 2);
+  assert.equal(formatted.rates.length, 3);
+  formatted.rates.forEach((x, i) => {
+    assert.deepEqual([x.from, x.to], [i, i + 1]);
+    assert.ok(!("ratio" in x) && !("text" in x), "string values have no ratio");
+    approx(x.anchor.y, (formatted.layers[i].y + formatted.layers[i].h + formatted.layers[i + 1].y) / 2);
+  });
+  // a single layer has no neighbour
+  assert.deepEqual(taper({ layers: ["only"], width: 300 }).rates, []);
 });
 
 // ============================================================================
