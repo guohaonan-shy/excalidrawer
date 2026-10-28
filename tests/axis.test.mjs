@@ -448,3 +448,81 @@ test("axis: exactly 1000 ticks is fine, 1001 is not", () => {
 test("axis: a step below float range does not slip past the cap as Infinity", () => {
   assert.throws(() => axis({ from, domain: [0, 1e300], length: 500, ticks: { step: 1e-300 } }), /axis.*1000/);
 });
+
+// ---------------------------------------------------------------------------
+// dir "up": a vertical axis that grows from its start toward the top
+// ---------------------------------------------------------------------------
+
+const base = { x: 100, y: 400 };
+
+test("axis up: a 0-100 axis with 5 ticks puts 0 on the start and 100 one axis length above it", () => {
+  const a = axis({ from: base, dir: "up", domain: [0, 100], length: 300, ticks: { count: 5 } });
+  assert.deepEqual(a.ticks.map((t) => t.value), [0, 20, 40, 60, 80, 100]);
+  assert.deepEqual(a.ticks.map((t) => t.y), [400, 340, 280, 220, 160, 100]);
+  assert.ok(a.ticks.every((t) => t.x === 100));
+  assert.deepEqual(a.from, base);
+  assert.deepEqual(a.to, { x: 100, y: 100 });
+});
+
+test("axis up: the scale puts 40 between 0 and 100 and lower on the page than 75", () => {
+  const a = axis({ from: base, dir: "up", domain: [0, 100], length: 300 });
+  assert.equal(a.scale.origin, 400);
+  approx(a.scale.pxPerUnit, -3);
+  const yOf = (v) => a.scale.origin + (v - a.scale.domain[0]) * a.scale.pxPerUnit;
+  approx(yOf(0), 400);
+  approx(yOf(100), 100);
+  approx(yOf(40), 280);
+  assert.ok(yOf(40) < 400 && yOf(40) > 100, "40 sits between 0 and 100");
+  assert.ok(yOf(40) > yOf(75), "40 is lower on the page (larger y) than 75");
+});
+
+test("axis up: valued marks climb from the start", () => {
+  const a = axis({ from: base, dir: "up", marks: months, length: 600 });
+  assert.deepEqual(a.marks.map((m) => m.y), [400, 300, 200, -200]);
+  assert.ok(a.marks.every((m) => m.x === 100));
+  assert.deepEqual(a.to, { x: 100, y: -200 });
+  approx(a.marks[1].t, 100 / 600);
+});
+
+test("axis up: the scale does not count `extend`", () => {
+  const a = axis({ from: base, dir: "up", domain: [0, 100], length: 300, extend: [20, 30] });
+  assert.equal(a.scale.origin, 380);
+  approx(a.scale.pxPerUnit, -2.5);
+  approx(a.scale.origin + 100 * a.scale.pxPerUnit, a.to.y + 30);
+});
+
+test("axis up: segments run upward, cut around marks by `gap`", () => {
+  const a = axis({ from: base, dir: "up", marks: [{}, {}], spacing: 100, gap: 10 });
+  assert.deepEqual(a.segments.map((s) => [s.at, s.points[1]]), [[[100, 390], [0, -80]]]);
+  const one = axis({ from: base, dir: "up", marks: [{}, {}], spacing: 100 });
+  assert.deepEqual(one.segments, [{ at: [100, 400], points: [[0, 0], [0, -100]], arrow: false }]);
+});
+
+test("axis up: 'before' labels are left of the axis and 'after' right, like dir 'y'", () => {
+  const a = axis({ from: base, dir: "up", marks: [{}, {}], labelSide: "alternate" });
+  assert.deepEqual(a.marks[0].labelAnchor, { x: 88, y: 400, side: "before" });
+  assert.deepEqual(a.marks[1].labelAnchor, { x: 112, y: 240, side: "after" });
+  const t = axis({ from: base, dir: "up", domain: [0, 10], length: 100, ticks: { step: 5 } });
+  assert.deepEqual(t.ticks[1].labelAnchor, { x: 112, y: 350, side: "after" });
+});
+
+test("axis up: a collapsed range keeps a zero (not negative-zero) scale", () => {
+  const a = axis({ from: base, dir: "up", marks: [{ value: 5 }], length: 100, ticks: { count: 5 } });
+  assert.ok(Object.is(a.scale.pxPerUnit, 0));
+  assert.deepEqual(a.ticks.map((t) => [t.x, t.y]), [[100, 400]]);
+});
+
+test("axis up: `domain` still has to be min <= max", () => {
+  assert.throws(() => axis({ from, dir: "up", domain: [100, 0], length: 100 }), /axis.*domain/);
+});
+
+test("axis: the unknown-dir message lists up", () => {
+  assert.throws(() => axis({ from, dir: "down" }), /axis.*dir.*"up"/);
+});
+
+test("axis up: compute_layout gives the same result as calling axis; an unknown dir still errors", () => {
+  const args = { from: base, dir: "up", domain: [0, 100], length: 300, ticks: { count: 5 } };
+  const res = getTool("compute_layout").run({ helper: "axis", args });
+  assert.deepEqual(res.result, axis(args));
+  assert.match(getTool("compute_layout").run({ helper: "axis", args: { ...args, dir: "left" } }).error, /axis.*dir/);
+});

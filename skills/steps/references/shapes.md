@@ -83,6 +83,18 @@
 
 同一个数组里可以既有 sugar 元素（有 `shape` 字段），又有 raw Excalidraw 元素（没有 `shape`）。raw 元素原样通过，缺的基础字段补上——从 Excalidraw 导出里贴一段、或手调某一个元素时有用。
 
+### 画在形状后面的线
+
+sugar 的 `line` / `arrow` 总是在所有形状之后画，所以一条要**压在形状下面**的线（图表的网格线、折线图里穿过圆点的折线）用 sugar 写会盖住形状。把它写成 raw 的 `line`，放在数组里它要垫着的形状**之前**：raw 元素按数组顺序画。
+
+```js
+// 一条浅灰虚线网格，宽 560，起点 (100, 320)
+{ type: "line", id: "grid-30", x: 100, y: 320, width: 560, height: 0,
+  points: [[0, 0], [560, 0]], strokeStyle: "dashed", strokeColor: "#adb5bd", strokeWidth: 1 }
+```
+
+`points` 是相对 `x, y` 的偏移；`width` / `height` 是 `points` 的包围盒；颜色只能写十六进制（`strokeColor`），描边色取调色板里 `stroke*` 那一组（蓝 `#1971c2`、橙 `#e67700`、绿 `#2f9e44`、紫 `#7048e8`、灰 `#868e96`）。不需要垫在下面的线仍然用 sugar 的 `line`。
+
 ## 报错
 
 sugar 元素写错时 `render_diagram` 返回 `{ error, issues: [...] }`，每条 issue 写明出错元素的下标和问题（`unknown fill color`、`arrow "from" references unknown id`、`fromT must be a number in [0,1]`……）。改了再来，失败时不会写任何文件。

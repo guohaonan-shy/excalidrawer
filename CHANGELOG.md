@@ -29,6 +29,19 @@ See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
   request already says it, and triggers on "data stack" / "high-level" / 数据全景.
   No new entry skill or component; the output is still
   `architecture-<name>`. New README figure `docs/gallery/high-level.png`.
+- **`chart` entry skill, and `axis` can grow upward.** Simple bar charts
+  (vertical, or horizontal when the category names are long or there are more
+  than 8; up to three series with a legend, values on the bar tops) and line
+  charts (a value axis that starts at a neat tick, a dot per point, the last
+  value written beside the line). `axis` takes `dir: "up"` next to `"x"` and
+  `"y"`: the value axis climbs from its start, marks and ticks follow, and the
+  `scale` formula stays `origin + (v - domain[0]) * pxPerUnit` with a negative
+  `pxPerUnit`. `"x"` and `"y"` behave exactly as before; `domain` is still
+  min ≤ max. No chart component: bars, lines, dots and grid come from the
+  axes' ticks and scale (`examples/chart-figures.mjs`). The step skill's
+  shapes reference gains *lines drawn behind shapes* (raw `line`, for grid
+  lines and the polyline). New README figures `docs/gallery/chart-bar.png` and
+  `chart-line.png`.
 - **`state-machine` entry skill.** States and transitions with events and
   guards (`event [guard] / action`), the main path in one row, an initial dot
   and final double rings, back-edges, self-loops, two-way transitions and one

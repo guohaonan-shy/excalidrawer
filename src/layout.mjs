@@ -1710,7 +1710,8 @@ const clean = (v) => Number(v.toPrecision(12));
  *
  * @param {object} opts
  * @param {{x:number,y:number}} opts.from - start of the axis
- * @param {"x"|"y"} [opts.dir="x"] - `x` runs right, `y` runs down
+ * @param {"x"|"y"|"up"} [opts.dir="x"] - `x` runs right, `y` runs down, `up` runs up
+ *   (a chart's value axis: the start is the baseline and larger values sit higher)
  * @param {Array<{id?:string,value?:number,label?:string}>} [opts.marks=[]]
  * @param {[number,number]} [opts.domain] - value range; defaults to the marks' min..max
  * @param {number} [opts.length] - total length; default `spacing*(n-1)` + both `extend`s
@@ -1721,7 +1722,7 @@ const clean = (v) => Number(v.toPrecision(12));
  * @param {{step?:number,count?:number}} [opts.ticks] - ticks on the domain (`count` defaults to 5;
  *   step is the nearest of 1/2/5 × 10^k, ticks on multiples of it, inside the domain;
  *   more than 1000 ticks throws — raise `step` / lower `count`)
- * @param {"before"|"after"|"alternate"} [opts.labelSide="after"] - before = above (x) / left (y)
+ * @param {"before"|"after"|"alternate"} [opts.labelSide="after"] - before = above (x) / left (y, up)
  * @param {number} [opts.labelOffset=12] - label anchor distance from the line
  *
  * @returns {{ kind:"axis", from, to, marks, ticks, segments, scale }}
@@ -1730,7 +1731,8 @@ const clean = (v) => Number(v.toPrecision(12));
  *   - `segments`: `{ at:[x,y], points:[[0,0],[dx,dy]], arrow }`
  *   - `scale`: `{ domain, origin, pxPerUnit }` — value v sits at
  *     `origin + (v - domain[0]) * pxPerUnit`, measured along the axis (x for
- *     `dir:"x"`, y for `"y"`); the `extend` stretches are not part of it.
+ *     `dir:"x"`, y for `"y"` and `"up"`); the `extend` stretches are not part of
+ *     it. On `"up"` the origin is the baseline and `pxPerUnit` is negative.
  *     `domain` and `pxPerUnit` are null when there is no domain.
  *
  * @example
@@ -1757,7 +1759,9 @@ export function axis(opts = {}) {
   if (!from || !isNum(from.x) || !isNum(from.y)) {
     throw new Error("axis: `from` must be { x, y } with numeric coordinates");
   }
-  if (dir !== "x" && dir !== "y") throw new Error(`axis: unknown \`dir\` "${dir}" (use "x" or "y")`);
+  if (dir !== "x" && dir !== "y" && dir !== "up") {
+    throw new Error(`axis: unknown \`dir\` "${dir}" (use "x", "y" or "up")`);
+  }
   if (!["before", "after", "alternate"].includes(labelSide)) {
     throw new Error(`axis: unknown \`labelSide\` "${labelSide}" (use "before", "after" or "alternate")`);
   }
@@ -1817,18 +1821,23 @@ export function axis(opts = {}) {
     throw new Error("axis: `length` must leave a positive stretch inside `extend` to place the domain on");
   }
 
-  const pxPerUnit = dom === undefined ? null : (dom[1] === dom[0] ? 0 : span / (dom[1] - dom[0]));
-  const posOfValue = (v) => e0 + (v - dom[0]) * pxPerUnit;
+  // A value sits `e0 + (v - dom[0]) * along` from the start of the axis. On "up"
+  // the page coordinate falls along the axis, and the returned scale is in page
+  // coordinates, so it runs the other way: negative px per unit, origin at the
+  // baseline `from.y - e0`.
+  const along = dom === undefined ? null : (dom[1] === dom[0] ? 0 : span / (dom[1] - dom[0]));
+  const pxPerUnit = along === null || along === 0 || dir !== "up" ? along : -along;
+  const posOfValue = (v) => e0 + (v - dom[0]) * along;
   const positions = marks.map((m, i) => {
     if (valued) return posOfValue(m.value);
     if (length === undefined) return e0 + i * spacing;
     return n > 1 ? e0 + (i * span) / (n - 1) : e0;
   });
 
-  const unit = dir === "x" ? [1, 0] : [0, 1];
+  const unit = dir === "x" ? [1, 0] : dir === "y" ? [0, 1] : [0, -1];
   const point = (p) => ({ x: from.x + unit[0] * p, y: from.y + unit[1] * p });
   const t = (p) => (total > 0 ? p / total : 0);
-  // before = above an x axis / left of a y axis
+  // before = above an x axis / left of a y or up axis
   const anchor = (p, i) => {
     const side = labelSide === "alternate" ? (i % 2 === 0 ? "before" : "after") : labelSide;
     const off = side === "before" ? -labelOffset : labelOffset;
@@ -1904,7 +1913,7 @@ export function axis(opts = {}) {
     segments,
     scale: {
       domain: dom === undefined ? null : [dom[0], dom[1]],
-      origin: (dir === "x" ? from.x : from.y) + e0,
+      origin: dir === "x" ? from.x + e0 : dir === "y" ? from.y + e0 : from.y - e0,
       pxPerUnit,
     },
   };

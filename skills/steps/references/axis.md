@@ -5,13 +5,13 @@
 ## 什么时候用
 
 - 时间线的主轴：里程碑圆点等距，或按月份 / 日期换算位置。
-- 图表的坐标轴（给 #12 的柱状图、折线图）：好看的刻度间隔，加上 `scale` 把数据值换成坐标。
+- 图表的坐标轴（柱状图、折线图，见 [`chart` 入口 skill](../../chart/SKILL.md)）：竖着向上长的数值轴，好看的刻度间隔，加上 `scale` 把数据值换成坐标。
 - 任何"一条线上串着几个点"的东西。
 
 ## 参数和返回
 
 ```text
-axis — { from:{x,y}, dir?:"x"|"y"="x", marks?:[{value?,label?,id?}], domain?:[min,max],
+axis — { from:{x,y}, dir?:"x"|"y"|"up"="x", marks?:[{value?,label?,id?}], domain?:[min,max],
          length?, spacing?=160, extend?:[before,after]=[0,0], gap?=0, arrow?:"none"|"end"="none",
          ticks?:{step?|count?}, labelSide?:"before"|"after"|"alternate"="after", labelOffset?=12 }
      → { kind:"axis", from, to,
@@ -21,13 +21,14 @@ axis — { from:{x,y}, dir?:"x"|"y"="x", marks?:[{value?,label?,id?}], domain?:[
          scale:{ domain, origin, pxPerUnit } }
 ```
 
-- `dir: "x"` 向右，`"y"` 向下。`from` 是轴的起点，`to` 是终点。
+- `dir: "x"` 向右，`"y"` 向下，`"up"` 向上。`from` 是轴的起点，`to` 是终点。`"up"` 是图表数值轴的方向：起点是基线，数值越大 mark、tick 离基线越高；它的标签侧跟 `"y"` 一样（`before` 在左，`after` 在右）。
 - **摆位**：所有 mark 都带 `value` 时，按 `domain` 线性换算到轴上（`extend` 以内的那一段）；都不带时按 `spacing` 等距，写了 `length` 就均分；有的带有的不带会报错。`extend` 是第一个标记点之前、最后一个之后多出来的轴长（轴的"尾巴"）。
 - **缺口**：`gap` 是每个标记点两侧各断开多长（取圆点半径加一点留白），`0` 不断开。线段因此永远不会穿过圆点。
 - **箭头**：`arrow: "end"` 把最后一段标成箭头（时间朝那边流）。
 - **刻度**：`ticks: { step }` 或 `{ count }` 在 `domain` 内按 1 / 2 / 5 × 10ⁿ 的倍数加刻度，最多 1000 个（更多会报错，调大 `step` 或调小 `count`）。
 - **标签**：`labelAnchor` 是标签文字的参考点，`side` 说明文字在锚点的哪一侧；x 轴的 `before` 在上方，y 轴的 `before` 在左侧。`labelSide: "alternate"` 让第 1、3、5… 个标记点在 `before` 侧，第 2、4… 个在 `after` 侧。
-- **换算**：不在标记点上的数值用 `scale`：沿轴方向的坐标 = `origin + (v - domain[0]) * pxPerUnit`（`dir: "x"` 是 x，`"y"` 是 y）。
+- **换算**：不在标记点上的数值用 `scale`：沿轴方向的坐标 = `origin + (v - domain[0]) * pxPerUnit`（`dir: "x"` 是 x，`"y"` 和 `"up"` 是 y）。`"up"` 的 `origin` 是基线的 y，`pxPerUnit` 是负数（值越大 y 越小），所以同一个公式给出的是页面坐标，不用再翻一次。
+- **`domain` 只许首小于等于尾**：想让数值从上往下变大，不是把 `domain` 倒过来写（会报错），而是换方向（`"y"`）。
 
 ## 怎么画出来
 
@@ -89,13 +90,38 @@ domain: [0, 8], length: 640, extend: [110, 110], gap: 15, arrow: "end",
 
 ### 图表坐标轴
 
+一张柱状图或折线图要两条轴：**数值轴**和**类别轴**（或时间轴）。图表不是组件：柱子、折线、圆点、网格线都用这两条轴的返回值自己画。完整可跑的例子是 `examples/chart-figures.mjs`。
+
 ```js
-compute_layout({ helper: "axis", args: {
-  from: { x: 60, y: 400 }, dir: "y", domain: [0, 100], length: 300, ticks: { count: 5 },
-}})
+// 数值轴：向上长，0 在基线，100 在基线上方一个轴长
+const v = compute_layout({ helper: "axis", args: {
+  from: { x: 100, y: 470 }, dir: "up", domain: [0, 100], length: 300,
+  ticks: { count: 5 }, labelSide: "before",
+}}).result;
+
+// 类别轴：每个类别一个不带 value 的 mark。让 mark 落在等宽分带的正中：
+// 两头各留半个分带（extend），mark 在中间均分
+const band = 560 / categories.length;
+const c = compute_layout({ helper: "axis", args: {
+  from: { x: 100, y: 470 }, dir: "x", length: 560,
+  extend: [band / 2, band / 2], marks: categories.map((label) => ({ label })),
+}}).result;
 ```
 
-返回的 `ticks[i].labelAnchor` 放刻度文字，`scale` 把数据值换成坐标：`y = origin + (v - domain[0]) * pxPerUnit`。柱子、折线、数据点、网格线不在 axis 里，用 `scale` 自己画。
+- **刻度文字**放在 `v.ticks[i].labelAnchor`（`side` 是 `before`，文字在锚点左侧）。数值轴的下限要落在一个刻度上，所以折线图的数值轴想从 40 起就写 `domain: [40, 90]`，下限就是整齐的第一个刻度；柱状图从 0 起。
+- **数据值 → y**：`y = v.scale.origin + (value - v.scale.domain[0]) * v.scale.pxPerUnit`，`"up"` 的 `pxPerUnit` 是负数，直接得到页面 y。
+- **类别文字**放在 `c.marks[i].labelAnchor`（轴下方），宽度取一个分带减去一点留白。
+- **轴线**：两条轴的 `segments` 各画成一条 `line`，不加箭头。
+- **网格线**：每个刻度（基线那个除外）一条浅灰虚线，从数值轴画到图的右边。**网格线用 raw 的 `line`，放在数组最前面**：sugar 的 `line` 总是画在所有形状上面，会盖住柱子。写法见 [`shapes.md`](shapes.md) 的「画在形状后面的线」。
+- **柱子**（竖）：每个类别的分带里，一个系列一根 `rect`。柱子底边是基线，顶边是 `y(值)`：`at: [x, y(值)]`，`size: [柱宽, 基线 y - y(值)]`。多系列的同一个类别，柱子并排紧贴，整组居中在 mark 上，组宽约取分带的 70%。
+- **柱顶的数值**：一个 `text` 放在柱顶上方，宽度等于柱宽加一点，写不下的长数字缩小字号。
+- **折线**：一个系列的所有点依次连成一条线，用 raw 的 `line`（`points` 相对第一个点），颜色用该色系的描边色，放在圆点前面；圆点是 `ellipse`（直径约 10，填同一个描边色），压在线上。末点右侧一个 `text` 写数值。
+- **图例**：多系列时用 [`legend.md`](legend.md)，放在图的右上角、图的外面。样本画成与系列同色的色块。
+- **轴标题**（可选）：一个 `text`，数值轴的写在轴顶上方、靠左；类别轴的写在类别文字下方。单位写进数值轴标题。
+
+#### 横着的柱状图（类别名长、类别多）
+
+类别沿竖轴往下排，柱子向右长：数值轴是 `dir: "x"`（起点在左下，刻度文字 `after` 在下方），类别轴是 `dir: "y"`（起点在左上，`labelSide: "before"` 把类别名放在轴左侧）。`scale` 此时给的是 x：`x = origin + (value - domain[0]) * pxPerUnit`，柱子 `at: [基线 x, 类别 mark 的 y - 柱高 / 2]`、`size: [x(值) - 基线 x, 柱高]`，数值写在柱子右端外侧。网格线是竖的。类别名放得下的地方要给够：轴左侧留出最长类别名的宽度。
 
 ### 里程碑旁边的文字
 
