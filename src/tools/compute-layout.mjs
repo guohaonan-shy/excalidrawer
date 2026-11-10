@@ -1,7 +1,7 @@
 import { defineTool } from "./schema.mjs";
 import {
   gridLayout, chain, swimlane, hubSpoke, edgePoint, routeU, labelAnchor,
-  fitContainer, titledBox, equalize, tree, stack, panel, axis, legend, taper,
+  fitContainer, titledBox, equalize, tree, stack, panel, axis, legend, taper, pie,
 } from "../layout.mjs";
 
 /**
@@ -26,6 +26,7 @@ const DISPATCH = {
   axis:        (a) => axis(a),
   legend:      (a) => legend(a),
   taper:       (a) => taper(a),
+  pie:         (a) => pie(a),
 };
 
 export const HELPERS = Object.keys(DISPATCH);
@@ -77,6 +78,11 @@ export const computeLayout = defineTool({
     "{kind:'taper',narrow,x,y,w,h,cx,layers:[{index,text,value?,x,y,w,h,corners:[[x,y]×4 tl,tr,br,bl],textBox:{x,y,w,h,fontSize,text},valueAnchor?:{x,y}}],rates:[{from,to,ratio?,text?,anchor:{x,y}}]} " +
     "(stacked trapezoids that narrow by the same step per layer — values never change the shape; draw each layer's corners as shape:'polygon', " +
     "textBox as a centered text (its text is already wrapped; a layer whose label wraps grows taller), valueAnchor / rates[].anchor as left-middle of the number's text; rates has one entry per pair of neighbouring layers, ratio / text only when both values are numbers)\n" +
+    "  pie         — { slices:[{label,value,valueText?}] (clockwise in this order; a zero value has no slice), r?=120, cx?=r, cy?=r, startDeg?=-90 (12 o'clock), " +
+    "fontSize?=16, decimals?=1, insideW?=r, outsideW?=180, leader?:[radial,horizontal]=[22,14], arcStep?=6 } → " +
+    "{kind:'pie',cx,cy,r,total,slices:[{index,label,value,share,valueText,startDeg,endDeg,midDeg,points:[[x,y]...],placement:'inside'|'outside',textBox:{x,y,w,h,fontSize,text},leader?:{at,points}}],bounds:{x,y,w,h}} " +
+    "(draw each slice's points as shape:'polygon', textBox as a centered text (its text is the wrapped name + '\\n' + the percentage), leader as shape:'line'; " +
+    "a label that cannot fit inside its slice moves outside on a leader, never dropped; bounds covers the circle and every label)\n" +
     "On bad input it returns { error }.",
   params: {
     helper: {

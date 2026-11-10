@@ -2097,3 +2097,237 @@ export function taper(opts = {}) {
     rates,
   };
 }
+
+// ---------------------------------------------------------------------------
+// pie
+// ---------------------------------------------------------------------------
+
+// Room kept between a label inside a slice and the slice's arc and straight edges.
+const PIE_INSET = 6;
+// Vertical room between two outside labels on the same side.
+const PIE_LABEL_GAP = 6;
+// Horizontal room between the end of a leader and its label.
+const PIE_LEADER_GAP = 4;
+
+/**
+ * A pie: one slice per value, sized by its share of the total, each with a
+ * label (name + percentage). Returns coordinates only: each slice's outline as
+ * polygon points (draw them as sugar `polygon`), the box its label goes in
+ * (draw it as `text`), and, for a label that sits outside, the leader line from
+ * the slice to the label (draw it as `line`).
+ *
+ * Slices go clockwise from `startDeg` (-90 = 12 o'clock) in the given order.
+ * A zero value has no slice.
+ *
+ * Labels. A label goes inside its slice when its wrapped name plus the
+ * percentage fits there with `PIE_INSET` to spare on every side; otherwise it
+ * moves outside, on the side of the circle the slice faces, at the end of a
+ * leader that leaves the arc at the slice's middle angle, runs out radially and
+ * turns horizontal to a column clear of the circle (one column per side). Small slices therefore keep their labels — dropping them
+ * hides exactly the values a reader can't eyeball. Outside labels on one side
+ * that would overlap are pushed apart vertically (the leader follows its label).
+ *
+ * @param {object} opts
+ * @param {Array<{label:string, value:number, valueText?:string}>} opts.slices - non-empty; values >= 0, total > 0
+ * @param {number} [opts.r=120] - radius
+ * @param {number} [opts.cx=r] - center x
+ * @param {number} [opts.cy=r] - center y
+ * @param {number} [opts.startDeg=-90] - angle of the first slice's start edge; 0 = 3 o'clock, -90 = 12 o'clock
+ * @param {number} [opts.fontSize=16] - label font size
+ * @param {number} [opts.decimals=1] - decimals of the percentage ("13.3%"); a slice's `valueText` replaces it
+ * @param {number} [opts.insideW=r] - width a label inside a slice wraps to
+ * @param {number} [opts.outsideW=180] - width an outside label wraps to
+ * @param {number} [opts.leader=[22,14]] - an outside leader's radial length past the arc, and how far past
+ *   `r + radial` from the center its label column starts
+ * @param {number} [opts.arcStep=6] - max degrees per polygon edge along the arc
+ *
+ * @returns {{ kind:"pie", cx:number, cy:number, r:number, total:number,
+ *   slices: Array<{ index:number, label:string, value:number, share:number, valueText:string,
+ *     startDeg:number, endDeg:number, midDeg:number, points:[number,number][],
+ *     placement:"inside"|"outside",
+ *     textBox:{x:number,y:number,w:number,h:number,fontSize:number,text:string},
+ *     leader?:{at:[number,number], points:[number,number][]} }>,
+ *   bounds:{x:number,y:number,w:number,h:number} }}
+ *   - `index`: position in the input `slices` (zero values are left out, so it can skip).
+ *   - `textBox.text`: the wrapped name, "\n", the percentage; draw it as a centered `text` of that size.
+ *   - `leader`: L4 form, ready for `{ shape: "line", at, points }`.
+ *   - `bounds`: the circle plus every label — size the canvas from it.
+ *
+ * @example
+ *   const p = pie({ cx: 380, cy: 260, r: 120, slices: [
+ *     { label: "Opinion", value: 50 }, { label: "Trade-off", value: 10.9 } ] });
+ *   // p.slices[i].points → { shape: "polygon", points, fill }
+ *   // p.slices[i].textBox → { shape: "text", at: [x, y], size: [w, h], text, fontSize }
+ */
+export function pie(opts = {}) {
+  const o = opts ?? {};
+  const bad = (name, want, v) =>
+    new Error(`pie: \`${name}\` must be ${want}, got ${JSON.stringify(v) ?? String(v)}`);
+  const num = (name, def, kind = "any") => {
+    const v = o[name] ?? def;
+    const wrong =
+      !isNum(v) || (kind === "positive" && v <= 0) || (kind === "non-negative" && v < 0);
+    if (wrong) throw bad(name, kind === "any" ? "a number" : `a ${kind} number`, o[name]);
+    return v;
+  };
+
+  const { slices } = o;
+  if (!Array.isArray(slices) || slices.length === 0) {
+    throw bad("slices", "a non-empty array of { label, value }", slices);
+  }
+  slices.forEach((s, i) => {
+    if (!s || typeof s !== "object" || typeof s.label !== "string" || s.label === "") {
+      throw bad(`slices[${i}]`, "{ label, value } with a non-empty `label`", s);
+    }
+    if (!isNum(s.value) || s.value < 0) throw bad(`slices[${i}].value`, "a non-negative number", s.value);
+    if (s.valueText !== undefined && typeof s.valueText !== "string") {
+      throw bad(`slices[${i}].valueText`, "a string", s.valueText);
+    }
+  });
+  const total = slices.reduce((t, s) => t + s.value, 0);
+  if (total <= 0) throw bad("slices", "values with a total above 0", slices.map((s) => s.value));
+
+  const r = num("r", 120, "positive");
+  const cx = num("cx", r);
+  const cy = num("cy", r);
+  const startDeg = num("startDeg", -90);
+  const fontSize = num("fontSize", 16, "positive");
+  const decimals = num("decimals", 1, "non-negative");
+  const insideW = num("insideW", r, "positive");
+  const outsideW = num("outsideW", 180, "positive");
+  const arcStep = num("arcStep", 6, "positive");
+  const leaderOpt = o.leader ?? [22, 14];
+  if (!Array.isArray(leaderOpt) || leaderOpt.length !== 2 || !leaderOpt.every((v) => isNum(v) && v >= 0)) {
+    throw bad("leader", "[radial, horizontal] non-negative numbers", o.leader);
+  }
+  const [radialLen, horizLen] = leaderOpt;
+
+  const rad = (deg) => (deg * Math.PI) / 180;
+  const at = (deg, dist) => [cx + dist * Math.cos(rad(deg)), cy + dist * Math.sin(rad(deg))];
+  const round = (v) => Math.round(v * 100) / 100;
+  const pt = ([x, y]) => [round(x), round(y)];
+
+  // Is (x, y) inside the slice from a to b (degrees, a < b), PIE_INSET clear of its edges?
+  const inSlice = (x, y, a, b) => {
+    const dx = x - cx, dy = y - cy;
+    const d = Math.hypot(dx, dy);
+    if (d > r - PIE_INSET) return false;
+    if (b - a >= 360) return true;
+    let ang = (Math.atan2(dy, dx) * 180) / Math.PI;
+    while (ang < a) ang += 360;
+    while (ang >= a + 360) ang -= 360;
+    if (ang > b) return false;
+    // Perpendicular distance to each straight edge (only matters within 90° of it).
+    const toEdge = (e) => {
+      const diff = Math.abs(((ang - e + 540) % 360) - 180);
+      return diff >= 90 ? Infinity : d * Math.sin(rad(Math.min(Math.abs(ang - e), 360 - Math.abs(ang - e))));
+    };
+    return toEdge(a) >= PIE_INSET && toEdge(b) >= PIE_INSET;
+  };
+
+  const boxOf = (text) => {
+    const w = widestLine(text, fontSize) + PIE_LEADER_GAP * 2;
+    return { w, h: textHeight(text, fontSize, 0) };
+  };
+
+  let deg = startDeg;
+  const out = [];
+  slices.forEach((s, index) => {
+    if (s.value === 0) return;
+    const share = s.value / total;
+    const sweep = share * 360;
+    const a = deg;
+    const b = deg + sweep;
+    deg = b;
+    const mid = a + sweep / 2;
+    const valueText = s.valueText ?? `${(share * 100).toFixed(decimals)}%`;
+
+    // Outline: center, then the arc; a full circle has no center point.
+    const n = Math.max(1, Math.ceil(sweep / arcStep));
+    const arc = [];
+    for (let k = 0; k <= n; k++) arc.push(pt(at(a + (sweep * k) / n, r)));
+    const points = sweep >= 360 ? arc.slice(0, -1) : [pt([cx, cy]), ...arc];
+
+    // Inside: try a few wrap widths and distances from the center.
+    let placed = null;
+    // Nearest to 0.6 r first: far enough out to read as that slice's, clear of the center.
+    const dists = sweep >= 360
+      ? [0]
+      : Array.from({ length: 12 }, (_, k) => 0.25 + k * 0.05)
+          .sort((p, q) => Math.abs(p - 0.6) - Math.abs(q - 0.6))
+          .map((f) => f * r);
+    for (const wrapW of [insideW, insideW * 0.75, insideW * 0.55]) {
+      if (placed) break;
+      const text = `${wrapText(s.label, wrapW, fontSize)}\n${valueText}`;
+      const { w, h } = boxOf(text);
+      for (const dist of dists) {
+        const [mx, my] = at(mid, dist);
+        const x = mx - w / 2, y = my - h / 2;
+        const corners = [[x, y], [x + w, y], [x + w, y + h], [x, y + h]];
+        if (corners.every(([px, py]) => inSlice(px, py, a, b))) {
+          placed = { x: round(x), y: round(y), w, h, fontSize, text };
+          break;
+        }
+      }
+    }
+
+    const slice = {
+      index, label: s.label, value: s.value, share, valueText,
+      startDeg: a, endDeg: b, midDeg: mid, points,
+    };
+    if (placed) {
+      out.push({ ...slice, placement: "inside", textBox: placed });
+    } else {
+      const text = `${wrapText(s.label, outsideW, fontSize)}\n${valueText}`;
+      const { w, h } = boxOf(text);
+      const right = Math.cos(rad(mid)) >= 0;
+      const [ex, ey] = at(mid, r + radialLen);
+      out.push({ ...slice, placement: "outside", right, elbow: [ex, ey], w, h, text, ly: ey });
+    }
+  });
+
+  // Outside labels on one side: top to bottom, each at least PIE_LABEL_GAP below the one above.
+  for (const side of [true, false]) {
+    const group = out.filter((s) => s.placement === "outside" && s.right === side).sort((p, q) => p.elbow[1] - q.elbow[1]);
+    let floor = -Infinity;
+    for (const s of group) {
+      const top = Math.max(s.ly - s.h / 2, floor);
+      s.ly = top + s.h / 2;
+      floor = top + s.h + PIE_LABEL_GAP;
+    }
+  }
+
+  const result = out.map((s) => {
+    if (s.placement === "inside") return s;
+    const { right, elbow, w, h, text, ly, ...rest } = s;
+    const [sx, sy] = at(s.midDeg, r + 2);
+    // A label pushed off its natural height turns its leader where the
+    // horizontal leg stays clear of the circle at that height.
+    const reach = Math.sqrt(Math.max(0, (r + radialLen) ** 2 - (ly - cy) ** 2));
+    const ex = right ? Math.max(elbow[0], cx + reach) : Math.min(elbow[0], cx - reach);
+    // Every outside label on a side ends its leader at one column clear of the
+    // circle, so stacked labels line up and no leader runs through a neighbour.
+    const hx = right ? cx + r + radialLen + horizLen : cx - r - radialLen - horizLen;
+    const x = right ? hx + PIE_LEADER_GAP : hx - PIE_LEADER_GAP - w;
+    return {
+      ...rest,
+      textBox: { x: round(x), y: round(ly - h / 2), w, h, fontSize, text },
+      leader: {
+        at: pt([sx, sy]),
+        points: [[0, 0], pt([ex - sx, ly - sy]), pt([hx - sx, ly - sy])],
+      },
+    };
+  });
+
+  let x0 = cx - r, y0 = cy - r, x1 = cx + r, y1 = cy + r;
+  for (const s of result) {
+    x0 = Math.min(x0, s.textBox.x);
+    y0 = Math.min(y0, s.textBox.y);
+    x1 = Math.max(x1, s.textBox.x + s.textBox.w);
+    y1 = Math.max(y1, s.textBox.y + s.textBox.h);
+  }
+  return {
+    kind: "pie", cx, cy, r, total, slices: result,
+    bounds: { x: round(x0), y: round(y0), w: round(x1 - x0), h: round(y1 - y0) },
+  };
+}

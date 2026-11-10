@@ -1,6 +1,6 @@
 ---
 name: steps
-description: Step skill for the excalidrawer entry skills (flowchart / timeline / architecture / sequence / comparison / tree / state-machine / pyramid / chart). An entry skill calls it when it reaches a step and points at one section - "clarify" (how to ask), "组件" (which reference to read for each component - shapes, connectors, stack, panel, axis, legend, tree, taper, classic layouts - plus the shared visual semantics), "出图" (MCP precheck + CLI fallback, file naming, label language, export formats, render call, the two-layer quality gate, iteration), "新增一种图类型" (the checklist for adding a diagram type). Not a standalone drawing entry - do not trigger it on a drawing request; the entry skill for that diagram type comes first. 步骤 skill / 出图 / 组件用法 / 命名 / 导出格式 / 质量关。
+description: Step skill for the excalidrawer entry skills (flowchart / timeline / architecture / sequence / comparison / tree / state-machine / pyramid / chart). An entry skill calls it when it reaches a step and points at one section - "clarify" (how to ask), "组件" (which reference to read for each component - shapes, connectors, stack, panel, axis, legend, tree, taper, pie, classic layouts - plus the shared visual semantics), "出图" (MCP precheck + CLI fallback, file naming, label language, export formats, render call, the two-layer quality gate, iteration), "新增一种图类型" (the checklist for adding a diagram type). Not a standalone drawing entry - do not trigger it on a drawing request; the entry skill for that diagram type comes first. 步骤 skill / 出图 / 组件用法 / 命名 / 导出格式 / 质量关。
 allowed-tools: mcp__excalidrawer__render_diagram, mcp__excalidrawer__compute_layout, Bash(npx -y -p excalidrawer*:*), Read, Write(./*.json), AskUserQuestion
 ---
 
@@ -16,9 +16,9 @@ not the whole file.
 | section | lines (read only these) | when an entry skill sends you here |
 |---|---|---|
 | [clarify](#clarify) | 行 33–55 | the "ask the user" step |
-| [组件](#组件) | 行 57–89 | the "compose the diagram" step - which component to use and how to fill its fields |
-| [出图](#出图) | 行 91–264 | the "render and deliver" step |
-| [新增一种图类型](#新增一种图类型) | 行 266–291 | writing a new entry skill |
+| [组件](#组件) | 行 57–90 | the "compose the diagram" step - which component to use and how to fill its fields |
+| [出图](#出图) | 行 92–265 | the "render and deliver" step |
+| [新增一种图类型](#新增一种图类型) | 行 267–292 | writing a new entry skill |
 
 To read one section, open this file with an offset at its first line and a limit of its length (the line numbers are checked by `tests/skills-steps.test.mjs`, which tells you the right ones if you change the file).
 
@@ -72,10 +72,11 @@ Read in this order:
 | connectors | any arrow or line: id-anchored routing, pinned sides, back-edges, label dodging, long-haul detours, self-loops, two-way pairs, `edgePoint` / `routeU` / `labelAnchor`, L4 manual form | [`connectors.md`](references/connectors.md) |
 | stack | cells in a row or column whose container is sized from content; **`equalize`** (one height for a row of cells); lifeline length from a step column; a milestone's text rows | [`stack.md`](references/stack.md) |
 | panel | a container with a heading: layer bands, comparison sides, sub-lanes; the older `titledBox` / `fitContainer` | [`panel.md`](references/panel.md) |
-| axis | a marked line: a timeline spine, a chart axis, value → coordinate | [`axis.md`](references/axis.md) |
+| axis | a marked line: a timeline spine, a chart axis (bars, lines, 100% stacked bars), value → coordinate | [`axis.md`](references/axis.md) |
 | legend | any custom meaning of line style or color | [`legend.md`](references/legend.md) |
 | tree | one root fanning out to children | [`tree.md`](references/tree.md) |
 | taper | layers that narrow step by step: a pyramid (narrow at the top) or a funnel (narrow at the bottom), with values and conversion rates | [`taper.md`](references/taper.md) |
+| pie | a whole split into slices: each slice's outline, its label inside it or outside on a leader | [`pie.md`](references/pie.md) |
 | classic layouts | the older placement helpers still in use: `chain`, `gridLayout`, `swimlane`, `hubSpoke` | [`classic-layouts.md`](references/classic-layouts.md) |
 
 Precedence when they disagree: the user's explicit request → the entry
@@ -107,8 +108,8 @@ If the MCP tools aren't available (server failed to start, older host,
 sandboxed env), fall back to the CLI shipped by the same package:
 
 ```bash
-npx -y -p excalidrawer@^0.6.0 -c 'excalidrawer render -i elements.json -o ./flowchart-foo'
-npx -y -p excalidrawer@^0.6.0 -c "excalidrawer compute-layout --helper gridLayout -a '{...}'"
+npx -y -p excalidrawer@^0.6.1 -c 'excalidrawer render -i elements.json -o ./flowchart-foo'
+npx -y -p excalidrawer@^0.6.1 -c "excalidrawer compute-layout --helper gridLayout -a '{...}'"
 ```
 
 `elements.json` accepts either a bare sugar array or `{ "elements": [...] }`.

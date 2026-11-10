@@ -1,8 +1,8 @@
 {
   "name": "excalidrawer",
   "displayName": "Excalidrawer",
-  "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence, comparison, tree, state machine, pyramid / funnel, bar / line chart. Generate hand-drawn-style diagrams and export to .excalidraw / SVG / PNG / WebP — no browser.",
-  "version": "0.1.1",
+  "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence, comparison, tree, state machine, pyramid / funnel, bar / line / 100% stacked bar / pie chart. Generate hand-drawn-style diagrams and export to .excalidraw / SVG / PNG / WebP — no browser.",
+  "version": "0.1.2",
   "author": {
     "name": "guohaonan-shy",
     "email": "guohaonan980421@gmail.com"
