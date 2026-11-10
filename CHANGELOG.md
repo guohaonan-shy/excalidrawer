@@ -4,7 +4,41 @@ All notable changes to this project are documented here.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) for the forward-looking plan.
 
-## Unreleased
+## 0.6.1
+
+_engine 0.6.1 · plugin 0.1.2_
+
+### Added
+
+- **Pie charts and 100% stacked bars in the `chart` skill** (#54). The entry
+  skill now covers part-to-whole shares: a pie for one whole, a 100% stacked bar
+  for the makeup of several groups. Both label every slice / segment with its
+  percentage, and a slice or segment too small to hold its label moves it
+  outside on a leader instead of dropping it — the smallest shares are exactly
+  the ones a reader can't eyeball. Chinese and English labels both wrap and fit.
+- **`pie` layout component** (`compute_layout` helper `pie`, library export
+  `pie`). Returns each slice's outline as polygon points (clockwise from
+  12 o'clock), a label box inside the slice when the wrapped name plus the
+  percentage fits there, otherwise a label box outside with an L4 leader —
+  outside labels line up in one column per side and are pushed apart so they
+  never overlap — and the bounds of the circle plus every label. Reference:
+  `skills/steps/references/pie.md`.
+- 100% stacked bars are drawn from `axis` (no new component): the recipe is the
+  "100% 堆叠柱" section of `skills/steps/references/axis.md`.
+- Gallery: `chart-pie.png`, `chart-stacked.png`; runnable builders
+  `pieFigure` / `stackedFigure` in `examples/chart-figures.mjs`.
+
+### Changed
+
+- **Layer A compares two polygons by their real outlines.** `SHAPE_OVERLAP`
+  used the bounding boxes, so the slices of any pie (which share a center and
+  have overlapping boxes) were flagged; two polygons now count as overlapping
+  only where their areas do. Free text over a polygon is contrast-checked
+  against the polygon whose outline (not box) holds its center.
+- The plugin manifests and the CLI fallback in `skills/steps` pin
+  `excalidrawer@^0.6.1`, the first engine with `pie`.
+
+## plugin 0.1.1
 
 _plugin 0.1.1_
 

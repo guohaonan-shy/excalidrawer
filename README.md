@@ -35,9 +35,16 @@ Nine diagram types, each with its own agent skill. Click a figure for full size.
 <tr>
   <td align="center" width="33%"><a href="docs/gallery/chart-bar.png"><img src="docs/gallery/chart-bar.png" alt="Bar chart"></a><br><b>Chart · bars</b><br><sub>Categories compared, grouped series, labelled values</sub></td>
   <td align="center" width="33%"><a href="docs/gallery/chart-line.png"><img src="docs/gallery/chart-line.png" alt="Line chart"></a><br><b>Chart · lines</b><br><sub>A trend over time, one line per series</sub></td>
+  <td align="center" width="33%"><a href="docs/gallery/chart-pie.png"><img src="docs/gallery/chart-pie.png" alt="Pie chart"></a><br><b>Chart · pie</b><br><sub>Shares of a whole; small slices labelled outside on a leader</sub></td>
+</tr>
+<tr>
+  <td align="center" width="33%"><a href="docs/gallery/chart-stacked.png"><img src="docs/gallery/chart-stacked.png" alt="100% stacked bar chart"></a><br><b>Chart · 100% stacked</b><br><sub>The makeup of each group, segment by segment</sub></td>
+  <td width="33%"></td>
   <td width="33%"></td>
 </tr>
 </table>
+
+*New in 0.6.1: pie charts and 100% stacked bars in the chart skill.*
 
 *New in 0.6.0: state machines, pyramids and funnels, bar and line charts, and a
 left-to-right data-stack overview as a fourth architecture layout — plus WebP
@@ -190,7 +197,7 @@ Claude Code and Codex both install them.
 | `tree` | Hierarchies from one root — taxonomies, org charts, user-story maps; left→right or top→down | tree, 树状图, hierarchy, org chart, 层级图, 分类树 |
 | `state-machine` | Object lifecycles and state transitions — events, guards, self-loops, two-way transitions, start/end states | state machine, 状态机, state diagram, lifecycle, 订单状态 |
 | `pyramid` | Pyramids (ranked layers) and funnels (stage-by-stage drop-off with counts and conversion) | pyramid, funnel, 金字塔, 漏斗, 转化漏斗 |
-| `chart` | Simple bar and line charts — category comparisons and trends, up to three series | bar chart, line chart, 柱状图, 折线图, 趋势图 |
+| `chart` | Simple bar, line, 100% stacked bar and pie charts — category comparisons, trends and shares of a whole | bar chart, line chart, pie chart, stacked bar, 柱状图, 折线图, 饼图, 堆叠柱 |
 | `steps` | Step skill — how to ask, which component to use and how to fill it (one reference per component), output rules, quality gate (called by the entry skills, not invoked directly) | — |
 
 An entry skill is a single `SKILL.md` in plain language: what to ask, what a

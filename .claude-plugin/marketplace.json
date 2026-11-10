@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "excalidrawer",
-      "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence, comparison, tree, state machine, pyramid / funnel, bar / line chart.",
-      "version": "0.1.1",
+      "description": "Code-first Excalidraw diagram skills: flowchart, timeline, architecture, sequence, comparison, tree, state machine, pyramid / funnel, bar / line / 100% stacked bar / pie chart.",
+      "version": "0.1.2",
       "source": "./",
       "author": {
         "name": "guohaonan-shy",

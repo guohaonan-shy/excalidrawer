@@ -47,6 +47,7 @@ export {
   axis,
   legend,
   taper,
+  pie,
 } from "./layout.mjs";
 
 // Serializer: sugar/raw elements → output formats (0.5.6+).

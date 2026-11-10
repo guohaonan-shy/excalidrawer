@@ -51,7 +51,9 @@ const CANVAS_WHITE = { r: 255, g: 255, b: 255 };
 const SHAPE_TYPES = new Set(["rectangle", "diamond", "ellipse"]);
 
 // A closed polygon (a `line` with polygon: true) counts as a shape, ranged by
-// its bounding box (x / y / width / height) like a rectangle.
+// its bounding box (x / y / width / height) like a rectangle — except against
+// another polygon, where the real outlines are compared: the slices of a pie
+// share a center and their boxes overlap, their areas don't.
 const isPolygon = (e) => e.type === "line" && e.polygon === true;
 const isShape = (e) => (SHAPE_TYPES.has(e.type) || isPolygon(e)) && e.width > 0 && e.height > 0;
 
@@ -138,11 +140,15 @@ function checkShapeOverlap(flat, warnings) {
     for (let j = i + 1; j < shapes.length; j++) {
       const a = shapes[i];
       const b = shapes[j];
-      const ix = intersectArea(a, b);
+      let ix = intersectArea(a, b);
       if (ix <= 0) continue;
       // Full containment is intentional nesting (a section around its items).
       if (contains(a, b) || contains(b, a)) continue;
-      const minArea = Math.min(a.width * a.height, b.width * b.height);
+      let minArea = Math.min(a.width * a.height, b.width * b.height);
+      if (isPolygon(a) && isPolygon(b)) {
+        ix = polygonOverlapArea(a, b);
+        minArea = Math.min(polygonArea(a), polygonArea(b));
+      }
       if (ix > minArea * OVERLAP_AREA_FRAC) {
         warnings.push({
           code: "SHAPE_OVERLAP",
@@ -160,6 +166,51 @@ function intersectArea(a, b) {
   const w = Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x));
   const h = Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
   return w * h;
+}
+
+// A polygon's outline in absolute coordinates.
+function outline(p) {
+  return p.points.map(([x, y]) => [p.x + x, p.y + y]);
+}
+
+function polygonArea(p) {
+  const pts = outline(p);
+  let a = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const [x0, y0] = pts[i];
+    const [x1, y1] = pts[(i + 1) % pts.length];
+    a += x0 * y1 - x1 * y0;
+  }
+  return Math.abs(a) / 2;
+}
+
+function pointInPolygon([px, py], pts) {
+  let inside = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const [xi, yi] = pts[i];
+    const [xj, yj] = pts[j];
+    if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+// Area two polygons share, estimated on a sample grid over their boxes' overlap.
+// Deterministic, and exact enough for a "more than 15%" threshold.
+const OVERLAP_SAMPLES = 32;
+function polygonOverlapArea(a, b) {
+  const x0 = Math.max(a.x, b.x), x1 = Math.min(a.x + a.width, b.x + b.width);
+  const y0 = Math.max(a.y, b.y), y1 = Math.min(a.y + a.height, b.y + b.height);
+  if (x1 <= x0 || y1 <= y0) return 0;
+  const pa = outline(a), pb = outline(b);
+  const dx = (x1 - x0) / OVERLAP_SAMPLES, dy = (y1 - y0) / OVERLAP_SAMPLES;
+  let hits = 0;
+  for (let i = 0; i < OVERLAP_SAMPLES; i++) {
+    for (let j = 0; j < OVERLAP_SAMPLES; j++) {
+      const pt = [x0 + (i + 0.5) * dx, y0 + (j + 0.5) * dy];
+      if (pointInPolygon(pt, pa) && pointInPolygon(pt, pb)) hits++;
+    }
+  }
+  return hits * dx * dy;
 }
 
 function contains(outer, inner, eps = 1) {
@@ -306,12 +357,13 @@ function checkContrast(flat, byId, warnings) {
       if (parsed) bg = parsed;
     } else {
       // Free text has no container, but a label drawn over a filled polygon
-      // (a `taper` layer) is read against that fill: the topmost one whose
-      // bounding box holds the text's center.
+      // (a `taper` layer, a pie slice) is read against that fill: the topmost
+      // one whose outline holds the text's center.
       const cx = el.x + (el.width || 0) / 2;
       const cy = el.y + (el.height || 0) / 2;
       const under = flat.filter(
-        (p) => isPolygon(p) && p.width > 0 && p.height > 0 && pointInRect([cx, cy], p) && parseColor(p.backgroundColor)
+        (p) => isPolygon(p) && p.width > 0 && p.height > 0 && pointInRect([cx, cy], p) &&
+          pointInPolygon([cx, cy], outline(p)) && parseColor(p.backgroundColor)
       );
       if (under.length > 0) bg = parseColor(under.at(-1).backgroundColor);
     }
